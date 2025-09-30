@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+	<default>
+		<agentic_commerce>
+			<general_settings>
+				<enable_feed>0</enable_feed>
+				<enable_checkout>0</enable_checkout>
+			</general_settings>
+		</agentic_commerce>
+	</default>
+</config>

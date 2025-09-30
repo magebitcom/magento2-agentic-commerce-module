@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ac_product_feed_mapping.xsd">
+    <attributes>
+        <mapping id="name">
+            <source_attribute>name</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::TITLE</target_attribute>
+        </mapping>
+
+        <mapping id="description">
+            <source_attribute>description</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::DESCRIPTION</target_attribute>
+        </mapping>
+
+        <mapping id="gtin">
+            <source_attribute>sku</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::GTIN</target_attribute>
+        </mapping>
+
+        <mapping id="link">
+            <source xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Url</source>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::LINK</target_attribute>
+        </mapping>
+
+        <mapping id="price">
+            <source_attribute>price</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\PriceInterface::PRICE</target_attribute>
+            <formatter xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Formatter\Price</formatter>
+        </mapping>
+    </attributes>
+</config>
