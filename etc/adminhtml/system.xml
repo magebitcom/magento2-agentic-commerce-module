@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<section id="agentic_commerce" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+            <class>separator-top</class>
+			<label>Agentic Commerce</label>
+			<tab>magebit</tab>
+			<resource>Magebit_AgenticCommerce::config_settings</resource>
+			<group id="general_settings" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>General Settings</label>
+				<field id="enable_feed" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable Feed</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="enable_checkout" type="select" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable Checkout</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enable_feed">1</field>
+                    </depends>
+				</field>
+			</group>
+		</section>
+	</system>
+</config>

@@ -1,0 +1,73 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:simpleType name="phpClassName">
+        <xs:annotation>
+            <xs:documentation>
+                A string that matches a Fully Qualified Class Name from PHP, especially not starting
+                with a backslash as this is an invalid character to start a class name with but a
+                somewhat common mistake so this simple type can be used to validate against it
+                already
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(\\?[a-zA-Z_&#x7f;-&#xff;][a-zA-Z0-9_&#x7f;-&#xff;]*)(\\[a-zA-Z_&#x7f;-&#xff;][a-zA-Z0-9_&#x7f;-&#xff;]*)*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="argumentType" abstract="true" mixed="true">
+    </xs:complexType>
+
+    <xs:complexType name="const">
+        <xs:complexContent>
+            <xs:extension base="attributeName" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="object">
+        <xs:complexContent>
+            <xs:extension base="argumentType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="attributeName">
+        <xs:annotation>
+            <xs:documentation>
+                A string that matches an attribute name
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="argumentType" />
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="config">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="attributes">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="mapping" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:choice minOccurs="1" maxOccurs="1">
+                                            <xs:element type="attributeName" name="source_attribute"/>
+                                            <xs:element type="object" name="source"/>
+                                        </xs:choice>
+                                        <xs:element type="attributeName" name="target_attribute"/>
+                                        <xs:element type="object" name="formatter" minOccurs="0"/>
+                                    </xs:sequence>
+                                    <xs:attribute name="id" type="xs:string" use="required"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                    <xs:unique name="uniqueMappingId">
+                        <xs:selector xpath="mapping"/>
+                        <xs:field xpath="@id"/>
+                    </xs:unique>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

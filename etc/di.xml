@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magebit\AgenticCommerce\Api\ConfigInterface" type="Magebit\AgenticCommerce\Model\Config" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\FeedProductInterface" type="Magebit\AgenticCommerce\Model\Data\FeedProduct" />
+    <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\ProductMapper" />
+    <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Writer\CsvWriter" />
+    <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
+
+    <virtualType name="ProductFeedMappingConfigReader" type="Magento\Framework\Config\Reader\Filesystem">
+        <arguments>
+            <argument name="converter" xsi:type="object">Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Converter</argument>
+            <argument name="schemaLocator" xsi:type="object">Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator</argument>
+            <argument name="fileName" xsi:type="string">ac_product_feed_mapping.xml</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data">
+        <arguments>
+            <argument name="reader" xsi:type="object">ProductFeedMappingConfigReader</argument>
+            <argument name="cacheId" xsi:type="string">ac_product_feed_mapping_cache</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Model\Writer\CsvWriter">
+        <arguments>
+            <argument name="feedFilePath" xsi:type="string">export/agentic_commerce.csv</argument>
+        </arguments>
+    </type>
+
+	<type name="Magento\Framework\Console\CommandList">
+		<arguments>
+			<argument name="commands" xsi:type="array">
+				<item name="ExportFeed" xsi:type="object">Magebit\AgenticCommerce\Console\Command\ExportFeed</item>
+			</argument>
+		</arguments>
+	</type>
+</config>
