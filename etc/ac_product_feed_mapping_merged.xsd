@@ -1,0 +1,6 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:redefine schemaLocation="urn:magento:module:Magebit_AgenticCommerce:etc/ac_product_feed_mapping.xsd">
+    </xs:redefine>
+</xs:schema>
