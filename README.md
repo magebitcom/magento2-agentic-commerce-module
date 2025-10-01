@@ -45,7 +45,7 @@ Usage:
 
 Options:
   -s, --store=STORE     Store ID to export products from [default: 1]
-  -o, --output=OUTPUT   Output file path [default: "var/export/agentic_commerce.csv"]
+  -o, --output=OUTPUT   Output file path. Relative to var directory [default: "export/agentic_commerce.csv"]
 ```
 
 ## Configuring feed mapping
