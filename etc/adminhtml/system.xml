@@ -20,6 +20,44 @@
                     </depends>
 				</field>
 			</group>
+
+            <group id="product_feed" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Product Feed</label>
+				<field id="gtin_source" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>GTIN Source</label>
+					<source_model>Magebit\AgenticCommerce\Model\Config\Source\GtinSource</source_model>
+                    <comment>Source attribute to use for GTIN</comment>
+				</field>
+                <field id="seller_name_source" type="select" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Seller Name</label>
+					<source_model>Magebit\AgenticCommerce\Model\Config\Source\SellerName</source_model>
+				</field>
+                <field id="seller_name" type="text" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Seller Name Value</label>
+                    <comment>Seller name to use for the feed</comment>
+                    <depends>
+                        <field id="seller_name_source">custom</field>
+                    </depends>
+                </field>
+                <field id="seller_privacy_policy_url" type="text" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Seller Privacy Policy URL</label>
+                    <comment>Seller privacy policy URL to use for the feed. Can be a full URL or a relative path. Required if checkout is enabled.</comment>
+                </field>
+                <field id="seller_tos_url" type="text" sortOrder="50" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Seller Terms of Service URL</label>
+                    <comment>Seller terms of service URL to use for the feed. Can be a full URL or a relative path. Required if checkout is enabled.</comment>
+                </field>
+                <field id="return_policy_url" type="text" sortOrder="60" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Return Policy URL</label>
+                    <comment>Return policy URL to use for the feed. Can be a full URL or a relative path.</comment>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="return_window" type="text" sortOrder="70" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Return Window</label>
+                    <comment>Days allowed for return</comment>
+                    <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                </field>
+			</group>
 		</section>
 	</system>
 </config>

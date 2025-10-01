@@ -6,6 +6,11 @@
 				<enable_feed>0</enable_feed>
 				<enable_checkout>0</enable_checkout>
 			</general_settings>
+			<product_feed>
+				<gtin_source>ean</gtin_source>
+				<seller_name_source>general</seller_name_source>
+				<return_window>14</return_window>
+			</product_feed>
 		</agentic_commerce>
 	</default>
 </config>

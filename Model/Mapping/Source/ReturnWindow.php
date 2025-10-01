@@ -2,12 +2,12 @@
 
 namespace Magebit\AgenticCommerce\Model\Mapping\Source;
 
-use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Api\Mapping\SourceInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 
-class SellerName implements SourceInterface
+class ReturnWindow implements SourceInterface
 {
     /**
      * @param ConfigInterface $config
@@ -24,6 +24,6 @@ class SellerName implements SourceInterface
     public function getValue(ProductInterface $product): mixed
     {
         /** @var Product $product */
-        return $this->config->getSellerName((int) $product->getStoreId());
+        return $this->config->getReturnWindow((int) $product->getStoreId());
     }
 }

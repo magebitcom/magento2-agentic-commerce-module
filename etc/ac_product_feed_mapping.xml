@@ -27,9 +27,8 @@
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::DESCRIPTION</target_attribute>
         </mapping>
 
-        <!-- TODO -->
         <mapping id="gtin">
-            <source_attribute>sku</source_attribute>
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Gtin</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::GTIN</target_attribute>
         </mapping>
 
@@ -101,6 +100,28 @@
         <mapping id="seller_url">
             <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SellerUrl</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MerchantInfoInterface::SELLER_URL</target_attribute>
+        </mapping>
+
+        <mapping id="seller_privacy_policy">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SellerPrivacyPolicy</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MerchantInfoInterface::SELLER_PRIVACY_POLICY</target_attribute>
+        </mapping>
+
+        <mapping id="seller_tos">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SellerTos</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MerchantInfoInterface::SELLER_TOS</target_attribute>
+        </mapping>
+
+        <!-- Return Information -->
+
+        <mapping id="return_policy">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\ReturnPolicy</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ReturnsInterface::RETURN_POLICY</target_attribute>
+        </mapping>
+
+        <mapping id="return_window">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\ReturnWindow</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ReturnsInterface::RETURN_WINDOW</target_attribute>
         </mapping>
     </attributes>
 </config>
