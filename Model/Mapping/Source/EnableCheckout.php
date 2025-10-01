@@ -16,6 +16,7 @@ class EnableCheckout implements SourceInterface
     public function getValue(ProductInterface $product): mixed
     {
         /** @var Product $product */
-        return !!$product->getData(ProductAttribute::ENABLE_CHECKOUT->value);
+        $enableCheckout = $product->getData(ProductAttribute::ENABLE_CHECKOUT->value) ?? 1;
+        return !!$enableCheckout ? 'true' : 'false';
     }
 }

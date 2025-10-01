@@ -18,12 +18,12 @@ class EnableSearch implements FormatterInterface
     public function format(ProductInterface $product, $value): mixed
     {
         /** @var Product $product */
-        $enableSearch = $product->getData(ProductAttribute::ENABLE_SEARCH->value);
+        $enableSearch = $product->getData(ProductAttribute::ENABLE_SEARCH->value) ?? EnableSearchSource::USE_VISIBILITY;
 
         if ($enableSearch === EnableSearchSource::USE_VISIBILITY) {
-            return in_array($value, [Visibility::VISIBILITY_IN_SEARCH, Visibility::VISIBILITY_BOTH]);
+            return in_array($value, [Visibility::VISIBILITY_IN_SEARCH, Visibility::VISIBILITY_BOTH]) ? 'true' : 'false';
         }
 
-        return $enableSearch === EnableSearchSource::ENABLED;
+        return $enableSearch === EnableSearchSource::ENABLED ? 'true' : 'false';
     }
 }
