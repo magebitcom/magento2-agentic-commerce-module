@@ -9,7 +9,7 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magebit_AgenticCommerce:etc/ac_product_feed_mapping.xsd">
-    <attributes>
+    <attributes product_type="all">
         <mapping id="enable_search">
             <source_attribute>visibility</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\OpenAIFlagsInterface::ENABLE_SEARCH</target_attribute>
@@ -131,6 +131,13 @@
         <mapping id="return_window">
             <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\ReturnWindow</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ReturnsInterface::RETURN_WINDOW</target_attribute>
+        </mapping>
+    </attributes>
+
+    <attributes product_type="configurable">
+        <mapping id="item_group_id">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\ItemGroupId</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\VariantInterface::ITEM_GROUP_ID</target_attribute>
         </mapping>
     </attributes>
 </config>

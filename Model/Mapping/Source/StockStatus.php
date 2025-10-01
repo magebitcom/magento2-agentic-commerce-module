@@ -22,9 +22,10 @@ class StockStatus implements SourceInterface
      * Format stock status
      *
      * @param ProductInterface $product
+     * @param ProductInterface|null $parentProduct
      * @return mixed
      */
-    public function getValue(ProductInterface $product): mixed
+    public function getValue(ProductInterface $product, ?ProductInterface $parentProduct = null): mixed
     {
         /** @var Product $product */
         return $product->isAvailable() ? 'in_stock' : 'out_of_stock';

@@ -47,7 +47,11 @@ class MapperComposite implements ProductMapperInterface
         $type = $product->getTypeId();
 
         if (!isset($this->productTypeMappers[$type])) {
-            return $this->productTypeMappers['simple'];
+            if (isset($this->productTypeMappers['simple'])) {
+                return $this->productTypeMappers['simple'];
+            }
+
+            throw new \InvalidArgumentException('Product type mapper not found for type: ' . $type);
         }
 
         return $this->productTypeMappers[$type];

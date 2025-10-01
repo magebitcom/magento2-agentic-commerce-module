@@ -44,7 +44,7 @@
     <xs:element name="config">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="attributes">
+                <xs:element name="attributes" maxOccurs="unbounded" minOccurs="1">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="mapping" maxOccurs="unbounded" minOccurs="0">
@@ -58,6 +58,7 @@
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
+                        <xs:attribute name="product_type" type="xs:string" use="required"/>
                     </xs:complexType>
                     <xs:unique name="uniqueMappingId">
                         <xs:selector xpath="mapping"/>
@@ -66,5 +67,9 @@
                 </xs:element>
             </xs:sequence>
         </xs:complexType>
+        <xs:unique name="uniqueProductTypes">
+            <xs:selector xpath="attributes"/>
+            <xs:field xpath="@product_type"/>
+        </xs:unique>
     </xs:element>
 </xs:schema>

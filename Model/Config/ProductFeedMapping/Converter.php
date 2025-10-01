@@ -25,11 +25,18 @@ class Converter implements ConverterInterface
      */
     public function convert($source): array
     {
-        $mappings = $source->getElementsByTagName('mapping');
+        $attributes = $source->getElementsByTagName('attributes');
         $data = [];
 
-        foreach ($mappings as $mapping) {
-            $data[$mapping->getAttribute('id')] = $this->processMapping($mapping);
+        foreach ($attributes as $attribute) {
+            $mappings = $attribute->getElementsByTagName('mapping');
+            $attributeData = [];
+
+            foreach ($mappings as $mapping) {
+                $attributeData[$mapping->getAttribute('id')] = $this->processMapping($mapping);
+            }
+
+            $data[$attribute->getAttribute('product_type')] = $attributeData;
         }
 
         return $data;

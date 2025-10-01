@@ -29,9 +29,10 @@ class SalePriceEffectiveDate implements SourceInterface
 
     /**
      * @param ProductInterface $product
+     * @param ProductInterface|null $parentProduct
      * @return mixed
      */
-    public function getValue(ProductInterface $product): mixed
+    public function getValue(ProductInterface $product, ?ProductInterface $parentProduct = null): mixed
     {
         /** @var Product $product */
         if (!$product->getSpecialFromDate() || !$product->getSpecialToDate() || !$product->getSpecialPrice()) {

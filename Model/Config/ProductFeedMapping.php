@@ -27,63 +27,28 @@ class ProductFeedMapping
     /**
      * Get mapping configuration by ID
      *
-     * @param string $id
+     * @param string $type
      * @return array|null
      */
-    public function getMapping(string $id): ?array
+    public function getMappingsForType(string $type): ?array
     {
-        return $this->config->getMapping($id);
+        return $this->config->getMappingsForType($type);
     }
 
     /**
-     * Get all mapping configurations
+     * Get mapping configuration by types
      *
+     * @param array $types
      * @return array
      */
-    public function getAllMappings(): array
+    public function getMappingsForTypes(array $types): array
     {
-        return $this->config->getAllMappings();
-    }
+        $mappings = [];
 
-    /**
-     * Get source attribute name from mapping
-     *
-     * @param string $id
-     * @return string|null
-     */
-    public function getSourceAttribute(string $id): ?string
-    {
-        $mapping = $this->getMapping($id);
-        return $mapping['source_attribute'] ?? null;
-    }
-
-    /**
-     * Get target attribute from mapping
-     *
-     * @param string $id
-     * @return string|null
-     */
-    public function getTargetAttribute(string $id): ?string
-    {
-        $mapping = $this->getMapping($id);
-        if (isset($mapping['target_attribute']) && is_array($mapping['target_attribute'])) {
-            return $mapping['target_attribute']['value'] ?? null;
+        foreach ($types as $type) {
+            $mappings = array_merge($mappings, $this->getMappingsForType($type));
         }
-        return $mapping['target_attribute'] ?? null;
-    }
 
-    /**
-     * Get formatter class from mapping
-     *
-     * @param string $id
-     * @return string|null
-     */
-    public function getFormatter(string $id): ?string
-    {
-        $mapping = $this->getMapping($id);
-        if (isset($mapping['formatter']) && is_array($mapping['formatter'])) {
-            return $mapping['formatter']['value'] ?? null;
-        }
-        return null;
+        return $mappings;
     }
 }

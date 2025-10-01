@@ -13,9 +13,12 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Mapping;
 
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
+use Magebit\AgenticCommerce\Api\ProductMapperInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Catalog\Model\Product;
 
-class ConfigurableProductMapper extends AbstractMapper
+class ConfigurableProductMapper extends AbstractMapper implements ProductMapperInterface
 {
     /**
      * @param ProductInterface $product
@@ -23,14 +26,46 @@ class ConfigurableProductMapper extends AbstractMapper
      */
     public function map(ProductInterface $product): array
     {
-        $data = [];
+        $childProducts = $this->getChildProducts($product);
 
-        $allMappings = $this->productFeedMapping->getAllMappings();
+        $feedProducts = [];
 
-        foreach ($allMappings as $mapping) {
-            $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping);
+        foreach ($childProducts as $childProduct) {
+            $feedProducts[] = $this->mapChildProduct($childProduct, $product);
         }
 
-        return [$this->feedProductFactory->create(['data' => $data])];
+        return $feedProducts;
+    }
+
+    /**
+     * Map child product
+     *
+     * @param ProductInterface $product
+     * @param ProductInterface $parentProduct
+     * @return FeedProductInterface
+     */
+    public function mapChildProduct(ProductInterface $product, ProductInterface $parentProduct): FeedProductInterface
+    {
+        $allMappings = $this->productFeedMapping->getMappingsForTypes(['all', 'configurable']);
+
+        foreach ($allMappings as $mapping) {
+            $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping, $parentProduct);
+        }
+
+        return $this->feedProductFactory->create(['data' => $data]);
+    }
+
+    /**
+     * Get child products of configurable product
+     *
+     * @param ProductInterface $product
+     * @return Product[]
+     */
+    public function getChildProducts(ProductInterface $product): array
+    {
+        /** @var Product $product */
+        /** @var Configurable $typeInstance */
+        $typeInstance = $product->getTypeInstance();
+        return $typeInstance->getUsedProducts($product);
     }
 }

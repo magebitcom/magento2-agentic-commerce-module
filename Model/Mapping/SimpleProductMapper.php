@@ -14,8 +14,9 @@ namespace Magebit\AgenticCommerce\Model\Mapping;
 
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magebit\AgenticCommerce\Api\ProductMapperInterface;
 
-class SimpleProductMapper extends AbstractMapper
+class SimpleProductMapper extends AbstractMapper implements ProductMapperInterface
 {
     /**
      * @param ProductInterface $product
@@ -25,7 +26,7 @@ class SimpleProductMapper extends AbstractMapper
     {
         $data = [];
 
-        $allMappings = $this->productFeedMapping->getAllMappings();
+        $allMappings = $this->productFeedMapping->getMappingsForTypes(['all', 'simple']);
 
         foreach ($allMappings as $mapping) {
             $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping);

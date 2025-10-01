@@ -42,12 +42,13 @@ abstract class AbstractMapper implements ProductMapperInterface
      *
      * @param ProductInterface $product
      * @param array $mapping
+     * @param ProductInterface|null $parentProduct
      * @return mixed
      */
-    public function mapAttribute(ProductInterface $product, array $mapping): mixed
+    public function mapAttribute(ProductInterface $product, array $mapping, ?ProductInterface $parentProduct = null): mixed
     {
         /** @var Product $product */
-        $value = $this->getAttributeValue($product, $mapping);
+        $value = $this->getAttributeValue($product, $mapping, $parentProduct);
         $value = $this->formatValue($value, $product, $mapping);
 
         return $value;
@@ -59,9 +60,10 @@ abstract class AbstractMapper implements ProductMapperInterface
      * @param mixed $value
      * @param ProductInterface $product
      * @param array $mapping
+     * @param ProductInterface|null $parentProduct
      * @return mixed
      */
-    public function formatValue(mixed $value, ProductInterface $product, array $mapping): mixed
+    public function formatValue(mixed $value, ProductInterface $product, array $mapping, ?ProductInterface $parentProduct = null): mixed
     {
         $value = $this->getAttributeValue($product, $mapping);
 
@@ -83,9 +85,10 @@ abstract class AbstractMapper implements ProductMapperInterface
      *
      * @param ProductInterface $product
      * @param array $mapping
+     * @param ProductInterface|null $parentProduct
      * @return mixed
      */
-    public function getAttributeValue(ProductInterface $product, array $mapping): mixed
+    public function getAttributeValue(ProductInterface $product, array $mapping, ?ProductInterface $parentProduct = null): mixed
     {
         if (!isset($mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE])) {
             throw new \InvalidArgumentException('Source attribute is required');
@@ -94,7 +97,7 @@ abstract class AbstractMapper implements ProductMapperInterface
         $sourceAttribute = $mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE];
 
         if ($sourceAttribute instanceof SourceInterface) {
-            return $sourceAttribute->getValue($product);
+            return $sourceAttribute->getValue($product, $parentProduct);
         }
 
         if (!is_string($sourceAttribute)) {

@@ -45,6 +45,6 @@ class Price implements FormatterInterface
         $store = $this->storeManager->getStore($product->getStoreId());
         $currency = $store->getCurrentCurrencyCode();
 
-        return number_format($value, 2, '.', '') . ' ' . $currency;
+        return number_format((float) $value, 2, '.', '') . ' ' . $currency;
     }
 }

@@ -21,7 +21,7 @@ use Magento\Framework\Serialize\SerializerInterface;
 class Data extends ConfigData implements DataInterface
 {
     /**
-     * @var array<mixed>|null
+     * @var array<string, array<mixed>>|null
      */
     private ?array $mappings = null;
 
@@ -42,24 +42,14 @@ class Data extends ConfigData implements DataInterface
      * @param string $id
      * @return array|null
      */
-    public function getMapping(string $id): ?array
+    public function getMappingsForType(string $type): ?array
     {
-        return $this->interpretMapping($this->get($id));
-    }
-
-    /**
-     * Get all mapping configurations
-     *
-     * @return array
-     */
-    public function getAllMappings(): array
-    {
-        if ($this->mappings) {
-            return $this->mappings;
+        if (isset($this->mappings[$type])) {
+            return $this->mappings[$type];
         }
-        $mappings = $this->get();
-        $this->mappings = array_map([$this, 'interpretMapping'], $mappings);
-        return $this->mappings;
+        $mappings = $this->get($type) ?? [];
+        $this->mappings[$type] = array_map([$this, 'interpretMapping'], $mappings);
+        return $this->mappings[$type];
     }
 
     /**

@@ -15,17 +15,10 @@ namespace Magebit\AgenticCommerce\Model\Config\ProductFeedMapping;
 interface DataInterface
 {
     /**
-     * Get mapping configuration by ID
+     * Get mapping configuration by type
      *
-     * @param string $id
+     * @param string $type
      * @return array|null
      */
-    public function getMapping(string $id): ?array;
-
-    /**
-     * Get all mapping configurations
-     *
-     * @return array
-     */
-    public function getAllMappings(): array;
+    public function getMappingsForType(string $type): ?array;
 }

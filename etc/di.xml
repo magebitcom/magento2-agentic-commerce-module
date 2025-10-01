@@ -29,6 +29,7 @@
             <argument name="schemaLocator" xsi:type="object">Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator</argument>
             <argument name="fileName" xsi:type="string">ac_product_feed_mapping.xml</argument>
             <argument name="idAttributes" xsi:type="array">
+                <item name="/config/attributes" xsi:type="string">product_type</item>
                 <item name="/config/attributes/mapping" xsi:type="string">id</item>
             </argument>
         </arguments>
@@ -59,6 +60,7 @@
         <arguments>
             <argument name="productTypeMappers" xsi:type="array">
                 <item name="simple" xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\SimpleProductMapper</item>
+                <item name="configurable" xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\ConfigurableProductMapper</item>
             </argument>
         </arguments>
     </type>
