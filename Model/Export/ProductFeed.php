@@ -12,6 +12,7 @@ use Generator;
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magebit\AgenticCommerce\Api\ProductFeedWriterInterface;
+use Magebit\AgenticCommerce\Api\ProductFeedWriterInterfaceFactory;
 use Magebit\AgenticCommerce\Api\ProductMapperInterface;
 
 class ProductFeed
@@ -26,10 +27,15 @@ class ProductFeed
      */
     private ?int $storeId = null;
 
+    /**
+     * @var null|string
+     */
+    private ?string $feedFilePath = null;
+
     public function __construct(
         private readonly CollectionFactory $productCollectionFactory,
         private readonly ProductMapperInterface $productMapper,
-        private readonly ProductFeedWriterInterface $productFeedWriter
+        private readonly ProductFeedWriterInterfaceFactory $productFeedWriterFactory
     ) {
     }
 
@@ -39,6 +45,10 @@ class ProductFeed
      */
     public function export()
     {
+        /** @var ProductFeedWriterInterface $productFeedWriter */
+        $productFeedWriter = $this->productFeedWriterFactory->create();
+        $productFeedWriter->setFeedFilePath($this->feedFilePath);
+
         foreach ($this->pageIterator() as $page => $collection) {
             $data = [];
 
@@ -47,7 +57,7 @@ class ProductFeed
                 $this->progressBar?->advance();
             }
 
-            $this->productFeedWriter->write($data, $page);
+            $productFeedWriter->write($data, $page);
         }
 
         return $data;
@@ -117,6 +127,17 @@ class ProductFeed
     public function setProgressBar(ProgressBar $progressBar): self
     {
         $this->progressBar = $progressBar;
+
+        return $this;
+    }
+
+    /**
+     * @param string $feedFilePath
+     * @return ProductFeed
+     */
+    public function setFeedFilePath(string $feedFilePath): self
+    {
+        $this->feedFilePath = $feedFilePath;
 
         return $this;
     }

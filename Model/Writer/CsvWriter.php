@@ -42,4 +42,13 @@ class CsvWriter implements ProductFeedWriterInterface
         $stream->unlock();
         $stream->close();
     }
+
+    /**
+     * @param string $feedFilePath
+     * @return void
+     */
+    public function setFeedFilePath(string $feedFilePath): void
+    {
+        $this->feedFilePath = $feedFilePath;
+    }
 }

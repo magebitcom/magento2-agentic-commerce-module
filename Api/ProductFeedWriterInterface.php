@@ -10,4 +10,10 @@ interface ProductFeedWriterInterface
      * @return void
      */
     public function write(array $products, int $page): void;
+
+    /**
+     * @param string $feedFilePath
+     * @return void
+     */
+    public function setFeedFilePath(string $feedFilePath): void;
 }

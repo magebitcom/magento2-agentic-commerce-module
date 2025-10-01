@@ -10,24 +10,18 @@ use Magebit\AgenticCommerce\Model\Export\ProductFeedFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\ImportExport\Model\Export\ConfigInterface;
-use Magento\ImportExport\Model\Export\Adapter\Factory as ExportAdapterFactory;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Helper\ProgressIndicator;
 use Magento\Framework\App\State;
 
 class ExportFeed extends Command
 {
     private const COMMAND_NAME = "magebit:agentic-commerce:export";
-    private const FILE_FORMAT = 'csv';
 
     private const STORE_OPTION = 'store';
     private const OUTPUT_OPTION = 'output';
 
     public function __construct(
         private readonly ProductFeedFactory $productFeedFactory,
-        private readonly ExportAdapterFactory $exportAdapterFactory,
-        private readonly ConfigInterface $exportConfig,
         private readonly State $state,
         string $name = null
     ) {
@@ -41,12 +35,10 @@ class ExportFeed extends Command
         InputInterface $input,
         OutputInterface $output
     ): int {
-        $entities = $this->exportConfig->getFileFormats();
         $progressBar = new ProgressBar($output);
 
         $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
 
-        $writer = $this->exportAdapterFactory->create($entities[self::FILE_FORMAT]['model']);
         $output->writeln('<info>Exporting product feed. This may take a while...</info>');
 
         $storeId = $input->getOption(self::STORE_OPTION);
@@ -55,9 +47,10 @@ class ExportFeed extends Command
         /** @var ProductFeed $feed */
         $feed = $this->productFeedFactory->create();
         $progressBar->start();
-        $data = $feed
+        $feed
             ->setProgressBar($progressBar)
             ->setStoreId($storeId)
+            ->setFeedFilePath($outputPath)
             ->export();
 
         $progressBar->finish();
@@ -74,7 +67,7 @@ class ExportFeed extends Command
         $this->setDescription("Export product feed");
         $this->setDefinition([
             new InputOption(self::STORE_OPTION, "-s", InputOption::VALUE_REQUIRED, "Store ID to export products from", 1),
-            new InputOption(self::OUTPUT_OPTION, "-o", InputOption::VALUE_REQUIRED, "Output file path", 'var/export/agentic_commerce.csv')
+            new InputOption(self::OUTPUT_OPTION, "-o", InputOption::VALUE_REQUIRED, "Output file path. Relative to var directory", 'export/agentic_commerce.csv')
         ]);
         parent::configure();
     }
