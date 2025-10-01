@@ -8,7 +8,7 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 
 **This module is currently actively under development by Magebit and is open to public contributions.**
 
-## Implementation Roadmap
+## Features
 
 - [x] ChatGPT Compatible Product Feed Export
 - [ ] Instant Checkout Ready (In progress / Coming soon)
