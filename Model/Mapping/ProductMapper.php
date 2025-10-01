@@ -4,6 +4,7 @@ namespace Magebit\AgenticCommerce\Model\Mapping;
 
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Mapping\FormatterInterface;
 use Magebit\AgenticCommerce\Api\Mapping\SourceInterface;
@@ -15,8 +16,11 @@ class ProductMapper implements ProductMapperInterface
     private const CONFIG_KEY_SOURCE_ATTRIBUTE = 'source_attribute';
     private const CONFIG_KEY_TARGET_ATTRIBUTE = 'target_attribute';
     private const CONFIG_KEY_FORMATTER = 'formatter';
-    private const CONFIG_KEY_SOURCE = 'source';
 
+    /**
+     * @param FeedProductInterfaceFactory $feedProductFactory
+     * @param ProductFeedMapping $productFeedMapping
+     */
     public function __construct(
         private readonly FeedProductInterfaceFactory $feedProductFactory,
         private readonly ProductFeedMapping $productFeedMapping,
@@ -47,20 +51,22 @@ class ProductMapper implements ProductMapperInterface
      */
     public function mapAttribute(ProductInterface $product, array $mapping): mixed
     {
-        if (isset($mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE])) {
-            $sourceAttribute = $mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE];
-            $value = $product->getData($sourceAttribute);
-        } elseif (isset($mapping[self::CONFIG_KEY_SOURCE])) {
-            $source = $mapping[self::CONFIG_KEY_SOURCE];
+        /** @var Product $product */
+        $value = $this->getAttributeValue($product, $mapping);
+        $value = $this->formatValue($value, $product, $mapping);
 
-            if (!($source instanceof SourceInterface)) {
-                throw new \InvalidArgumentException('Source must implement SourceInterface');
-            }
+        return $value;
+    }
 
-            $value = $source->getValue($product);
-        } else {
-            throw new \InvalidArgumentException('Source attribute or source object is required');
-        }
+    /**
+     * @param mixed $value
+     * @param ProductInterface $product
+     * @param array $mapping
+     * @return mixed
+     */
+    public function formatValue(mixed $value, ProductInterface $product, array $mapping): mixed
+    {
+        $value = $this->getAttributeValue($product, $mapping);
 
         if (isset($mapping[self::CONFIG_KEY_FORMATTER])) {
             $formatter = $mapping[self::CONFIG_KEY_FORMATTER];
@@ -73,5 +79,30 @@ class ProductMapper implements ProductMapperInterface
         }
 
         return $value;
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @param array $mapping
+     * @return mixed
+     */
+    public function getAttributeValue(ProductInterface $product, array $mapping): mixed
+    {
+        if (!isset($mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE])) {
+            throw new \InvalidArgumentException('Source attribute is required');
+        }
+
+        $sourceAttribute = $mapping[self::CONFIG_KEY_SOURCE_ATTRIBUTE];
+
+        if ($sourceAttribute instanceof SourceInterface) {
+            return $sourceAttribute->getValue($product);
+        }
+
+        if (!is_string($sourceAttribute)) {
+            throw new \InvalidArgumentException('Source attribute must be a string or implement SourceInterface');
+        }
+
+        /** @var Product $product */
+        return $product->getData($sourceAttribute);
     }
 }

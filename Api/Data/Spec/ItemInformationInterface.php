@@ -23,6 +23,10 @@ interface ItemInformationInterface
     public const WEIGHT = 'weight';
     public const AGE_GROUP = 'age_group';
 
+    public const CONDITION_NEW = 'new';
+    public const CONDITION_USED = 'used';
+    public const CONDITION_REFURBISHED = 'refurbished';
+
     /**
      * Get the condition
      *

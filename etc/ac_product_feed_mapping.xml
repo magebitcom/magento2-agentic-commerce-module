@@ -1,6 +1,22 @@
 <?xml version="1.0" ?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ac_product_feed_mapping.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magebit_AgenticCommerce:etc/ac_product_feed_mapping.xsd">
     <attributes>
+        <mapping id="enable_search">
+            <source_attribute>visibility</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\OpenAIFlagsInterface::ENABLE_SEARCH</target_attribute>
+            <formatter xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Formatter\EnableSearch</formatter>
+        </mapping>
+
+        <mapping id="enable_checkout">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\EnableCheckout</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\OpenAIFlagsInterface::ENABLE_CHECKOUT</target_attribute>
+        </mapping>
+
+        <mapping id="id">
+            <source_attribute>sku</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::ID</target_attribute>
+        </mapping>
+
         <mapping id="name">
             <source_attribute>name</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::TITLE</target_attribute>
@@ -11,20 +27,80 @@
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::DESCRIPTION</target_attribute>
         </mapping>
 
+        <!-- TODO -->
         <mapping id="gtin">
             <source_attribute>sku</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::GTIN</target_attribute>
         </mapping>
 
         <mapping id="link">
-            <source xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Url</source>
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Url</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ProductInterface::LINK</target_attribute>
         </mapping>
+
+        <!-- Item Information -->
+        <mapping id="condition">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Condition</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ItemInformationInterface::CONDITION</target_attribute>
+        </mapping>
+
+        <mapping id="product_category">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Category</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ItemInformationInterface::PRODUCT_CATEGORY</target_attribute>
+        </mapping>
+
+        <mapping id="brand">
+            <source_attribute>manufacturer</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\ItemInformationInterface::BRAND</target_attribute>
+        </mapping>
+
+        <!-- Media Information -->
+        <mapping id="image_link">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Image</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MediaInterface::IMAGE_LINK</target_attribute>
+        </mapping>
+
+        <!-- Price Information -->
 
         <mapping id="price">
             <source_attribute>price</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\PriceInterface::PRICE</target_attribute>
             <formatter xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Formatter\Price</formatter>
+        </mapping>
+
+        <mapping id="sale_price">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\FinalPrice</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\PriceInterface::SALE_PRICE</target_attribute>
+            <formatter xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Formatter\Price</formatter>
+        </mapping>
+
+        <mapping id="sale_price_effective_date">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SalePriceEffectiveDate</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\PriceInterface::SALE_PRICE_EFFECTIVE_DATE</target_attribute>
+        </mapping>
+
+        <!-- Availability & Inventory -->
+
+        <mapping id="availability">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\StockStatus</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\AvailabilityInterface::AVAILABILITY</target_attribute>
+        </mapping>
+
+        <mapping id="inventory_quantity">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\StockQuantity</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\AvailabilityInterface::INVENTORY_QUANTITY</target_attribute>
+        </mapping>
+
+        <!-- Merchant Info -->
+
+        <mapping id="seller_name">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SellerName</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MerchantInfoInterface::SELLER_NAME</target_attribute>
+        </mapping>
+
+        <mapping id="seller_url">
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\SellerUrl</source_attribute>
+            <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\MerchantInfoInterface::SELLER_URL</target_attribute>
         </mapping>
     </attributes>
 </config>

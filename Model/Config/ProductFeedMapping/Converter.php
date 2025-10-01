@@ -12,29 +12,9 @@ namespace Magebit\AgenticCommerce\Model\Config\ProductFeedMapping;
 
 use DOMElement;
 use Magento\Framework\Config\ConverterInterface;
-use Magento\Framework\Config\Dom\ArrayNodeConfig;
-use Magento\Framework\Config\Dom\NodePathMatcher;
-use Magento\Framework\Data\Argument\InterpreterInterface;
-use Magento\Framework\ObjectManager\Config\Mapper\ArgumentParser;
-use Magento\Framework\Config\Converter\Dom\Flat as FlatConverter;
 
 class Converter implements ConverterInterface
 {
-    /**
-     * @var FlatConverter|null
-     */
-    private ?FlatConverter $converter = null;
-
-    /**
-     * @param InterpreterInterface $argumentInterpreter
-     * @param ArgumentParser $argumentParser
-     */
-    public function __construct(
-        private readonly InterpreterInterface $argumentInterpreter,
-        private readonly ArgumentParser $argumentParser
-    ) {
-    }
-
     /**
      * Convert DOM document to array
      *
@@ -57,7 +37,7 @@ class Converter implements ConverterInterface
      * Process mapping
      *
      * @param DOMElement $mapping
-     * @return array{source_attribute: string|null, target_attribute: string|null, formatter: string|null, source: string|null}
+     * @return array<mixed>
      */
     protected function processMapping(DOMElement $mapping): array
     {
@@ -68,14 +48,12 @@ class Converter implements ConverterInterface
                 continue;
             }
 
-            if ($node->getAttribute('xsi:type')) {
-                $data[$node->nodeName] = $this->argumentInterpreter->evaluate([
-                    'xsi:type' => $node->getAttribute('xsi:type'),
-                    'value' => $node->nodeValue,
-                ]);
-            } else {
-                $data[$node->nodeName] = $node->nodeValue;
-            }
+            $field = [
+                'value' => $node->nodeValue,
+                'xsi:type' => $node->getAttribute('xsi:type')
+            ];
+
+            $data[$node->nodeName] = $field;
         }
 
         return $data;

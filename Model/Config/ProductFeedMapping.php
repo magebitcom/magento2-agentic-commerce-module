@@ -56,21 +56,6 @@ class ProductFeedMapping
     }
 
     /**
-     * Get source object class from mapping
-     *
-     * @param string $id
-     * @return string|null
-     */
-    public function getSourceObject(string $id): ?string
-    {
-        $mapping = $this->getMapping($id);
-        if (isset($mapping['source']) && is_array($mapping['source'])) {
-            return $mapping['source']['value'] ?? null;
-        }
-        return null;
-    }
-
-    /**
      * Get target attribute from mapping
      *
      * @param string $id
