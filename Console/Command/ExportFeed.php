@@ -14,6 +14,7 @@ use Magento\ImportExport\Model\Export\ConfigInterface;
 use Magento\ImportExport\Model\Export\Adapter\Factory as ExportAdapterFactory;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\ProgressIndicator;
+use Magento\Framework\App\State;
 
 class ExportFeed extends Command
 {
@@ -27,6 +28,7 @@ class ExportFeed extends Command
         private readonly ProductFeedFactory $productFeedFactory,
         private readonly ExportAdapterFactory $exportAdapterFactory,
         private readonly ConfigInterface $exportConfig,
+        private readonly State $state,
         string $name = null
     ) {
         parent::__construct($name);
@@ -41,6 +43,8 @@ class ExportFeed extends Command
     ): int {
         $entities = $this->exportConfig->getFileFormats();
         $progressBar = new ProgressBar($output);
+
+        $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
 
         $writer = $this->exportAdapterFactory->create($entities[self::FILE_FORMAT]['model']);
         $output->writeln('<info>Exporting product feed. This may take a while...</info>');

@@ -15,6 +15,7 @@ use Magento\Framework\DataObject;
 
 class FeedProduct extends DataObject implements FeedProductInterface
 {
+    use Trait\WithOpenAIFlagsData;
     use Trait\WithProductData;
     use Trait\WithMediaData;
     use Trait\WithItemInformationData;

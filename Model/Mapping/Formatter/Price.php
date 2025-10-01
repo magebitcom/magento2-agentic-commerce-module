@@ -26,6 +26,11 @@ class Price implements FormatterInterface
      */
     public function format(ProductInterface $product, $value): mixed
     {
+        if (!$value) {
+            return null;
+        }
+
+        /** @var Product $product */
         /** @var Store $store */
         $store = $this->storeManager->getStore($product->getStoreId());
         $currency = $store->getCurrentCurrencyCode();

@@ -6,6 +6,13 @@
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
 
+    <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
+        <arguments>
+            <argument name="moduleName" xsi:type="string">Magebit_AgenticCommerce</argument>
+            <argument name="schema" xsi:type="string">ac_product_feed_mapping.xsd</argument>
+        </arguments>
+    </virtualType>
+
     <virtualType name="ProductFeedMappingConfigReader" type="Magento\Framework\Config\Reader\Filesystem">
         <arguments>
             <argument name="converter" xsi:type="object">Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Converter</argument>
@@ -18,6 +25,9 @@
         <arguments>
             <argument name="reader" xsi:type="object">ProductFeedMappingConfigReader</argument>
             <argument name="cacheId" xsi:type="string">ac_product_feed_mapping_cache</argument>
+            <argument name="idAttributes" xsi:type="array">
+                <item name="config/mapping" xsi:type="string">id</item>
+            </argument>
         </arguments>
     </type>
 

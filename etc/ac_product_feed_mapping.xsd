@@ -26,7 +26,7 @@
 
     <xs:complexType name="object">
         <xs:complexContent>
-            <xs:extension base="argumentType" />
+            <xs:extension base="attributeName" />
         </xs:complexContent>
     </xs:complexType>
 
@@ -50,10 +50,7 @@
                             <xs:element name="mapping" maxOccurs="unbounded" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:choice minOccurs="1" maxOccurs="1">
-                                            <xs:element type="attributeName" name="source_attribute"/>
-                                            <xs:element type="object" name="source"/>
-                                        </xs:choice>
+                                        <xs:element type="attributeName" name="source_attribute"/>
                                         <xs:element type="attributeName" name="target_attribute"/>
                                         <xs:element type="object" name="formatter" minOccurs="0"/>
                                     </xs:sequence>
