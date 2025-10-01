@@ -22,6 +22,12 @@ This module enables Agentic Commerce features in Magento2 / Adobe Commerce store
 1. Download latest release files and extract them under `app/code/Magebit/AgenticCommerce`
 2. Run `bin/magento setup:upgrade`
 
+## Configuration
+
+You can find the Module's configuration under `Stores -> Settings -> Configuration -> Magebit -> Agentic Commerce`:
+
+<img width="1796" height="263" alt="image" src="https://github.com/user-attachments/assets/91e63348-b4c8-453a-a759-cbc98d2f8f34" />
+
 ## Product feed
 
 To export the product feed, use the `magebit:agentic-commerce:export` Magento command:
