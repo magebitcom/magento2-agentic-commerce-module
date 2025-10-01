@@ -25,8 +25,15 @@ This module enables Agentic Commerce features in Magento2 / Adobe Commerce store
 ## Configuration
 
 You can find the Module's configuration under `Stores -> Settings -> Configuration -> Magebit -> Agentic Commerce`:
+Make sure to configure Product Feed settings before running an export.
 
-<img width="1796" height="263" alt="image" src="https://github.com/user-attachments/assets/91e63348-b4c8-453a-a759-cbc98d2f8f34" />
+<img width="1793" height="784" alt="image" src="https://github.com/user-attachments/assets/a1403a16-f944-42e2-8ea6-29289efe98b1" />
+
+Additionally, there are settings at the product level. Here you can configure product visibility in Agentic search and whether to allow
+Agentic Checkout.
+
+<img width="1799" height="320" alt="image" src="https://github.com/user-attachments/assets/5cc8b68f-5ec2-40a4-b0ca-fd806ef38b2d" />
+
 
 ## Product feed
 
