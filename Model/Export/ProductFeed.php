@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+
 declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Export;
@@ -14,6 +22,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magebit\AgenticCommerce\Api\ProductFeedWriterInterface;
 use Magebit\AgenticCommerce\Api\ProductFeedWriterInterfaceFactory;
 use Magebit\AgenticCommerce\Api\ProductMapperInterface;
+use Magento\Catalog\Model\Product\Visibility;
 
 class ProductFeed
 {
@@ -53,7 +62,7 @@ class ProductFeed
             $data = [];
 
             foreach ($collection as $product) {
-                $data[$product->getId()] = $this->getFeedProduct($product);
+                $data = array_merge($data, $this->mapProduct($product));
                 $this->progressBar?->advance();
             }
 
@@ -65,9 +74,9 @@ class ProductFeed
 
     /**
      * @param ProductInterface $product
-     * @return FeedProductInterface
+     * @return FeedProductInterface[]
      */
-    public function getFeedProduct(ProductInterface $product): FeedProductInterface
+    public function mapProduct(ProductInterface $product): array
     {
         return $this->productMapper->map($product);
     }
@@ -101,10 +110,18 @@ class ProductFeed
     {
         /** @var Collection $collection */
         $collection = $this->productCollectionFactory->create();
+
         return $collection
             ->addAttributeToSelect('*')
             ->addPriceData()
             ->addAttributeToFilter('status', Status::STATUS_ENABLED)
+            ->addAttributeToFilter('visibility', [
+                'in' => [
+                    Visibility::VISIBILITY_IN_CATALOG,
+                    Visibility::VISIBILITY_IN_SEARCH,
+                    Visibility::VISIBILITY_BOTH,
+                ]
+            ])
             ->addStoreFilter($this->storeId)
             ->setPageSize($this->getPageSize());
     }

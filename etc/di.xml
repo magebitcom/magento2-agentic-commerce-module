@@ -1,8 +1,17 @@
 <?xml version="1.0" ?>
+<!--
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Magebit\AgenticCommerce\Api\ConfigInterface" type="Magebit\AgenticCommerce\Model\Config" />
     <preference for="Magebit\AgenticCommerce\Api\Data\FeedProductInterface" type="Magebit\AgenticCommerce\Model\Data\FeedProduct" />
-    <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\ProductMapper" />
+    <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
 
@@ -45,4 +54,12 @@
 			</argument>
 		</arguments>
 	</type>
+
+    <type name="Magebit\AgenticCommerce\Model\Mapping\MapperComposite">
+        <arguments>
+            <argument name="productTypeMappers" xsi:type="array">
+                <item name="simple" xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\SimpleProductMapper</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

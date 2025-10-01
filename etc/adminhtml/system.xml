@@ -1,4 +1,13 @@
 <?xml version="1.0" ?>
+<!--
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
 	<system>
 		<section id="agentic_commerce" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">

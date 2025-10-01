@@ -1,50 +1,45 @@
 <?php
 
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Model\Mapping;
 
-use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
+use Magebit\AgenticCommerce\Api\ProductMapperInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Model\Product;
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Mapping\FormatterInterface;
 use Magebit\AgenticCommerce\Api\Mapping\SourceInterface;
 use Magebit\AgenticCommerce\Model\Config\ProductFeedMapping;
-use Magebit\AgenticCommerce\Api\ProductMapperInterface;
+use Magento\Catalog\Model\Product;
 
-class ProductMapper implements ProductMapperInterface
+abstract class AbstractMapper implements ProductMapperInterface
 {
-    private const CONFIG_KEY_SOURCE_ATTRIBUTE = 'source_attribute';
-    private const CONFIG_KEY_TARGET_ATTRIBUTE = 'target_attribute';
-    private const CONFIG_KEY_FORMATTER = 'formatter';
+    protected const CONFIG_KEY_SOURCE_ATTRIBUTE = 'source_attribute';
+    protected const CONFIG_KEY_TARGET_ATTRIBUTE = 'target_attribute';
+    protected const CONFIG_KEY_FORMATTER = 'formatter';
 
     /**
      * @param FeedProductInterfaceFactory $feedProductFactory
      * @param ProductFeedMapping $productFeedMapping
+     * @param ProductMapperInterface[] $productTypeMappers
      */
     public function __construct(
-        private readonly FeedProductInterfaceFactory $feedProductFactory,
-        private readonly ProductFeedMapping $productFeedMapping,
+        protected readonly FeedProductInterfaceFactory $feedProductFactory,
+        protected readonly ProductFeedMapping $productFeedMapping
     ) {
     }
 
     /**
-     * @param ProductInterface $product
-     * @return FeedProductInterface
-     */
-    public function map(ProductInterface $product): FeedProductInterface
-    {
-        $data = [];
-
-        $allMappings = $this->productFeedMapping->getAllMappings();
-
-        foreach ($allMappings as $mapping) {
-            $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping);
-        }
-
-        return $this->feedProductFactory->create(['data' => $data]);
-    }
-
-    /**
+     * Map product attribute to value
+     *
      * @param ProductInterface $product
      * @param array $mapping
      * @return mixed
@@ -59,6 +54,8 @@ class ProductMapper implements ProductMapperInterface
     }
 
     /**
+     * Format value using formatter
+     *
      * @param mixed $value
      * @param ProductInterface $product
      * @param array $mapping
@@ -82,6 +79,8 @@ class ProductMapper implements ProductMapperInterface
     }
 
     /**
+     * Get attribute value from product
+     *
      * @param ProductInterface $product
      * @param array $mapping
      * @return mixed
