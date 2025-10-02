@@ -16,6 +16,10 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 
 Agentic Checkout for Stripe, PayPal, and other payment providers support is coming soon with a standardized Shared Payment Token.
 
+## Requirements
+
+- PHP >= 8.1
+
 ## Installation
 
 ### As a composer package
