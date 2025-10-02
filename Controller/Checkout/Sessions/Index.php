@@ -15,7 +15,7 @@ use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magebit\AgenticCommerce\Controller\ApiController;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
-use Magento\Framework\App\Response\Http;
+use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
@@ -44,13 +44,17 @@ class Index extends ApiController implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
+        /** @var Http $request */
         $request = $this->getRequest();
 
         if ($validationError = $this->complianceService->validateRequest($request)) {
             return $this->makeErrorResponse($validationError);
         }
 
-        /** @var Http $request */
+        if ($response = $this->complianceService->handleIdempotency($request)) {
+            return $response;
+        }
+
         /** @var string $content */
         $content = $request->getContent();
         $rawData = json_decode($content, true);
@@ -68,6 +72,12 @@ class Index extends ApiController implements HttpPostActionInterface
 
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->create($checkoutSessionsRequest);
+
+            /** @var CheckoutSessionResponse $checkoutSessionResponse */
+            $responseData = $checkoutSessionResponse->toArray();
+            $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
+
+            return $this->makeJsonResponse($responseData);
         } catch (LocalizedException $e) {
             $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
 
@@ -85,18 +95,5 @@ class Index extends ApiController implements HttpPostActionInterface
                 'message' => 'Internal server error',
             ]]), 500);
         }
-
-        /** @var CheckoutSessionResponse $checkoutSessionResponse */
-        return $this->makeJsonResponse($checkoutSessionResponse->toArray());
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return bool
-     */
-    public function validateApiVersion(RequestInterface $request): bool
-    {
-        /** @var Http $request */
-        return $request->getHeader('API-Version') === self::API_VERSION;
     }
 }
