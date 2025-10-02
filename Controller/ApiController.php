@@ -13,6 +13,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
 use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magento\Framework\DataObject;
 
 abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
 {
@@ -42,11 +43,11 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
     }
 
     /**
-     * @param array<mixed> $data
+     * @param array<mixed>|DataObject $data
      * @param int $statusCode
      * @return ResultJson
      */
-    public function makeJsonResponse(array $data, int $statusCode = 200): ResultJson
+    public function makeJsonResponse(array|DataObject $data, int $statusCode = 200): ResultJson
     {
         $resultJson = $this->resultJsonFactory->create();
         $resultJson->setData($data);

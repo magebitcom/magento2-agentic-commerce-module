@@ -68,6 +68,22 @@ class CheckoutSessionService
     }
 
     /**
+     * @param string $sessionId
+     * @return CheckoutSessionResponseInterface
+     */
+    public function retrieve(string $sessionId): CheckoutSessionResponseInterface
+    {
+        $cart = $this->guestCartRepository->get($sessionId);
+        /** @var Quote $cart */
+        $cart->collectTotals();
+
+        $response = $this->checkoutSessionResponseFactory->create();
+        $response->setId($sessionId);
+        $this->assignCartDataToResponse($cart, $response);
+        return $response;
+    }
+
+    /**
      * @param CartInterface $cart
      * @param CheckoutSessionResponseInterface $response
      * @return void

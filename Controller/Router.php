@@ -36,9 +36,9 @@ class Router implements RouterInterface
             $action = 'index';
             $sessionId = null;
 
-            if (count($parts) === 2) {
+            if (count($parts) >= 1) {
                 $sessionId = $parts[0];
-                $action = $parts[1] ?? 'index';
+                $action = $parts[1] ?? 'retrieve';
             }
 
             $request->setModuleName('agentic_commerce');
