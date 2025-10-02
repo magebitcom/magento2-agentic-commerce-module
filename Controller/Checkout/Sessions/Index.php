@@ -1,7 +1,10 @@
 <?php
 /**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
  */
 declare(strict_types=1);
 
@@ -25,6 +28,15 @@ use Magebit\AgenticCommerce\Service\ComplianceService;
 
 class Index extends ApiController implements HttpPostActionInterface
 {
+    /**
+     * @param JsonFactory $resultJsonFactory
+     * @param RequestInterface $request
+     * @param ComplianceService $complianceService
+     * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
+     * @param CheckoutSessionService $checkoutSessionService
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
