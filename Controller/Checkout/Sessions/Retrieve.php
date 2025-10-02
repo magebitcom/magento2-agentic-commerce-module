@@ -26,6 +26,14 @@ use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 
 class Retrieve extends ApiController implements HttpGetActionInterface
 {
+    /**
+     * @param JsonFactory $resultJsonFactory
+     * @param RequestInterface $request
+     * @param ComplianceService $complianceService
+     * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param LoggerInterface $logger
+     * @param CheckoutSessionService $checkoutSessionService
+     */
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
