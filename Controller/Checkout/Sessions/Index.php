@@ -52,6 +52,7 @@ class Index extends ApiController implements HttpPostActionInterface
         }
 
         if ($response = $this->complianceService->handleIdempotency($request)) {
+            $this->addHeaders($response, $request);
             return $response;
         }
 
@@ -77,7 +78,9 @@ class Index extends ApiController implements HttpPostActionInterface
             $responseData = $checkoutSessionResponse->toArray();
             $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
 
-            return $this->makeJsonResponse($responseData);
+            $response = $this->makeJsonResponse($responseData);
+            $this->addHeaders($response, $request);
+            return $response;
         } catch (LocalizedException $e) {
             $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
 

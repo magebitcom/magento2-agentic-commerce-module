@@ -12,6 +12,7 @@ use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
+use Magebit\AgenticCommerce\Service\ComplianceService;
 
 abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
 {
@@ -50,7 +51,20 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
         $resultJson = $this->resultJsonFactory->create();
         $resultJson->setData($data);
         $resultJson->setHttpResponseCode($statusCode);
+
         return $resultJson;
+    }
+
+    /**
+     * @param ResultJson $resultJson
+     * @param Http $request
+     * @return void
+     */
+    public function addHeaders(ResultJson $resultJson, Http $request): void
+    {
+        $resultJson->setHeader('Idempotency-Key', (string) $request->getHeader('Idempotency-Key', ''));
+        $resultJson->setHeader('API-Version', ComplianceService::API_VERSION);
+        $resultJson->setHeader('Request-Id', (string) $request->getHeader('Request-Id', ''));
     }
 
     /**
