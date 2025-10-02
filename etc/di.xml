@@ -10,10 +10,33 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Magebit\AgenticCommerce\Api\ConfigInterface" type="Magebit\AgenticCommerce\Model\Config" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\FeedProductInterface" type="Magebit\AgenticCommerce\Model\Data\FeedProduct" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\FeedProductInterface" type="Magebit\AgenticCommerce\Model\Data\Feed\Product" />
     <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Export\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
+
+    <!-- Supporting Data Interfaces -->
+    <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\BuyerInterface" type="Magebit\AgenticCommerce\Model\Data\Buyer" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentProvider" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\TotalInterface" type="Magebit\AgenticCommerce\Model\Data\Total" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentDataInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentData" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\LinkInterface" type="Magebit\AgenticCommerce\Model\Data\Link" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\MessageInterface" type="Magebit\AgenticCommerce\Model\Data\Message" />
+
+    <!-- Fulfillment Option Interfaces -->
+    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOption" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionShippingInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionShipping" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionDigitalInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionDigital" />
+
+    <!-- Response Interfaces -->
+    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionWithOrderResponse" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>

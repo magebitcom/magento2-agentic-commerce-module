@@ -10,24 +10,29 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Api\Data\Spec;
+namespace Magebit\AgenticCommerce\Model\Data\Feed\Trait;
 
-interface GeoTaggingInterface
+use Magebit\AgenticCommerce\Api\Data\Spec\GeoTaggingInterface;
+
+trait WithGeoTaggingData
 {
-    public const GEO_PRICE = 'geo_price';
-    public const GEO_AVAILABILITY = 'geo_availability';
-
     /**
      * Get the geo price
      *
      * @return string|null
      */
-    public function getGeoPrice(): ?string;
+    public function getGeoPrice(): ?string
+    {
+        return $this->getData(GeoTaggingInterface::GEO_PRICE);
+    }
 
     /**
      * Get the geo availability
      *
      * @return string|null
      */
-    public function getGeoAvailability(): ?string;
+    public function getGeoAvailability(): ?string
+    {
+        return $this->getData(GeoTaggingInterface::GEO_AVAILABILITY);
+    }
 }

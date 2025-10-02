@@ -10,24 +10,29 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Api\Data\Spec;
+namespace Magebit\AgenticCommerce\Model\Data\Feed\Trait;
 
-interface RelatedProductInterface
+use Magebit\AgenticCommerce\Api\Data\Spec\RelatedProductInterface;
+
+trait WithRelatedProductData
 {
-    public const RELATED_PRODUCT_ID = 'related_product_id';
-    public const RELATIONSHIP_TYPE = 'relationship_type';
-
     /**
      * Get the related product ID
      *
      * @return string|null
      */
-    public function getRelatedProductId(): ?string;
+    public function getRelatedProductId(): ?string
+    {
+        return $this->getData(RelatedProductInterface::RELATED_PRODUCT_ID);
+    }
 
     /**
      * Get the relationship type
      *
      * @return string|null
      */
-    public function getRelationshipType(): ?string;
+    public function getRelationshipType(): ?string
+    {
+        return $this->getData(RelatedProductInterface::RELATIONSHIP_TYPE);
+    }
 }

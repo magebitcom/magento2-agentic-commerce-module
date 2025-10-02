@@ -10,24 +10,29 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Api\Data\Spec;
+namespace Magebit\AgenticCommerce\Model\Data\Feed\Trait;
 
-interface PerformanceInterface
+use Magebit\AgenticCommerce\Api\Data\Spec\PerformanceInterface;
+
+trait WithPerformanceData
 {
-    public const POPULARITY_SCORE = 'popularity_score';
-    public const RETURN_RATE = 'return_rate';
-
     /**
      * Get the popularity score
      *
      * @return float|null
      */
-    public function getPopularityScore(): ?float;
+    public function getPopularityScore(): ?float
+    {
+        return $this->getData(PerformanceInterface::POPULARITY_SCORE);
+    }
 
     /**
      * Get the return rate
      *
      * @return float|null
      */
-    public function getReturnRate(): ?float;
+    public function getReturnRate(): ?float
+    {
+        return $this->getData(PerformanceInterface::RETURN_RATE);
+    }
 }

@@ -71,4 +71,3 @@ interface PriceInterface
      */
     public function getPricingTrend(): ?string;
 }
-

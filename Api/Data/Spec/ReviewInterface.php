@@ -63,4 +63,3 @@ interface ReviewInterface
      */
     public function getRawReviewData(): ?string;
 }
-

@@ -39,4 +39,3 @@ interface ComplianceInterface
      */
     public function getAgeRestriction(): ?int;
 }
-

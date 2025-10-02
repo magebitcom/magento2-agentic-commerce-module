@@ -10,24 +10,29 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Api\Data\Spec;
+namespace Magebit\AgenticCommerce\Model\Data\Feed\Trait;
 
-interface ReturnsInterface
+use Magebit\AgenticCommerce\Api\Data\Spec\ReturnsInterface;
+
+trait WithReturnsData
 {
-    public const RETURN_POLICY = 'return_policy';
-    public const RETURN_WINDOW = 'return_window';
-
     /**
      * Get the return policy
      *
      * @return string
      */
-    public function getReturnPolicy(): string;
+    public function getReturnPolicy(): string
+    {
+        return $this->getData(ReturnsInterface::RETURN_POLICY);
+    }
 
     /**
      * Get the return window
      *
      * @return int
      */
-    public function getReturnWindow(): int;
+    public function getReturnWindow(): int
+    {
+        return $this->getData(ReturnsInterface::RETURN_WINDOW);
+    }
 }
