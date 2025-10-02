@@ -63,4 +63,3 @@ interface AvailabilityInterface
      */
     public function getPickupSla(): ?string;
 }
-

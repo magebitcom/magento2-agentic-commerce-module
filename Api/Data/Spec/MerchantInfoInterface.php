@@ -47,4 +47,3 @@ interface MerchantInfoInterface
      */
     public function getSellerTos(): ?string;
 }
-

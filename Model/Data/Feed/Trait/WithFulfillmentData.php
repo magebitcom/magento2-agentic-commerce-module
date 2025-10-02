@@ -10,24 +10,29 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Api\Data\Spec;
+namespace Magebit\AgenticCommerce\Model\Data\Feed\Trait;
 
-interface FulfillmentInterface
+use Magebit\AgenticCommerce\Api\Data\Spec\FulfillmentInterface;
+
+trait WithFulfillmentData
 {
-    public const SHIPPING = 'shipping';
-    public const DELIVERY_ESTIMATE = 'delivery_estimate';
-
     /**
      * Get the shipping
      *
      * @return string
      */
-    public function getShipping(): string;
+    public function getShipping(): string
+    {
+        return $this->getData(FulfillmentInterface::SHIPPING);
+    }
 
     /**
      * Get the delivery estimate
      *
      * @return string|null
      */
-    public function getDeliveryEstimate(): ?string;
+    public function getDeliveryEstimate(): ?string
+    {
+        return $this->getData(FulfillmentInterface::DELIVERY_ESTIMATE);
+    }
 }
