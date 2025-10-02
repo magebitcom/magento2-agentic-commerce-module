@@ -12,7 +12,7 @@
     <preference for="Magebit\AgenticCommerce\Api\ConfigInterface" type="Magebit\AgenticCommerce\Model\Config" />
     <preference for="Magebit\AgenticCommerce\Api\Data\FeedProductInterface" type="Magebit\AgenticCommerce\Model\Data\FeedProduct" />
     <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
-    <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Writer\CsvWriter" />
+    <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Export\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">

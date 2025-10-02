@@ -12,11 +12,15 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Mapping;
 
+use InvalidArgumentException;
+use LogicException;
+use Exception;
 use Magebit\AgenticCommerce\Api\Data\FeedProductInterface;
 use Magebit\AgenticCommerce\Api\ProductMapperInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Catalog\Model\Product;
+use Magento\Framework\Exception\LocalizedException;
 
 class ConfigurableProductMapper extends AbstractMapper implements ProductMapperInterface
 {
@@ -50,9 +54,45 @@ class ConfigurableProductMapper extends AbstractMapper implements ProductMapperI
 
         foreach ($allMappings as $mapping) {
             $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping, $parentProduct);
+            $data = array_merge($data, $this->addVariantAttributes($product, $parentProduct));
         }
 
         return $this->feedProductFactory->create(['data' => $data]);
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @param ProductInterface $parentProduct
+     * @return void
+     */
+    public function addVariantAttributes(ProductInterface $product, ProductInterface $parentProduct)
+    {
+        $data = [];
+
+        $i = 1;
+        foreach ($this->getConfigurableAttributes($parentProduct) as $attribute) {
+            $eavAttribute = $attribute->getProductAttribute();
+            $value = $product->getData($eavAttribute->getAttributeCode());
+
+            $data['Custom_variant' . $i . '_category'] = $eavAttribute->getFrontend()->getLabel();
+            $data['Custom_variant' . $i . '_option'] = $eavAttribute->getSource()->getOptionText($value);
+            $i++;
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @return Configurable\Attribute[]
+     */
+    public function getConfigurableAttributes(ProductInterface $product)
+    {
+        /** @var Product $product */
+        /** @var Configurable $typeInstance */
+        $typeInstance = $product->getTypeInstance();
+
+        return $typeInstance->getConfigurableAttributes($product);
     }
 
     /**

@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-namespace Magebit\AgenticCommerce\Model\Writer;
+namespace Magebit\AgenticCommerce\Model\Export\Writer;
 
 use Magebit\AgenticCommerce\Api\ProductFeedWriterInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
