@@ -10,9 +10,9 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 
 ## Features
 
-- ChatGPT Compatible Product Feed Export
-- Instant Checkout Ready (Coming Soon)
-- Agentic Checkout Configuration (according to ACP)
+- [x] ChatGPT Compatible Product Feed Export
+- [ ] Instant Checkout Ready (In progress / Coming soon)
+- [ ] Agentic Checkout Configuration (according to ACP)
 
 Agentic Checkout for Stripe, PayPal, and other payment providers support is coming soon with a standardized Shared Payment Token.
 
