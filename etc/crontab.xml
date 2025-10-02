@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="magebit_agenticcommerce_clean_expired_idempotency" instance="Magebit\AgenticCommerce\Cron\CleanExpiredIdempotency" method="execute">
+            <schedule>0 * * * *</schedule>
+        </job>
+    </group>
+</config>
