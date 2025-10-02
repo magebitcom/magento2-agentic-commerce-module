@@ -21,14 +21,14 @@ use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
+use Magebit\AgenticCommerce\Service\ComplianceService;
 
 class Index extends ApiController implements HttpPostActionInterface
 {
-    private const API_VERSION = '2025-10-01';
-
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
+        protected readonly ComplianceService $complianceService,
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
         protected readonly CheckoutSessionService $checkoutSessionService,
@@ -46,12 +46,8 @@ class Index extends ApiController implements HttpPostActionInterface
     {
         $request = $this->getRequest();
 
-        if (!$this->validateApiVersion($request)) {
-            return $this->makeErrorResponse($this->errorResponseFactory->create([
-                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
-                'code' => 'invalid_api_version',
-                'message' => 'Invalid API version',
-            ]));
+        if ($validationError = $this->complianceService->validateRequest($request)) {
+            return $this->makeErrorResponse($validationError);
         }
 
         /** @var Http $request */
@@ -79,7 +75,7 @@ class Index extends ApiController implements HttpPostActionInterface
                 'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,
                 'code' => 'processing_error',
                 'message' => $e->getMessage(),
-            ]]));
+            ]]), 500);
         } catch (\Exception $e) {
             $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
 
@@ -87,7 +83,7 @@ class Index extends ApiController implements HttpPostActionInterface
                 'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,
                 'code' => 'internal_server_error',
                 'message' => 'Internal server error',
-            ]]));
+            ]]), 500);
         }
 
         /** @var CheckoutSessionResponse $checkoutSessionResponse */
