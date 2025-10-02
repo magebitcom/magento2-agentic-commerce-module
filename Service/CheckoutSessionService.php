@@ -20,6 +20,7 @@ use Magebit\AgenticCommerce\Model\Convert\CartItemToLineItem;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentAddress;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
+use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
 
 class CheckoutSessionService
 {
@@ -33,6 +34,7 @@ class CheckoutSessionService
         protected readonly CartToFulfillmentAddress $cartToFulfillmentAddress,
         protected readonly CartToTotals $cartToTotals,
         protected readonly CartToFulfillmentOptions $cartToFulfillmentOptions,
+        protected readonly CartToPaymentProvider $cartToPaymentProvider,
     ) {
     }
 
@@ -83,11 +85,13 @@ class CheckoutSessionService
         $fulfillmentAddress = $this->cartToFulfillmentAddress->execute($cart);
         $totals = $this->cartToTotals->execute($cart);
         $fulfillmentOptions = $this->cartToFulfillmentOptions->execute($cart);
+        $paymentProvider = $this->cartToPaymentProvider->execute($cart);
 
         $response->setLineItems($lineItems);
         $response->setFulfillmentAddress($fulfillmentAddress);
         $response->setTotals($totals);
         $response->setFulfillmentOptions($fulfillmentOptions);
+        $response->setPaymentProvider($paymentProvider);
 
         $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
 

@@ -12,9 +12,6 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data;
 
-/**
- * Payment Provider interface
- */
 interface PaymentProviderInterface
 {
     public const PROVIDER_STRIPE = 'stripe';
