@@ -6,45 +6,46 @@
  * @author    Magebit <info@magebit.com>
  * @license   GNU General Public License ("GPL") v3.0
  */
+
 declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Controller\Checkout\Sessions;
 
-use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
-use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
-use Magebit\AgenticCommerce\Controller\ApiController;
-use Magento\Framework\App\Action\HttpPostActionInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\Http;
+use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
+use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterfaceFactory;
+use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
+use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
+use Magebit\AgenticCommerce\Controller\ApiController;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
-use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magento\Framework\Exception\LocalizedException;
+use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 
-class Index extends ApiController implements HttpPostActionInterface
+class Update extends ApiController implements HttpGetActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
      * @param ComplianceService $complianceService
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
-     * @param CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
-     * @param CheckoutSessionService $checkoutSessionService
      * @param LoggerInterface $logger
+     * @param CheckoutSessionService $checkoutSessionService
+     * @param UpdateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
         protected readonly ComplianceService $complianceService,
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
+        protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
-        protected readonly LoggerInterface $logger
+        protected readonly UpdateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
     ) {
         parent::__construct($resultJsonFactory, $request);
     }
@@ -68,11 +69,12 @@ class Index extends ApiController implements HttpPostActionInterface
             return $response;
         }
 
-        /** @var string $content */
-        $content = $request->getContent();
-        $rawData = json_decode($content, true);
+        /** @var string|null $sessionId */
+        $sessionId = $request->getParam('session_id');
 
-        if (!is_array($rawData) || !isset($rawData['items']) || !is_array($rawData['items'])) {
+        if (!$sessionId) {
+            $this->logger->critical('Session ID is required');
+
             return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
                 'code' => 'invalid_request',
@@ -80,11 +82,15 @@ class Index extends ApiController implements HttpPostActionInterface
             ]]));
         }
 
-        /** @var CreateCheckoutSessionRequestInterface $checkoutSessionsRequest */
+        /** @var string $content */
+        $content = $request->getContent();
+        $rawData = json_decode($content, true);
+
+        /** @var UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest */
         $checkoutSessionsRequest = $this->checkoutSessionsRequestFactory->create(['data' => $rawData]);
 
         try {
-            $checkoutSessionResponse = $this->checkoutSessionService->create($checkoutSessionsRequest);
+            $checkoutSessionResponse = $this->checkoutSessionService->update($sessionId, $checkoutSessionsRequest);
 
             /** @var CheckoutSessionResponse $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
