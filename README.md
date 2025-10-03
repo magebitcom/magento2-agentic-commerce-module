@@ -36,7 +36,8 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 You can find the Module's configuration under `Stores -> Settings -> Configuration -> Magebit -> Agentic Commerce`:
 Make sure to configure Product Feed settings before running an export.
 
-<img width="1793" height="784" alt="image" src="https://github.com/user-attachments/assets/a1403a16-f944-42e2-8ea6-29289efe98b1" />
+<img width="1486" height="864" alt="image" src="https://github.com/user-attachments/assets/14ae49c3-33be-45e0-b539-89856997f557" />
+
 
 Additionally, there are settings at the product level. Here you can configure product visibility in Agentic search and whether to allow
 Agentic Checkout.
