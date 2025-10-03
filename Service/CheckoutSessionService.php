@@ -137,6 +137,11 @@ class CheckoutSessionService
     public function complete(string $sessionId, CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
+
+        if (!$cart->getIsActive()) {
+            throw new LocalizedException(__('Cart is not active. Please create a new checkout session'));
+        }
+
         $paymentToken = $checkoutSessionsRequest->getPaymentData()->getToken();
 
         if (!$paymentToken) {
@@ -264,8 +269,8 @@ class CheckoutSessionService
         }
 
         $response->setLinks($links);
-        $response->setMessages($this->getCartMessages($validationErrors));
-        $response->setStatus($this->getCartStatus($validationErrors));
+        $response->setMessages($this->getCartMessages($cart, $validationErrors));
+        $response->setStatus($this->getCartStatus($cart, $validationErrors));
 
         $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
 
@@ -294,26 +299,56 @@ class CheckoutSessionService
     }
 
     /**
+     * @param CartInterface $cart
      * @param string[] $errors
      * @return string
      */
-    public function getCartStatus(array $errors): string
+    public function getCartStatus(CartInterface $cart, array $errors): string
     {
-        $status = CheckoutSessionResponseInterface::STATUS_NOT_READY_FOR_PAYMENT;
+        if (!$cart->getIsActive()) {
+            if ($cart->getReservedOrderId() !== null) {
+                return CheckoutSessionResponseInterface::STATUS_COMPLETED;
+            }
 
-        if (empty($errors)) {
-            $status = CheckoutSessionResponseInterface::STATUS_READY_FOR_PAYMENT;
+            return CheckoutSessionResponseInterface::STATUS_CANCELED;
         }
 
-        return $status;
+        if (empty($errors)) {
+            return CheckoutSessionResponseInterface::STATUS_READY_FOR_PAYMENT;
+        }
+
+        return CheckoutSessionResponseInterface::STATUS_NOT_READY_FOR_PAYMENT;
     }
 
     /**
+     * @param CartInterface $cart
      * @param string[] $errors
      * @return MessageInterface[]
      */
-    public function getCartMessages(array $errors): array
+    public function getCartMessages(CartInterface $cart, array $errors): array
     {
+        if (!$cart->getIsActive()) {
+            if ($cart->getReservedOrderId() !== null) {
+                return [
+                    $this->messageInterfaceFactory->create(['data' => [
+                        'type' => MessageInterface::TYPE_INFO,
+                        'code' => 'order_placed',
+                        'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
+                        'content' => sprintf('Order placed successfully: %s', $cart->getReservedOrderId()),
+                    ]]),
+                ];
+            }
+
+            return [
+                $this->messageInterfaceFactory->create(['data' => [
+                    'type' => MessageInterface::TYPE_ERROR,
+                    'code' => 'cart_not_active',
+                    'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
+                    'content' => 'Cart is not active. Please create a new checkout session',
+                ]]),
+            ];
+        }
+
         return array_map(function ($error) {
             return $this->messageInterfaceFactory->create(['data' => [
                 'type' => MessageInterface::TYPE_ERROR,
