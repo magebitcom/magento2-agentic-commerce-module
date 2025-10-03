@@ -4,7 +4,7 @@
  *
  * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
- * @license   GNU General Public License ("GPL") v3.0
+ * @license   MIT
  */
 declare(strict_types=1);
 
