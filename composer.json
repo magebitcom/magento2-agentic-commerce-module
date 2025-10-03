@@ -8,8 +8,11 @@
         "magebitcom/magento2-core": "0.1.*",
         "php": ">=8.1"
     },
+    "suggest": {
+        "stripe/stripe-payments": "*"
+    },
     "license": [
-        "Proprietary"
+        "GNU General Public License (GPL)"
     ],
     "autoload": {
         "files": [

@@ -7,6 +7,9 @@ use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
 use Magento\Quote\Api\ShippingMethodManagementInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Quote\Model\Cart\ShippingMethodConverter;
+use Magento\Quote\Api\Data\ShippingMethodInterface;
 
 class CartToFulfillmentOptions
 {
@@ -17,6 +20,7 @@ class CartToFulfillmentOptions
     public function __construct(
         protected readonly FulfillmentOptionInterfaceFactory $fulfillmentOptionInterfaceFactory,
         protected readonly ShippingMethodManagementInterface $shippingMethodManagement,
+        protected readonly ShippingMethodConverter $shippingMethodConverter,
         protected readonly ConvertPrice $convertPrice,
     ) {
     }
@@ -28,10 +32,7 @@ class CartToFulfillmentOptions
     public function execute(Quote $cart): array
     {
         $fulfillmentOptions = [];
-        /** @var int|string $cartId */
-        $cartId = $cart->getId();
-
-        $shippingMethods = $this->shippingMethodManagement->getList((int) $cartId);
+        $shippingMethods = $this->getShippingMethods($cart);
 
         foreach ($shippingMethods as $shippingMethod) {
             /** @var FulfillmentOptionInterface $fulfillmentOption */
@@ -51,5 +52,26 @@ class CartToFulfillmentOptions
         }
 
         return $fulfillmentOptions;
+    }
+
+    /**
+     * @param Quote $cart
+     * @return ShippingMethodInterface[]
+     */
+    public function getShippingMethods(Quote $cart): array
+    {
+        $shippingAddress = $cart->getShippingAddress();
+        if (!$shippingAddress->getCountryId()) {
+            throw new LocalizedException(__('The shipping address is missing. Set the address and try again.'));
+        }
+        $shippingAddress->collectShippingRates();
+        $shippingRates = $shippingAddress->getGroupedAllShippingRates();
+        $output = [];
+        foreach ($shippingRates as $carrierRates) {
+            foreach ($carrierRates as $rate) {
+                $output[] = $this->shippingMethodConverter->modelToDataObject($rate, $cart->getQuoteCurrencyCode());
+            }
+        }
+        return $output;
     }
 }

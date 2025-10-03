@@ -16,9 +16,12 @@
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
     <preference for="Magebit\AgenticCommerce\Api\Data\IdempotencyInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Model" />
     <preference for="Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Repository" />
+    <preference for="Magebit\AgenticCommerce\Api\CartValidatorInterface" type="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite" />
 
+    <!-- Request Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\UpdateCheckoutSessionRequest" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CompleteCheckoutSessionRequest" />
 
     <!-- Supporting Data Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
@@ -66,6 +69,23 @@
         <arguments>
             <argument name="reader" xsi:type="object">ProductFeedMappingConfigReader</argument>
             <argument name="cacheId" xsi:type="string">ac_product_feed_mapping_cache</argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Model\PaymentHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="stripe" xsi:type="object">Magebit\AgenticCommerce\Model\Payment\StripePaymentsHandler</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="shipping_address" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\ShippingAddressValidator</item>
+                <item name="customer" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\CustomerValidator</item>
+            </argument>
         </arguments>
     </type>
 
