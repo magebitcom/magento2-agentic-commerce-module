@@ -23,6 +23,8 @@ use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\LocalizedException;
 
 class Retrieve extends ApiController implements HttpGetActionInterface
 {
@@ -75,12 +77,38 @@ class Retrieve extends ApiController implements HttpGetActionInterface
                 'message' => 'Invalid request',
             ]]));
         }
-        /** @var string $sessionId */
-        /** @var CheckoutSessionResponse $response */
-        $response = $this->checkoutSessionService->retrieve((string) $sessionId);
-        $response = $this->makeJsonResponse($response);
 
-        $this->addHeaders($response, $request);
-        return $response;
+        try {
+
+            /** @var string $sessionId */
+            /** @var CheckoutSessionResponse $response */
+            $response = $this->checkoutSessionService->retrieve((string) $sessionId);
+            $response = $this->makeJsonResponse($response);
+
+            $this->addHeaders($response, $request);
+            return $response;
+        } catch (NoSuchEntityException $e) {
+            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'session_not_found',
+                'message' => 'Checkout session not found',
+            ]]), 404);
+        } catch (LocalizedException $e) {
+            $this->logger->critical('[AgenticCommerce] Error retrieving checkout session', ['exception' => $e]);
+
+            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
+                'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,
+                'code' => 'processing_error',
+                'message' => $e->getMessage(),
+            ]]), 500);
+        } catch (\Exception $e) {
+            $this->logger->critical('[AgenticCommerce] Error retrieving checkout session', ['exception' => $e]);
+
+            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
+                'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,
+                'code' => 'internal_server_error',
+                'message' => 'Internal server error',
+            ]]), 500);
+        }
     }
 }
