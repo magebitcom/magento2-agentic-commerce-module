@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Service;
 
+use LogicException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
@@ -43,6 +44,7 @@ use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 
@@ -199,6 +201,28 @@ class CheckoutSessionService
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
         return $response;
+    }
+
+    /**
+     * @param string $sessionId
+     * @return CheckoutSessionResponseInterface
+     */
+    public function cancel(string $sessionId): CheckoutSessionResponseInterface
+    {
+        $cart = $this->guestCartRepository->get($sessionId);
+
+        if (!$cart->getIsActive()) {
+            if ($cart->getReservedOrderId() !== null) {
+                throw new LocalizedException(__('Order is already placed. Please contact support to cancel the order'));
+            }
+
+            throw new LocalizedException(__('Cart is already canceled'));
+        }
+
+        /** @var Quote $cart */
+        $cart->setIsActive(false);
+        $this->cartRepository->save($cart);
+        return $this->retrieve($sessionId);
     }
 
     /**
