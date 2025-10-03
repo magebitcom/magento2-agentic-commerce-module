@@ -14,13 +14,21 @@ namespace Magebit\AgenticCommerce\Model\Data;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
-use Magento\Framework\DataObject;
+use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
+use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 
 /**
  * Payment Data Data Transfer Object
  */
-class PaymentData extends DataObject implements PaymentDataInterface
+class PaymentData extends DataTransferObject implements PaymentDataInterface
 {
+    public function __construct(
+        private readonly AddressInterfaceFactory $addressInterfaceFactory,
+        array $data = []
+    ) {
+        parent::__construct($data);
+    }
+
     /**
      * @inheritDoc
      */
@@ -63,7 +71,7 @@ class PaymentData extends DataObject implements PaymentDataInterface
             return $address;
         }
         if (is_array($address)) {
-            return Address::from($address);
+            return $this->addressInterfaceFactory->create(['data' => $address]);
         }
         return null;
     }
