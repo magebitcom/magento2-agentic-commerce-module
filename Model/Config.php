@@ -15,6 +15,7 @@ namespace Magebit\AgenticCommerce\Model;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 
@@ -23,10 +24,12 @@ class Config implements ConfigInterface
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param UrlInterface $urlBuilder
+     * @param SerializerInterface $serializer
      */
     public function __construct(
         public readonly ScopeConfigInterface $scopeConfig,
-        public readonly UrlInterface $urlBuilder
+        public readonly UrlInterface $urlBuilder,
+        public readonly SerializerInterface $serializer
     ) {
     }
 
@@ -62,6 +65,7 @@ class Config implements ConfigInterface
      */
     public function getGtinSourceAttribute(?int $storeId = null): string
     {
+        // @phpstan-ignore return.type
         return $this->scopeConfig->getValue(ConfigInterface::CONFIG_GTIN_SOURCE, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -71,6 +75,7 @@ class Config implements ConfigInterface
      */
     public function getSellerNameSource(?int $storeId = null): string
     {
+        // @phpstan-ignore return.type
         return $this->scopeConfig->getValue(ConfigInterface::CONFIG_SELLER_NAME_SOURCE, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -82,6 +87,7 @@ class Config implements ConfigInterface
         $source = $this->getSellerNameSource($storeId);
 
         if ($source === 'general') {
+            // @phpstan-ignore return.type
             return $this->scopeConfig->getValue(
                 'general/store_information/name',
                 ScopeInterface::SCOPE_STORE,
@@ -89,6 +95,7 @@ class Config implements ConfigInterface
             );
         }
 
+        // @phpstan-ignore return.type
         return $this->scopeConfig->getValue(ConfigInterface::CONFIG_SELLER_NAME, ScopeInterface::SCOPE_STORE, $storeId);
     }
 
@@ -98,6 +105,7 @@ class Config implements ConfigInterface
      */
     public function getSellerPrivacyPolicyUrl(?int $storeId = null): string
     {
+        /** @var string|null $url */
         $url = $this->scopeConfig->getValue(
             ConfigInterface::CONFIG_SELLER_PRIVACY_POLICY_URL,
             ScopeInterface::SCOPE_STORE,
@@ -108,11 +116,7 @@ class Config implements ConfigInterface
             throw new LocalizedException(__('Seller privacy policy URL is not configured.'));
         }
 
-        if (str_starts_with($url, '/')) {
-            $url = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . ltrim($url, '/');
-        }
-
-        return $url;
+        return $this->formatLink($url);
     }
 
     /**
@@ -121,6 +125,7 @@ class Config implements ConfigInterface
      */
     public function getSellerTosUrl(?int $storeId = null): string
     {
+        /** @var string|null $url */
         $url = $this->scopeConfig->getValue(
             ConfigInterface::CONFIG_SELLER_TOS_URL,
             ScopeInterface::SCOPE_STORE,
@@ -131,11 +136,7 @@ class Config implements ConfigInterface
             throw new LocalizedException(__('Seller terms of service URL is not configured.'));
         }
 
-        if (str_starts_with($url, '/')) {
-            $url = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . ltrim($url, '/');
-        }
-
-        return $url;
+        return $this->formatLink($url);
     }
 
     /**
@@ -144,17 +145,14 @@ class Config implements ConfigInterface
      */
     public function getReturnPolicyUrl(?int $storeId = null): string
     {
+        /** @var string|null $url */
         $url = $this->scopeConfig->getValue(ConfigInterface::CONFIG_RETURN_POLICY_URL, ScopeInterface::SCOPE_STORE, $storeId);
 
         if (!$url) {
             throw new LocalizedException(__('Return policy URL is not configured.'));
         }
 
-        if (str_starts_with($url, '/')) {
-            $url = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . ltrim($url, '/');
-        }
-
-        return $url;
+        return $this->formatLink($url);
     }
 
     /**
@@ -163,6 +161,51 @@ class Config implements ConfigInterface
      */
     public function getReturnWindow(?int $storeId = null): int
     {
+        // @phpstan-ignore cast.int
         return (int) $this->scopeConfig->getValue(ConfigInterface::CONFIG_RETURN_WINDOW, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
+     * @param int|null $storeId
+     * @return array<array{type: string, link: string}>
+     */
+    public function getCheckoutSessionLinks(?int $storeId = null): array
+    {
+        /** @var string|null $links */
+        $links = $this->scopeConfig->getValue(
+            ConfigInterface::CONFIG_CHECKOUT_SESSION_LINKS,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if (!$links) {
+            return [];
+        }
+
+        $links = $this->serializer->unserialize($links);
+
+        if (!is_array($links)) {
+            return [];
+        }
+
+        return array_map(function ($link) {
+            return [
+                'type' => $link['type'],
+                'link' => $this->formatLink($link['link'])
+            ];
+        }, array_values($links));
+    }
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    protected function formatLink(string $url): string
+    {
+        if (str_starts_with($url, '/')) {
+            $url = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . ltrim($url, '/');
+        }
+
+        return $url;
     }
 }
