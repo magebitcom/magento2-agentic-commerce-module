@@ -61,11 +61,6 @@ class Retrieve extends ApiController implements HttpGetActionInterface
             return $this->makeErrorResponse($validationError);
         }
 
-        if ($response = $this->complianceService->handleIdempotency($request)) {
-            $this->addHeaders($response, $request);
-            return $response;
-        }
-
         $sessionId = $request->getParam('session_id');
 
         if (!$sessionId) {
@@ -97,10 +92,10 @@ class Retrieve extends ApiController implements HttpGetActionInterface
             $this->logger->critical('[AgenticCommerce] Error retrieving checkout session', ['exception' => $e]);
 
             return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
-                'type' => ErrorResponseInterface::TYPE_PROCESSING_ERROR,
-                'code' => 'processing_error',
-                'message' => $e->getMessage(),
-            ]]), 500);
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'invalid_request',
+                'message' => $e->getLogMessage(),
+            ]]));
         } catch (\Exception $e) {
             $this->logger->critical('[AgenticCommerce] Error retrieving checkout session', ['exception' => $e]);
 

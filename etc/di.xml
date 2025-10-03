@@ -14,9 +14,11 @@
     <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Export\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\IdempotencyInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Model" />
     <preference for="Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Repository" />
+
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\UpdateCheckoutSessionRequest" />
 
     <!-- Supporting Data Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />

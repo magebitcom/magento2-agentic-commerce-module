@@ -26,6 +26,7 @@ use Magento\Quote\Model\Quote;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\LinkInterface;
 use Magebit\AgenticCommerce\Api\Data\LinkInterfaceFactory;
+use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -34,6 +35,8 @@ use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentAddress;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
 use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\LocalizedException;
 
 class CheckoutSessionService
 {
@@ -80,19 +83,30 @@ class CheckoutSessionService
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($maskedCartId);
 
-        $this->addItemsToCart($cart, $checkoutSessionsRequest->getItems());
-
-        if ($checkoutSessionsRequest->getBuyer()) {
-            $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
-        }
-
-        if ($checkoutSessionsRequest->getFulfillmentAddress()) {
-            $this->addFulfillmentAddressToCart($cart, $checkoutSessionsRequest->getFulfillmentAddress());
-        }
-
+        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
         $this->assignCartDataToResponse($cart, $response);
 
+        return $response;
+    }
+
+    /**
+     * @param string $sessionId
+     * @param UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
+     * @return CheckoutSessionResponseInterface
+     */
+    public function update(string $sessionId, UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    {
+        /** @var Quote $cart */
+        $cart = $this->guestCartRepository->get($sessionId);
+
+        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
+        $cart->collectTotals();
+        $this->cartRepository->save($cart);
+
+        $response = $this->checkoutSessionResponseFactory->create();
+        $response->setId($sessionId);
+        $this->assignCartDataToResponse($cart, $response);
         return $response;
     }
 
@@ -110,6 +124,35 @@ class CheckoutSessionService
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
         return $response;
+    }
+
+    /**
+     * @param CartInterface $cart
+     * @param CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
+     * @return void
+     */
+    public function processSessionsRequest(
+        CartInterface $cart,
+        CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
+    ): void {
+        /** @var Quote $cart */
+        if ($checkoutSessionsRequest->getItems()) {
+            $this->addItemsToCart($cart, $checkoutSessionsRequest->getItems());
+        }
+
+        if ($checkoutSessionsRequest->getBuyer()) {
+            $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
+        }
+
+        if ($checkoutSessionsRequest->getFulfillmentAddress()) {
+            $this->addFulfillmentAddressToCart($cart, $checkoutSessionsRequest->getFulfillmentAddress());
+        }
+
+        if ($checkoutSessionsRequest instanceof UpdateCheckoutSessionRequestInterface) {
+            if ($checkoutSessionsRequest->getFulfillmentOptionId()) {
+                $cart->getShippingAddress()->setShippingMethod($checkoutSessionsRequest->getFulfillmentOptionId());
+            }
+        }
     }
 
     /**
@@ -160,6 +203,9 @@ class CheckoutSessionService
      */
     public function addItemsToCart(CartInterface $cart, array $items): void
     {
+        /** @var Quote $cart */
+        $cart->removeAllItems();
+
         foreach ($items as $item) {
             /** @var Product $product */
             $product = $this->getProduct($item);

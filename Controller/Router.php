@@ -22,6 +22,11 @@ use Magento\Framework\App\Request\Http;
 
 class Router implements RouterInterface
 {
+    protected const SESSION_ACTION_MAP = [
+        'GET' => 'retrieve',
+        'POST' => 'update'
+    ];
+
     /**
      * @param ActionFactory $actionFactory
      * @param ConfigInterface $config
@@ -44,7 +49,7 @@ class Router implements RouterInterface
         $identifierParts = explode('/', $identifier);
         $routerParts = explode('/', $basePath);
 
-        if (array_intersect($identifierParts, $routerParts) && $request->getModuleName() !== 'agentic_commerce') {
+        if (array_intersect($identifierParts, $routerParts) && !$this->alreadyProcessed($request)) {
             for ($i = 0; $i < count($routerParts); $i++) {
                 array_shift($identifierParts);
             }
@@ -54,7 +59,7 @@ class Router implements RouterInterface
 
             if (count($identifierParts) >= 1) {
                 $sessionId = $identifierParts[0];
-                $action = $identifierParts[1] ?? 'retrieve';
+                $action = $this->getAction($request, $identifierParts);
             }
 
             $request->setModuleName('agentic_commerce');
@@ -67,5 +72,34 @@ class Router implements RouterInterface
         }
 
         return null;
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @return bool
+     */
+    protected function alreadyProcessed(RequestInterface $request): bool
+    {
+        /** @var Http $request */
+        return $request->getModuleName() === 'agentic_commerce';
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @param array<string> $identifierParts
+     * @return string
+     */
+    public function getAction(RequestInterface $request, array $identifierParts): string
+    {
+        /** @var Http $request */
+        $action = 'index';
+
+        if (count($identifierParts) === 2) {
+            $action = $identifierParts[1];
+        } else {
+            $action = self::SESSION_ACTION_MAP[$request->getMethod()];
+        }
+
+        return $action;
     }
 }
