@@ -15,6 +15,9 @@
 				<enable_feed>0</enable_feed>
 				<enable_checkout>0</enable_checkout>
 			</general_settings>
+            <agentic_checkout>
+                <router_base_path>checkout_sessions</router_base_path>
+            </agentic_checkout>
 			<product_feed>
 				<gtin_source>ean</gtin_source>
 				<seller_name_source>general</seller_name_source>

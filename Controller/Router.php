@@ -17,14 +17,18 @@ use Magento\Framework\App\ActionFactory;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\RouterInterface;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magento\Framework\App\Request\Http;
 
 class Router implements RouterInterface
 {
     /**
      * @param ActionFactory $actionFactory
+     * @param ConfigInterface $config
      */
     public function __construct(
         private readonly ActionFactory $actionFactory,
+        private readonly ConfigInterface $config,
     ) {
     }
 
@@ -34,20 +38,23 @@ class Router implements RouterInterface
      */
     public function match(RequestInterface $request): ?ActionInterface
     {
+        /** @var Http $request */
         $identifier = trim($request->getPathInfo(), '/');
+        $basePath = $this->config->getCheckoutRouterBasePath();
+        $identifierParts = explode('/', $identifier);
+        $routerParts = explode('/', $basePath);
 
-        if (str_starts_with($identifier, 'checkout_sessions') && $request->getModuleName() !== 'agentic_commerce') {
-            $parts = explode('/', $identifier);
-
-            // Remove the first part of the identifier
-            array_shift($parts);
+        if (array_intersect($identifierParts, $routerParts) && $request->getModuleName() !== 'agentic_commerce') {
+            for ($i = 0; $i < count($routerParts); $i++) {
+                array_shift($identifierParts);
+            }
 
             $action = 'index';
             $sessionId = null;
 
-            if (count($parts) >= 1) {
-                $sessionId = $parts[0];
-                $action = $parts[1] ?? 'retrieve';
+            if (count($identifierParts) >= 1) {
+                $sessionId = $identifierParts[0];
+                $action = $identifierParts[1] ?? 'retrieve';
             }
 
             $request->setModuleName('agentic_commerce');
@@ -55,6 +62,7 @@ class Router implements RouterInterface
             $request->setActionName($action);
             $request->setParam('session_id', $sessionId);
 
+            // @phpstan-ignore arguments.count
             return $this->actionFactory->create(Forward::class, ['request' => $request]);
         }
 

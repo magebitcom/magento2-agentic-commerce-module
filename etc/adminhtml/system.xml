@@ -32,7 +32,12 @@
 
             <group id="agentic_checkout" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
 				<label>Agentic Checkout</label>
-                <field id="session_links" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                <field id="router_base_path" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Router Base Path</label>
+                    <comment>Base path to use for the router. Default is `checkout_sessions`</comment>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="session_links" type="text" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
                     <label>Checkout Session Links</label>
                     <comment>List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer. List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer</comment>
                     <frontend_model>Magebit\AgenticCommerce\Block\Adminhtml\Form\Field\SessionLinks</frontend_model>
