@@ -25,6 +25,7 @@ use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\LocalizedException;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class Cancel extends ApiController implements HttpPostActionInterface
 {
@@ -35,6 +36,7 @@ class Cancel extends ApiController implements HttpPostActionInterface
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param LoggerInterface $logger
      * @param CheckoutSessionService $checkoutSessionService
+     * @param ConfigInterface $config
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
@@ -42,7 +44,8 @@ class Cancel extends ApiController implements HttpPostActionInterface
         protected readonly ComplianceService $complianceService,
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly LoggerInterface $logger,
-        protected readonly CheckoutSessionService $checkoutSessionService
+        protected readonly CheckoutSessionService $checkoutSessionService,
+        protected readonly ConfigInterface $config
     ) {
         parent::__construct($resultJsonFactory, $request);
     }
@@ -54,6 +57,14 @@ class Cancel extends ApiController implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
+        if (!$this->config->isCheckoutEnabled()) {
+            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'checkout_disabled',
+                'message' => 'Checkout is disabled',
+            ]]));
+        }
+
         /** @var Http $request */
         $request = $this->getRequest();
 
