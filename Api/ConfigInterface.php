@@ -18,6 +18,7 @@ interface ConfigInterface
     public const CONFIG_CHECKOUT_ENABLED = 'agentic_commerce/general_settings/enable_checkout';
 
     public const CONFIG_CHECKOUT_SESSION_LINKS = 'agentic_commerce/agentic_checkout/session_links';
+    public const CONFIG_CHECKOUT_ROUTER_BASE_PATH = 'agentic_commerce/agentic_checkout/router_base_path';
 
     public const CONFIG_GTIN_SOURCE = 'agentic_commerce/product_feed/gtin_source';
     public const CONFIG_SELLER_NAME_SOURCE = 'agentic_commerce/product_feed/seller_name_source';
@@ -86,4 +87,10 @@ interface ConfigInterface
      * @return array<array{type:string,link:string}>
      */
     public function getCheckoutSessionLinks(?int $storeId = null): array;
+
+    /**
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getCheckoutRouterBasePath(?int $storeId = null): string;
 }

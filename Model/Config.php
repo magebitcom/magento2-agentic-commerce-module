@@ -167,6 +167,22 @@ class Config implements ConfigInterface
 
     /**
      * @param int|null $storeId
+     * @return string
+     */
+    public function getCheckoutRouterBasePath(?int $storeId = null): string
+    {
+        /** @var string|null $value */
+        $value = $this->scopeConfig->getValue(ConfigInterface::CONFIG_CHECKOUT_ROUTER_BASE_PATH, ScopeInterface::SCOPE_STORE, $storeId);
+
+        if (!$value) {
+            return 'checkout_sessions';
+        }
+
+        return trim($value, '/');
+    }
+
+    /**
+     * @param int|null $storeId
      * @return array<array{type: string, link: string}>
      */
     public function getCheckoutSessionLinks(?int $storeId = null): array
