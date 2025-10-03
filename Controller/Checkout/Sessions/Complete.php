@@ -26,6 +26,7 @@ use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterfaceFactory;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class Complete extends ApiController implements HttpPostActionInterface
 {
@@ -36,6 +37,8 @@ class Complete extends ApiController implements HttpPostActionInterface
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param LoggerInterface $logger
      * @param CheckoutSessionService $checkoutSessionService
+     * @param CompleteCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory
+     * @param ConfigInterface $config
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
@@ -45,6 +48,7 @@ class Complete extends ApiController implements HttpPostActionInterface
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly CompleteCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
+        protected readonly ConfigInterface $config
     ) {
         parent::__construct($resultJsonFactory, $request);
     }
@@ -56,6 +60,14 @@ class Complete extends ApiController implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
+        if (!$this->config->isCheckoutEnabled()) {
+            return $this->makeErrorResponse($this->errorResponseFactory->create([ 'data' => [
+                'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+                'code' => 'checkout_disabled',
+                'message' => 'Checkout is disabled',
+            ]]));
+        }
+
         /** @var Http $request */
         $request = $this->getRequest();
 
