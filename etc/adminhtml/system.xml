@@ -30,7 +30,17 @@
 				</field>
 			</group>
 
-            <group id="product_feed" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+            <group id="agentic_checkout" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Agentic Checkout</label>
+                <field id="session_links" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Checkout Session Links</label>
+                    <comment>List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer. List of links (e.g. ToS/privacy policy/etc.) to be displayed to the customer</comment>
+                    <frontend_model>Magebit\AgenticCommerce\Block\Adminhtml\Form\Field\SessionLinks</frontend_model>
+                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                </field>
+			</group>
+
+            <group id="product_feed" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
 				<label>Product Feed</label>
 				<field id="gtin_source" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
 					<label>GTIN Source</label>

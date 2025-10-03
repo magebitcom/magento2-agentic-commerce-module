@@ -1,7 +1,18 @@
 <?php
 
+/**
+ * This file is part of the Magebit_AgenticCommerce package.
+ *
+ * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @author    Magebit <info@magebit.com>
+ * @license   GNU General Public License ("GPL") v3.0
+ */
+
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Service;
 
+use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
@@ -13,6 +24,8 @@ use Magento\Quote\Api\GuestCartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AgenticCommerce\Api\Data\LinkInterface;
+use Magebit\AgenticCommerce\Api\Data\LinkInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -24,10 +37,26 @@ use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
 
 class CheckoutSessionService
 {
+    /**
+     * @param ConfigInterface $config
+     * @param CartRepositoryInterface $cartRepository
+     * @param GuestCartManagementInterface $guestCartManagement
+     * @param CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory
+     * @param LinkInterfaceFactory $linkInterfaceFactory
+     * @param GuestCartRepositoryInterface $guestCartRepository
+     * @param ProductRepositoryInterface $productRepository
+     * @param CartItemToLineItem $cartItemToLineItem
+     * @param CartToFulfillmentAddress $cartToFulfillmentAddress
+     * @param CartToTotals $cartToTotals
+     * @param CartToFulfillmentOptions $cartToFulfillmentOptions
+     * @param CartToPaymentProvider $cartToPaymentProvider
+     */
     public function __construct(
+        protected readonly ConfigInterface $config,
         protected readonly CartRepositoryInterface $cartRepository,
         protected readonly GuestCartManagementInterface $guestCartManagement,
         protected readonly CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory,
+        protected readonly LinkInterfaceFactory $linkInterfaceFactory,
         protected readonly GuestCartRepositoryInterface $guestCartRepository,
         protected readonly ProductRepositoryInterface $productRepository,
         protected readonly CartItemToLineItem $cartItemToLineItem,
@@ -102,12 +131,20 @@ class CheckoutSessionService
         $totals = $this->cartToTotals->execute($cart);
         $fulfillmentOptions = $this->cartToFulfillmentOptions->execute($cart);
         $paymentProvider = $this->cartToPaymentProvider->execute($cart);
+        $links = $this->getLinks();
+
+        // Being very optimistic here
+        /** @var string $currency */
+        $currency = $cart->getCurrency()?->getStoreCurrencyCode();
 
         $response->setLineItems($lineItems);
         $response->setFulfillmentAddress($fulfillmentAddress);
         $response->setTotals($totals);
         $response->setFulfillmentOptions($fulfillmentOptions);
         $response->setPaymentProvider($paymentProvider);
+        $response->setCurrency($currency);
+        $response->setLinks($links);
+        $response->setMessages([]);
 
         $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
 
@@ -130,6 +167,18 @@ class CheckoutSessionService
             /** @var Quote $cart */
             $cart->addProduct($product, $item->getQuantity());
         }
+    }
+
+    /**
+     * @return LinkInterface[]
+     */
+    public function getLinks(): array
+    {
+        $linksConfig = $this->config->getCheckoutSessionLinks();
+
+        return array_map(function ($link) {
+            return $this->linkInterfaceFactory->create(['data' => $link]);
+        }, $linksConfig);
     }
 
     /**
