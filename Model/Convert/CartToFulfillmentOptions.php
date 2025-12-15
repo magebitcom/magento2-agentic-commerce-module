@@ -15,7 +15,6 @@ use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
 use Magento\Quote\Api\ShippingMethodManagementInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\Cart\ShippingMethodConverter;
 use Magento\Quote\Api\Data\ShippingMethodInterface;
 
@@ -70,7 +69,7 @@ class CartToFulfillmentOptions
     {
         $shippingAddress = $cart->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
-            throw new LocalizedException(__('The shipping address is missing. Set the address and try again.'));
+            return [];
         }
         $shippingAddress->collectShippingRates();
         $shippingRates = $shippingAddress->getGroupedAllShippingRates();

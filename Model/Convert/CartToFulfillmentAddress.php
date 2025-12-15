@@ -26,12 +26,28 @@ class CartToFulfillmentAddress
 
     /**
      * @param Quote $cart
-     * @return AddressInterface
+     * @return AddressInterface|null
      */
-    public function execute(Quote $cart): AddressInterface
+    public function execute(Quote $cart): ?AddressInterface
     {
         $shippingAddress = $cart->getShippingAddress();
-        $name = $shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname();
+
+        // Check if required address fields are present
+        if (!$shippingAddress->getCity()
+            || !$shippingAddress->getCountry()
+            || !$shippingAddress->getPostcode()
+            || !$shippingAddress->getStreet()
+        ) {
+            return null;
+        }
+
+        $name = trim($shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname());
+
+        // If name is empty, use a placeholder or return null
+        if (empty($name)) {
+            return null;
+        }
+
         /** @var AddressInterface $address */
         $address = $this->addressInterfaceFactory->create();
         $address->setName($name);

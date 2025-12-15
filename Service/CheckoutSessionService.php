@@ -174,6 +174,7 @@ class CheckoutSessionService
 
         if ($checkoutSessionsRequest->getPaymentData()->getBillingAddress()) {
             $this->addBillingAddressToCart($cart, $checkoutSessionsRequest->getPaymentData()->getBillingAddress());
+
         } else {
             $this->copyShippingAddressToBillingAddress($cart);
         }
@@ -314,7 +315,11 @@ class CheckoutSessionService
         $currency = $cart->getCurrency()?->getStoreCurrencyCode();
 
         $response->setLineItems($lineItems);
-        $response->setFulfillmentAddress($fulfillmentAddress);
+
+        if ($fulfillmentAddress) {
+            $response->setFulfillmentAddress($fulfillmentAddress);
+        }
+
         $response->setTotals($totals);
         $response->setFulfillmentOptions($fulfillmentOptions);
         $response->setPaymentProvider($paymentProvider);
@@ -422,8 +427,13 @@ class CheckoutSessionService
     {
         $linksConfig = $this->config->getCheckoutSessionLinks();
 
-        return array_map(function ($link) {
-            return $this->linkInterfaceFactory->create(['data' => $link]);
+        return array_map(function (array $link) : LinkInterface {
+            $linkData = [
+                'type' => $link['type'],
+                'url' => $link['link']
+            ];
+
+            return $this->linkInterfaceFactory->create(['data' => $linkData]);
         }, $linksConfig);
     }
 
@@ -477,6 +487,10 @@ class CheckoutSessionService
         $this->addDataToQuoteAddress($shippingAddress, $address);
 
         if (!$cart->getCustomerFirstname() || !$cart->getCustomerLastname()) {
+            if (!$this->isValidName($address->getName())) {
+                return;
+            }
+
             [$firstName, $lastName] = explode(' ', $address->getName(), 2);
             $cart->setCustomerFirstname($firstName);
             $cart->setCustomerLastname($lastName);
@@ -493,6 +507,10 @@ class CheckoutSessionService
         /** @var Quote $cart */
         $billingAddress = $cart->getBillingAddress();
         $this->addDataToQuoteAddress($billingAddress, $address);
+
+        if ($billingAddress && !$billingAddress->getTelephone() && $cart->getShippingAddress()) {
+            $billingAddress->setTelephone($cart->getShippingAddress()->getTelephone());
+        }
     }
 
     /**
@@ -516,6 +534,10 @@ class CheckoutSessionService
      */
     protected function addDataToQuoteAddress(QuoteAddressInterface $cartAddress, AddressInterface $address): void
     {
+        if (!$this->isValidName($address->getName())) {
+            return;
+        }
+
         [$firstName, $lastName] = explode(' ', $address->getName(), 2);
 
         $street = array_filter([$address->getLineOne(), $address->getLineTwo()]);
@@ -548,5 +570,14 @@ class CheckoutSessionService
         $billingAddress->setPostcode($shippingAddress->getPostcode());
         $billingAddress->setTelephone($shippingAddress->getTelephone());
         $billingAddress->setEmail($shippingAddress->getEmail());
+    }
+
+    /**
+     * @param string|null $name
+     * @return bool
+     */
+    protected function isValidName(?string $name): bool
+    {
+        return !empty($name) && strpos($name, ' ') !== false;
     }
 }
