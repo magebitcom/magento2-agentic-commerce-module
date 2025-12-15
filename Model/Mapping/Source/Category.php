@@ -16,6 +16,7 @@ use Magebit\AgenticCommerce\Api\Mapping\SourceInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Product;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Category implements SourceInterface
 {
@@ -36,9 +37,14 @@ class Category implements SourceInterface
     {
         /** @var Product $product */
         $categoryIds = $product->getCategoryIds();
-
         $category = array_shift($categoryIds);
 
-        return $this->categoryRepository->get($category, $product->getStoreId())->getName();
+        try {
+            $category = $this->categoryRepository->get($category, $product->getStoreId());
+        } catch (NoSuchEntityException $e) {
+            return null;
+        }
+
+        return $category->getName();
     }
 }
