@@ -23,6 +23,10 @@ interface ErrorResponseInterface
     public const CODE_INVALID_CARD = 'invalid_card';
     public const CODE_DUPLICATE_REQUEST = 'duplicate_request';
     public const CODE_IDEMPOTENCY_CONFLICT = 'idempotency_conflict';
+    public const CODE_MISSING_API_VERSION = 'missing_api_version';
+    public const CODE_UNSUPPORTED_API_VERSION = 'unsupported_api_version';
+
+    public const KEY_SUPPORTED_VERSIONS = 'supported_versions';
 
     /**
      * Get type
@@ -83,4 +87,19 @@ interface ErrorResponseInterface
      * @return $this
      */
     public function setParam(?string $param): self;
+
+    /**
+     * Get the API versions this module accepts, newest first
+     *
+     * @return string[]|null
+     */
+    public function getSupportedVersions(): ?array;
+
+    /**
+     * Set the API versions this module accepts, newest first
+     *
+     * @param string[]|null $supportedVersions
+     * @return $this
+     */
+    public function setSupportedVersions(?array $supportedVersions): self;
 }

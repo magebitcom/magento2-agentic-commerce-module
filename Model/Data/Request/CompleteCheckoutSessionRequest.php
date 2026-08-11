@@ -73,6 +73,7 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
     public static function loadValidatorMetadata(ClassMetadata $metadata): void
     {
         // Validate raw data array directly per OpenAI Agentic Checkout Spec
+        // allowExtraFields stays true: ACP adds optional fields between releases; ignore, never reject.
         $metadata->addGetterConstraint('rawData', new Assert\Collection([
             'fields' => [
                 'buyer' => new Assert\Optional([
@@ -91,7 +92,7 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
                             ]),
                             'phone_number' => new Assert\Optional(),
                         ],
-                        'allowExtraFields' => false,
+                        'allowExtraFields' => true,
                     ]),
                 ]),
                 'payment_data' => new Assert\Required([
@@ -142,15 +143,15 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
                                             new Assert\Length(max: 20),
                                         ]),
                                     ],
-                                    'allowExtraFields' => false,
+                                    'allowExtraFields' => true,
                                 ]),
                             ]),
                         ],
-                        'allowExtraFields' => false,
+                        'allowExtraFields' => true,
                     ]),
                 ]),
             ],
-            'allowExtraFields' => false,
+            'allowExtraFields' => true,
             'allowMissingFields' => false,
         ]));
     }

@@ -83,4 +83,26 @@ class ErrorResponse extends DataTransferObject implements ErrorResponseInterface
     {
         return $this->setData('param', $param);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedVersions(): ?array
+    {
+        $data = $this->getData(ErrorResponseInterface::KEY_SUPPORTED_VERSIONS);
+
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return array_values(array_filter($data, 'is_string'));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setSupportedVersions(?array $supportedVersions): ErrorResponseInterface
+    {
+        return $this->setData(ErrorResponseInterface::KEY_SUPPORTED_VERSIONS, $supportedVersions);
+    }
 }
