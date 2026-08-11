@@ -68,6 +68,7 @@ Found a bug, have a feature suggestion or just want to help in general? Contribu
 Interested in [Magebit](https://magebit.com) doing the integration for you? Contact us on our [website](https://magebit.com/contact) and we can help you with the full implementation of Agentic Commerce sales channels (Instant Checkout on ChatGPT, Product Feeds, etc).
 
 ---
-![magebit (1)](https://github.com/user-attachments/assets/cdc904ce-e839-40a0-a86f-792f7ab7961f)
+![Magebit](https://github.com/user-attachments/assets/cdc904ce-e839-40a0-a86f-792f7ab7961f)
 
-*Have questions or need help? Contact us at info@magebit.com*
+Magebit - Full-service e-commerce agency
+[magebit.com](https://magebit.com)
