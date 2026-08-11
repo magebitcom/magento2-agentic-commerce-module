@@ -22,6 +22,11 @@ use Magento\Framework\App\Request\Http;
 
 class Router implements RouterInterface
 {
+    /**
+     * The spec fixes this path, so it is not configurable like the session routes are.
+     */
+    protected const DISCOVERY_PATH = '.well-known/acp.json';
+
     protected const SESSION_ACTION_MAP = [
         'GET' => 'retrieve',
         'POST' => 'update'
@@ -45,6 +50,16 @@ class Router implements RouterInterface
     {
         /** @var Http $request */
         $identifier = trim($request->getPathInfo(), '/');
+
+        if ($identifier === self::DISCOVERY_PATH && !$this->alreadyProcessed($request)) {
+            $request->setModuleName('agentic_commerce');
+            $request->setControllerName('discovery');
+            $request->setActionName('index');
+
+            // @phpstan-ignore arguments.count
+            return $this->actionFactory->create(Forward::class, ['request' => $request]);
+        }
+
         $basePath = $this->config->getCheckoutRouterBasePath();
         $identifierParts = explode('/', $identifier);
         $routerParts = explode('/', $basePath);

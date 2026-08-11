@@ -25,11 +25,6 @@ use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 
 interface CheckoutSessionResponseInterface
 {
-    public const STATUS_NOT_READY_FOR_PAYMENT = 'not_ready_for_payment';
-    public const STATUS_READY_FOR_PAYMENT = 'ready_for_payment';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_CANCELED = 'canceled';
-    public const STATUS_IN_PROGRESS = 'in_progress';
 
     /**
      * Get ID

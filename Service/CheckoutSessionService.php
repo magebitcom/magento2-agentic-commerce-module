@@ -15,6 +15,7 @@ namespace Magebit\AgenticCommerce\Service;
 use LogicException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface as SpecCheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
@@ -207,7 +208,7 @@ class CheckoutSessionService
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
-        $response->setStatus(CheckoutSessionResponseInterface::STATUS_COMPLETED);
+        $response->setStatus(SpecCheckoutSessionInterface::STATUS_COMPLETED);
         $message = $this->messageInterfaceFactory->create(['data' => [
             'type' => MessageInterface::TYPE_INFO,
             'code' => 'order_placed',
@@ -374,17 +375,17 @@ class CheckoutSessionService
     {
         if (!$cart->getIsActive()) {
             if ($cart->getReservedOrderId() !== null) {
-                return CheckoutSessionResponseInterface::STATUS_COMPLETED;
+                return SpecCheckoutSessionInterface::STATUS_COMPLETED;
             }
 
-            return CheckoutSessionResponseInterface::STATUS_CANCELED;
+            return SpecCheckoutSessionInterface::STATUS_CANCELED;
         }
 
         if (empty($errors)) {
-            return CheckoutSessionResponseInterface::STATUS_READY_FOR_PAYMENT;
+            return SpecCheckoutSessionInterface::STATUS_READY_FOR_PAYMENT;
         }
 
-        return CheckoutSessionResponseInterface::STATUS_NOT_READY_FOR_PAYMENT;
+        return SpecCheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT;
     }
 
     /**
