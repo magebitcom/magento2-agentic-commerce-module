@@ -12,7 +12,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 interface CreateCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
@@ -41,7 +41,7 @@ interface CreateCheckoutSessionRequestInterface extends ValidatableDataInterface
     public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
 
     /**
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
      */
     public function getBuyer(): ?BuyerInterface;
 }

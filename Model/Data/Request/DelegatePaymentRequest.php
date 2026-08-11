@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterfaceFactory;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;

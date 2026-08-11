@@ -14,10 +14,10 @@ namespace Magebit\AgenticCommerce\Model\Convert;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\ItemInterface;
-use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
-use Magebit\AgenticCommerce\Api\Data\LineItemInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterfaceFactory;
 use Magento\Quote\Model\Quote\Item;
 
 class CartItemToLineItem
@@ -44,10 +44,11 @@ class CartItemToLineItem
     {
         $quantity = (int)$cartItem->getQty();
 
+        // Quantity lives on the line item now, so the spec's own Item is enough here.
         /** @var ItemInterface $item */
         $item = $this->itemFactory->create();
         $item->setId((string)$cartItem->getProduct()->getSku());
-        $item->setQuantity($quantity);
+        $item->setName((string)$cartItem->getName());
 
         /** @var LineItemInterface $lineItem */
         $lineItem = $this->lineItemFactory->create();

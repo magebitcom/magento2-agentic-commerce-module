@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data\Response;
 
-use Magebit\AgenticCommerce\Api\Data\OrderInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface;
 
 /**
@@ -25,7 +25,9 @@ class CheckoutSessionWithOrderResponse extends CheckoutSessionResponse implement
      */
     public function getOrder(): OrderInterface
     {
-        return $this->getData('order');
+        $order = $this->getDataOf('order', OrderInterface::class);
+
+        return $order ?? throw new \UnexpectedValueException('The checkout session carries no order.');
     }
 
     /**

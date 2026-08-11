@@ -10,8 +10,8 @@
 
 namespace Magebit\AgenticCommerce\Model\Convert;
 
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
 

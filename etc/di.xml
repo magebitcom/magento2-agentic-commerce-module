@@ -25,16 +25,16 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\DelegatePaymentRequest" />
 
     <!-- Supporting Data Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\BuyerInterface" type="Magebit\AgenticCommerce\Model\Data\Buyer" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Address" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Buyer" />
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface" type="Magebit\AcpSpec\Data\DelegatePayment\Allowance" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\LineItem" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Total" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentData" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Order" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Link" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageInfo" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageError" />

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
@@ -58,14 +58,14 @@ interface DelegatePaymentRequestInterface extends RequestInterface, ValidatableD
     /**
      * Get billing address
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface|null
      */
     public function getBillingAddress(): ?AddressInterface;
 
     /**
      * Set billing address
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\AddressInterface|null $billingAddress
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface|null $billingAddress
      * @return $this
      */
     public function setBillingAddress(?AddressInterface $billingAddress): self;

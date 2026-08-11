@@ -18,7 +18,7 @@ use Magebit\AgenticCommerce\Api\Data\Webhook\EventDataInterface;
 use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Api\Data\OrderInterface;
-use Magebit\AgenticCommerce\Model\Data\Order;
+use Magento\Sales\Model\Order as SalesOrder;
 use Magebit\AgenticCommerce\Api\Data\Webhook\RefundInterface;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 
@@ -82,7 +82,10 @@ class OrderToOrderCreatedUpdatedWebhook
      */
     public function getOrderPermalinkUrl(OrderInterface $order): string
     {
-        /** @var Order $order */
-        return $this->urlBuilder->getUrl('agentic_commerce/checkout/order', ['order_id' => $order->getAcOrderId()]);
+        /** @var SalesOrder $order */
+        return $this->urlBuilder->getUrl(
+            'agentic_commerce/checkout/order',
+            ['order_id' => $order->getAcOrderId()]
+        );
     }
 }

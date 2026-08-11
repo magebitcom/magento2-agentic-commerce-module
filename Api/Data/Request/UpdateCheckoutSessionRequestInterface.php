@@ -11,7 +11,7 @@
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 interface UpdateCheckoutSessionRequestInterface extends RequestInterface, ValidatableDataInterface
@@ -27,7 +27,7 @@ interface UpdateCheckoutSessionRequestInterface extends RequestInterface, Valida
     public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
 
     /**
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
      */
     public function getBuyer(): ?BuyerInterface;
 

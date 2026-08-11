@@ -12,21 +12,21 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data\Response;
 
-use Magebit\AgenticCommerce\Api\Data\OrderInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface;
 
 interface CheckoutSessionWithOrderResponseInterface extends CheckoutSessionResponseInterface
 {
     /**
      * Get order
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\OrderInterface
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface
      */
     public function getOrder(): OrderInterface;
 
     /**
      * Set order
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\OrderInterface $order
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface $order
      * @return $this
      */
     public function setOrder(OrderInterface $order): self;

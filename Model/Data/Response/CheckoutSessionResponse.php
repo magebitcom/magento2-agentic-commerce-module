@@ -12,8 +12,9 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data\Response;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
@@ -50,7 +51,7 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getBuyer(): ?BuyerInterface
     {
-        return $this->getData('buyer');
+        return $this->getDataOf('buyer', BuyerInterface::class);
     }
 
     /**
@@ -114,7 +115,7 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getLineItems(): array
     {
-        return $this->getData('line_items');
+        return $this->getDataListOf('line_items', LineItemInterface::class);
     }
 
     /**

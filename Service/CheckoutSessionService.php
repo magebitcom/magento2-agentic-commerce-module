@@ -18,7 +18,6 @@ use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressIn
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface as SpecCheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
@@ -29,7 +28,7 @@ use Magento\Quote\Api\GuestCartManagementInterface;
 use Magento\Quote\Api\GuestCartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
@@ -534,13 +533,10 @@ class CheckoutSessionService
 
     /**
      * @param CartInterface $cart
-     * @param AddressInterface|FulfillmentAddressInterface $address
+     * @param FulfillmentAddressInterface $address
      * @return void
      */
-    public function addBillingAddressToCart(
-        CartInterface $cart,
-        AddressInterface|FulfillmentAddressInterface $address
-    ): void
+    public function addBillingAddressToCart(CartInterface $cart, FulfillmentAddressInterface $address): void
     {
         /** @var Quote $cart */
         $billingAddress = $cart->getBillingAddress();
@@ -596,16 +592,13 @@ class CheckoutSessionService
     }
 
     /**
-     * Both address shapes declare the same accessors, so one mapper serves the fulfillment address
-     * and the delegate-payment billing address alike.
-     *
      * @param QuoteAddressInterface $cartAddress
-     * @param AddressInterface|FulfillmentAddressInterface $address
+     * @param FulfillmentAddressInterface $address
      * @return void
      */
     protected function addDataToQuoteAddress(
         QuoteAddressInterface $cartAddress,
-        AddressInterface|FulfillmentAddressInterface $address
+        FulfillmentAddressInterface $address
     ): void {
         if (!$this->isValidName($address->getName())) {
             return;

@@ -145,12 +145,6 @@ parameters:
 			path: Model/Config/Source/GtinSource.php
 
 		-
-			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Data\\Order is not subtype of native type Magento\\Sales\\Api\\Data\\OrderInterface\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: Model/Convert/OrderToOrderCreatedUpdatedWebhook.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAdditionalImageLink\(\) should return string\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -583,19 +577,7 @@ parameters:
 			path: Model/Data/FulfillmentOptionShipping.php
 
 		-
-			message: '#^Call to an undefined static method Magebit\\AgenticCommerce\\Model\\Data\\Item\:\:from\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: Model/Data/LineItem.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: Model/Data/LineItem.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CompleteCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CompleteCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\BuyerInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
@@ -625,7 +607,7 @@ parameters:
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\BuyerInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
@@ -679,7 +661,7 @@ parameters:
 			path: Model/Data/Request/DelegatePaymentRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getBillingAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getBillingAddress\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\AddressInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/DelegatePaymentRequest.php
@@ -721,7 +703,7 @@ parameters:
 			path: Model/Data/Request/DelegatePaymentRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\BuyerInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
@@ -775,28 +757,10 @@ parameters:
 			path: Model/Data/Response/CheckoutSessionResponse.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentOptions\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\FulfillmentOptionInterface\> but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getLineItems\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\LineItemInterface\> but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionWithOrderResponse\:\:getOrder\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\OrderInterface but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionWithOrderResponse.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -999,12 +963,6 @@ parameters:
 		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: Service/CheckoutSessionService.php
-
-		-
-			message: '#^Parameter \#1 \$region of method Magento\\Quote\\Api\\Data\\AddressInterface\:\:setRegion\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: Service/CheckoutSessionService.php
 

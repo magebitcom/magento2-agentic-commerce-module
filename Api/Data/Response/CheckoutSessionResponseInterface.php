@@ -12,10 +12,10 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data\Response;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
-use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
@@ -45,14 +45,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get buyer
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
      */
     public function getBuyer(): ?BuyerInterface;
 
     /**
      * Set buyer
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null $buyer
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null $buyer
      * @return $this
      */
     public function setBuyer(?BuyerInterface $buyer): self;
@@ -104,14 +104,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get line items
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\LineItemInterface[]
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface[]
      */
     public function getLineItems(): array;
 
     /**
      * Set line items
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\LineItemInterface[] $lineItems
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface[] $lineItems
      * @return $this
      */
     public function setLineItems(array $lineItems): self;
