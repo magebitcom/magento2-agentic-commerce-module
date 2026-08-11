@@ -12,8 +12,8 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentDataInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;

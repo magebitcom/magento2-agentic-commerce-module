@@ -10,7 +10,7 @@
 
 namespace Magebit\AgenticCommerce\Api;
 
-use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
 

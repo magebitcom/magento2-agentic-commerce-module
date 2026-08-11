@@ -18,6 +18,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterfaceFactory;
+use Magebit\AgenticCommerce\Controller\Schema\Index as SchemaIndex;
 use Magento\Framework\UrlInterface;
 use Magento\Quote\Model\Quote;
 
@@ -32,11 +33,6 @@ class CartToCapabilities
     private const HANDLER_DISPLAY_NAME = 'Stripe';
     private const HANDLER_VERSION = '2026-04-17';
     private const HANDLER_SPEC = 'https://agenticcommerce.dev/specs/delegate_payment';
-
-    /**
-     * Where this application serves the handler's own JSON Schemas.
-     */
-    private const SCHEMA_PATH = 'agentic_commerce/schema';
 
     /**
      * @param CapabilitiesInterfaceFactory $capabilitiesFactory
@@ -74,7 +70,7 @@ class CartToCapabilities
      */
     private function stripeHandler(): PaymentHandlerInterface
     {
-        $baseUrl = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . self::SCHEMA_PATH;
+        $baseUrl = rtrim($this->urlBuilder->getBaseUrl(), '/') . '/' . SchemaIndex::ROUTE;
 
         /** @var PaymentHandlerInterface $handler */
         $handler = $this->paymentHandlerFactory->create();
@@ -87,8 +83,8 @@ class CartToCapabilities
         // Tokens arrive already delegated, so no card data ever reaches this application.
         $handler->setRequiresPciCompliance(false);
         $handler->setPsp(self::HANDLER_ID);
-        $handler->setConfigSchema($baseUrl . '/config');
-        $handler->setInstrumentSchemas([$baseUrl . '/instrument_card']);
+        $handler->setConfigSchema($baseUrl . '/' . SchemaIndex::NAME_CONFIG);
+        $handler->setInstrumentSchemas([$baseUrl . '/' . SchemaIndex::NAME_INSTRUMENT_CARD]);
         $handler->setConfig([]);
 
         return $handler;

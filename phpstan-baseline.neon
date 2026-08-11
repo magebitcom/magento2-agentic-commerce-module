@@ -595,18 +595,6 @@ parameters:
 			path: Model/Data/LineItem.php
 
 		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 2
-			path: Model/Data/PaymentData.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\PaymentData\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: Model/Data/PaymentData.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CompleteCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1

@@ -166,10 +166,11 @@ class CheckoutSessionService
             throw new LocalizedException(__('Cart is not active. Please create a new checkout session'));
         }
 
-        $paymentToken = $checkoutSessionsRequest->getPaymentData()->getToken();
+        $paymentData = $checkoutSessionsRequest->getPaymentData();
 
-        if (!$paymentToken) {
-            throw new LocalizedException(__('Payment token is required'));
+        // The token moved inside the instrument's credential; without one there is nothing to charge.
+        if (($paymentData->getInstrument()?->getCredential()?->getToken() ?? '') === '') {
+            throw new LocalizedException(__('Payment credential token is required'));
         }
 
         if ($checkoutSessionsRequest->getBuyer()) {
@@ -178,14 +179,15 @@ class CheckoutSessionService
 
         $this->setCartEmailAddress($cart);
 
-        if ($checkoutSessionsRequest->getPaymentData()->getBillingAddress()) {
-            $this->addBillingAddressToCart($cart, $checkoutSessionsRequest->getPaymentData()->getBillingAddress());
+        $billingAddress = $paymentData->getBillingAddress();
 
+        if ($billingAddress !== null) {
+            $this->addBillingAddressToCart($cart, $billingAddress);
         } else {
             $this->copyShippingAddressToBillingAddress($cart);
         }
 
-        $cartPayment = $this->paymentHandlerPool->get($cart, $checkoutSessionsRequest->getPaymentData());
+        $cartPayment = $this->paymentHandlerPool->get($cart, $paymentData);
         $this->cartRepository->save($cart);
 
         $orderId = $this->guestCartManagement->placeOrder($sessionId, $cartPayment);
@@ -506,10 +508,13 @@ class CheckoutSessionService
 
     /**
      * @param CartInterface $cart
-     * @param AddressInterface $address
+     * @param AddressInterface|FulfillmentAddressInterface $address
      * @return void
      */
-    public function addBillingAddressToCart(CartInterface $cart, AddressInterface $address): void
+    public function addBillingAddressToCart(
+        CartInterface $cart,
+        AddressInterface|FulfillmentAddressInterface $address
+    ): void
     {
         /** @var Quote $cart */
         $billingAddress = $cart->getBillingAddress();

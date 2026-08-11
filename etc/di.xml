@@ -33,7 +33,7 @@
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />
     <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Total" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentDataInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentData" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentData" />
     <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Link" />
     <preference for="Magebit\AgenticCommerce\Api\Data\MessageInterface" type="Magebit\AgenticCommerce\Model\Data\Message" />

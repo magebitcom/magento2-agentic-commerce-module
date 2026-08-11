@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Controller;
 
 use Magento\Framework\App\Action\Forward;
+use Magebit\AgenticCommerce\Controller\Schema\Index as SchemaIndex;
 use Magento\Framework\App\ActionFactory;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\RequestInterface;
@@ -26,6 +27,8 @@ class Router implements RouterInterface
      * The spec fixes this path, so it is not configurable like the session routes are.
      */
     protected const DISCOVERY_PATH = '.well-known/acp.json';
+
+
 
     protected const SESSION_ACTION_MAP = [
         'GET' => 'retrieve',
@@ -50,6 +53,16 @@ class Router implements RouterInterface
     {
         /** @var Http $request */
         $identifier = trim($request->getPathInfo(), '/');
+
+        if (strpos($identifier, SchemaIndex::ROUTE . '/') === 0 && !$this->alreadyProcessed($request)) {
+            $request->setModuleName('agentic_commerce');
+            $request->setControllerName('schema');
+            $request->setActionName('index');
+            $request->setParam('name', substr($identifier, strlen(SchemaIndex::ROUTE) + 1));
+
+            // @phpstan-ignore arguments.count
+            return $this->actionFactory->create(Forward::class, ['request' => $request]);
+        }
 
         if ($identifier === self::DISCOVERY_PATH && !$this->alreadyProcessed($request)) {
             $request->setModuleName('agentic_commerce');
