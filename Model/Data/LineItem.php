@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
@@ -60,80 +61,32 @@ class LineItem extends DataTransferObject implements LineItemInterface
     /**
      * @inheritDoc
      */
-    public function getBaseAmount(): int
+    public function getQuantity(): int
     {
-        return (int) $this->getData('base_amount');
+        return $this->getDataInt('quantity');
     }
 
     /**
      * @inheritDoc
      */
-    public function setBaseAmount(int $amount): LineItemInterface
+    public function setQuantity(int $quantity): LineItemInterface
     {
-        return $this->setData('base_amount', $amount);
+        return $this->setData('quantity', $quantity);
     }
 
     /**
      * @inheritDoc
      */
-    public function getDiscount(): int
+    public function getTotals(): array
     {
-        return (int) $this->getData('discount');
+        return $this->getDataListOf('totals', TotalInterface::class);
     }
 
     /**
      * @inheritDoc
      */
-    public function setDiscount(int $discount): LineItemInterface
+    public function setTotals(array $totals): LineItemInterface
     {
-        return $this->setData('discount', $discount);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getSubtotal(): int
-    {
-        return (int) $this->getData('subtotal');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setSubtotal(int $subtotal): LineItemInterface
-    {
-        return $this->setData('subtotal', $subtotal);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTax(): int
-    {
-        return (int) $this->getData('tax');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setTax(int $tax): LineItemInterface
-    {
-        return $this->setData('tax', $tax);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getTotal(): int
-    {
-        return (int) $this->getData('total');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setTotal(int $total): LineItemInterface
-    {
-        return $this->setData('total', $total);
+        return $this->setData('totals', $totals);
     }
 }

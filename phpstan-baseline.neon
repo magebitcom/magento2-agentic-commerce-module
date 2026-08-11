@@ -145,12 +145,6 @@ parameters:
 			path: Model/Config/Source/GtinSource.php
 
 		-
-			message: '#^Parameter \#1 \$quantity of method Magebit\\AgenticCommerce\\Api\\Data\\ItemInterface\:\:setQuantity\(\) expects int, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: Model/Convert/CartItemToLineItem.php
-
-		-
 			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Data\\Order is not subtype of native type Magento\\Sales\\Api\\Data\\OrderInterface\.$#'
 			identifier: varTag.nativeType
 			count: 1
@@ -592,12 +586,6 @@ parameters:
 			message: '#^Call to an undefined static method Magebit\\AgenticCommerce\\Model\\Data\\Item\:\:from\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
-			path: Model/Data/LineItem.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 5
 			path: Model/Data/LineItem.php
 
 		-

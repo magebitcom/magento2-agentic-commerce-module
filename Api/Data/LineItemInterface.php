@@ -48,77 +48,26 @@ interface LineItemInterface
     public function setItem(ItemInterface $item): self;
 
     /**
-     * Get base amount (in cents)
-     *
      * @return int
      */
-    public function getBaseAmount(): int;
+    public function getQuantity(): int;
 
     /**
-     * Set base amount (in cents)
-     *
-     * @param int $amount
-     * @return $this
+     * @param int $quantity
+     * @return self
      */
-    public function setBaseAmount(int $amount): self;
+    public function setQuantity(int $quantity): self;
 
     /**
-     * Get discount (in cents)
+     * The money breakdown, replacing the flat base_amount/discount/subtotal/tax/total fields.
      *
-     * @return int
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface[]
      */
-    public function getDiscount(): int;
+    public function getTotals(): array;
 
     /**
-     * Set discount (in cents)
-     *
-     * @param int $discount
-     * @return $this
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface[] $totals
+     * @return self
      */
-    public function setDiscount(int $discount): self;
-
-    /**
-     * Get subtotal (in cents)
-     *
-     * @return int
-     */
-    public function getSubtotal(): int;
-
-    /**
-     * Set subtotal (in cents)
-     *
-     * @param int $subtotal
-     * @return $this
-     */
-    public function setSubtotal(int $subtotal): self;
-
-    /**
-     * Get tax (in cents)
-     *
-     * @return int
-     */
-    public function getTax(): int;
-
-    /**
-     * Set tax (in cents)
-     *
-     * @param int $tax
-     * @return $this
-     */
-    public function setTax(int $tax): self;
-
-    /**
-     * Get total (in cents)
-     *
-     * @return int
-     */
-    public function getTotal(): int;
-
-    /**
-     * Set total (in cents)
-     *
-     * @param int $total
-     * @return $this
-     */
-    public function setTotal(int $total): self;
+    public function setTotals(array $totals): self;
 }
