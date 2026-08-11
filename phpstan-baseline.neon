@@ -559,24 +559,6 @@ parameters:
 			path: Model/Data/Feed/Product.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getCarrier\(\) should return string\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/FulfillmentOptionShipping.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getEarliestDeliveryTime\(\) should return string\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/FulfillmentOptionShipping.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getLatestDeliveryTime\(\) should return string\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/FulfillmentOptionShipping.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CompleteCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\BuyerInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -754,12 +736,6 @@ parameters:
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 3
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentOptions\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\FulfillmentOptionInterface\> but returns mixed\.$#'
-			identifier: return.type
-			count: 1
 			path: Model/Data/Response/CheckoutSessionResponse.php
 
 		-

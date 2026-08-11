@@ -14,6 +14,7 @@ namespace Magebit\AgenticCommerce\Model\Data\Response;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
@@ -148,7 +149,7 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getFulfillmentOptions(): array
     {
-        return $this->getData('fulfillment_options');
+        return $this->getDataListOf('fulfillment_options', FulfillmentOptionShippingInterface::class);
     }
 
     /**

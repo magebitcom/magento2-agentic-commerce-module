@@ -14,7 +14,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Response;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
@@ -130,14 +130,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get fulfillment options
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface[]
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface[]
      */
     public function getFulfillmentOptions(): array;
 
     /**
      * Set fulfillment options
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface[] $options
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface[] $options
      * @return $this
      */
     public function setFulfillmentOptions(array $options): self;

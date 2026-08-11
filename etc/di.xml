@@ -40,9 +40,8 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageError" />
 
     <!-- Fulfillment Option Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOption" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionShippingInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionShipping" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionDigitalInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionDigital" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionShipping" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionDigitalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionDigital" />
 
     <!-- Response Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
