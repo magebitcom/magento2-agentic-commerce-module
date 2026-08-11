@@ -16,6 +16,7 @@ use Magento\Framework\App\Request\Http;
 use Magebit\AgenticCommerce\Api\Data\IdempotencyInterface;
 use Magebit\AgenticCommerce\Api\Data\IdempotencyInterfaceFactory;
 use Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -48,6 +49,43 @@ class Management
     }
 
     /**
+     * Claim the key before the work starts, so a second request arriving mid-flight can be told to
+     * wait instead of duplicating it. The unique index on `key` is what makes the claim atomic.
+     *
+     * @param Http $request
+     * @return bool False when the key is already claimed
+     * @throws CouldNotSaveException If the claim fails for any reason other than the key existing
+     */
+    public function reserve(Http $request): bool
+    {
+        $idempotencyKey = $request->getHeader('Idempotency-Key');
+
+        if (!$idempotencyKey || !$this->canHandleIdempotency($request)) {
+            return true;
+        }
+
+        $idempotency = $this->idempotencyFactory->create();
+        $idempotency->setKey((string) $idempotencyKey);
+        $idempotency->setRequestHash($this->hashRequest($request));
+        $idempotency->setStatus(0);
+        $idempotency->setExpiresAt($this->expiresAt());
+
+        try {
+            $this->idempotencyRepository->save($idempotency);
+        } catch (CouldNotSaveException $e) {
+            // The repository reports every failure the same way, so the unique-key race is confirmed
+            // by re-reading rather than assumed — anything else is a real failure and must surface.
+            if ($this->getIdempotency((string) $idempotencyKey) === null) {
+                throw $e;
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param Http $request
      * @param string $response
      * @param int $status
@@ -61,20 +99,25 @@ class Management
             return null;
         }
 
-        $idempotency = $this->idempotencyFactory->create();
+        // Completes the row `reserve()` claimed, rather than inserting a second one.
+        $idempotency = $this->getIdempotency((string) $idempotencyKey) ?? $this->idempotencyFactory->create();
         $idempotency->setKey((string) $idempotencyKey);
         $idempotency->setRequestHash($this->hashRequest($request));
         $idempotency->setResponse($this->encryptor->encrypt($response));
         $idempotency->setStatus($status);
-
-        $expiresAt = (int) strtotime('+' . $this->config->getIdempotencyTtl() . ' hours');
-        $idempotency->setExpiresAt(
-            date('Y-m-d H:i:s', $expiresAt)
-        );
+        $idempotency->setExpiresAt($this->expiresAt());
 
         $this->idempotencyRepository->save($idempotency);
 
         return $idempotency;
+    }
+
+    /**
+     * @return string
+     */
+    private function expiresAt(): string
+    {
+        return date('Y-m-d H:i:s', (int) strtotime('+' . $this->config->getIdempotencyTtl() . ' hours'));
     }
 
     /**

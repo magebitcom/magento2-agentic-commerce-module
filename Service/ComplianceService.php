@@ -34,6 +34,9 @@ class ComplianceService
     /** The version we emit, not the newest we accept. */
     public const API_VERSION = '2025-09-29';
 
+    /** What a client waiting on an in-flight request is told to wait, in seconds. */
+    public const IN_FLIGHT_RETRY_AFTER_SECONDS = 1;
+
     /**
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param IdempotencyManagement $idempotencyManagement
@@ -126,23 +129,99 @@ class ComplianceService
      */
     public function validateIdempotency(Http $request): ?ErrorResponseInterface
     {
-        $idempotency = $this->getIdempotency($request);
-
-        if (!$idempotency) {
+        if (!$this->idempotencyManagement->canHandleIdempotency($request)) {
             return null;
         }
 
-        $requestHash = $this->idempotencyManagement->hashRequest($request);
+        $key = trim((string) $request->getHeader('Idempotency-Key'));
 
-        if ($idempotency->getRequestHash() !== $requestHash) {
-            return $this->errorResponseFactory->create(['data' => [
-                'type' => ErrorResponseInterface::TYPE_REQUEST_NOT_IDEMPOTENT,
-                'code' => 'request_not_idempotent',
-                'message' => 'Used same idempotency key for a different request',
-            ]]);
+        if ($key === '') {
+            return $this->idempotencyError(
+                ErrorResponseInterface::CODE_IDEMPOTENCY_KEY_REQUIRED,
+                'Idempotency-Key header is required',
+                400
+            );
+        }
+
+        $idempotency = $this->getIdempotency($request);
+
+        if (!$idempotency) {
+            // Claim the key; losing the race means another request is already doing this work.
+            if (!$this->idempotencyManagement->reserve($request)) {
+                return $this->inFlightError();
+            }
+
+            return null;
+        }
+
+        if ($idempotency->getRequestHash() !== $this->idempotencyManagement->hashRequest($request)) {
+            return $this->idempotencyError(
+                ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT,
+                'Idempotency-Key has already been used with a different request body',
+                422
+            );
+        }
+
+        // A claimed key with no stored response yet is the original request, still running.
+        if ($idempotency->getResponse() === null && !$this->hasExpired($idempotency)) {
+            return $this->inFlightError();
         }
 
         return null;
+    }
+
+    /**
+     * @return ErrorResponseInterface
+     */
+    private function inFlightError(): ErrorResponseInterface
+    {
+        return $this->idempotencyError(
+            ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT,
+            'A request with this Idempotency-Key is currently being processed',
+            409,
+            self::IN_FLIGHT_RETRY_AFTER_SECONDS
+        );
+    }
+
+    /**
+     * Idempotency violations are all `invalid_request`; only the code and status differ.
+     *
+     * @param string $code
+     * @param string $message
+     * @param int $statusCode
+     * @param int|null $retryAfter Seconds to advertise in Retry-After, when the client should wait
+     * @return ErrorResponseInterface
+     */
+    private function idempotencyError(
+        string $code,
+        string $message,
+        int $statusCode,
+        ?int $retryAfter = null
+    ): ErrorResponseInterface {
+        $data = [
+            'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+            'code' => $code,
+            'message' => $message,
+            '_statusCode' => $statusCode,
+        ];
+
+        if ($retryAfter !== null) {
+            $data['_retryAfter'] = $retryAfter;
+        }
+
+        /** @var ErrorResponseInterface $error */
+        $error = $this->errorResponseFactory->create(['data' => $data]);
+
+        return $error;
+    }
+
+    /**
+     * @param IdempotencyInterface $idempotency
+     * @return bool
+     */
+    private function hasExpired(IdempotencyInterface $idempotency): bool
+    {
+        return (string) $idempotency->getExpiresAt() < date('Y-m-d H:i:s');
     }
 
     /**

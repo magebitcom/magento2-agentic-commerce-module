@@ -15,14 +15,14 @@ namespace Magebit\AgenticCommerce\Api\Data\Response;
 interface ErrorResponseInterface
 {
     public const TYPE_INVALID_REQUEST = 'invalid_request';
-    public const TYPE_REQUEST_NOT_IDEMPOTENT = 'request_not_idempotent';
-    public const TYPE_RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded';
     public const TYPE_PROCESSING_ERROR = 'processing_error';
     public const TYPE_SERVICE_UNAVAILABLE = 'service_unavailable';
 
     public const CODE_INVALID_CARD = 'invalid_card';
     public const CODE_DUPLICATE_REQUEST = 'duplicate_request';
     public const CODE_IDEMPOTENCY_CONFLICT = 'idempotency_conflict';
+    public const CODE_IDEMPOTENCY_KEY_REQUIRED = 'idempotency_key_required';
+    public const CODE_IDEMPOTENCY_IN_FLIGHT = 'idempotency_in_flight';
     public const CODE_MISSING_API_VERSION = 'missing_api_version';
     public const CODE_UNSUPPORTED_API_VERSION = 'unsupported_api_version';
 

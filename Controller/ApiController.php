@@ -89,10 +89,19 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
             $errorResponse->unsetData('_statusCode');
         }
 
+        // The spec requires Retry-After on an in-flight idempotency collision.
+        $retryAfter = $errorResponse->getData('_retryAfter');
+        $errorResponse->unsetData('_retryAfter');
+
         /** @var array<mixed> $data */
         $data = $errorResponse->toArray();
+        $response = $this->makeJsonResponse($data, $statusCode);
 
-        return $this->makeJsonResponse($data, $statusCode);
+        if (is_numeric($retryAfter)) {
+            $response->setHeader('Retry-After', (string) (int) $retryAfter, true);
+        }
+
+        return $response;
     }
 
     /**
