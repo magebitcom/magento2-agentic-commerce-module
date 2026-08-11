@@ -14,13 +14,13 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\AllowanceInterface;
-use Magebit\AgenticCommerce\Api\Data\AllowanceInterfaceFactory;
+use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\RiskSignalInterface;
-use Magebit\AgenticCommerce\Api\Data\RiskSignalInterfaceFactory;
+use Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraints as Assert;

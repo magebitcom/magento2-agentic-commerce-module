@@ -12,10 +12,25 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Block\Adminhtml\Form\Field;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magento\Framework\View\Element\Html\Select;
 
 class LinkTypeColumn extends Select
 {
+    /**
+     * The spec's complete `Link.type` enum; `seller_shop_policies` is not one of them.
+     */
+    private const TYPES = [
+        LinkInterface::TYPE_TERMS_OF_USE,
+        LinkInterface::TYPE_PRIVACY_POLICY,
+        LinkInterface::TYPE_RETURN_POLICY,
+        LinkInterface::TYPE_SHIPPING_POLICY,
+        LinkInterface::TYPE_CONTACT_US,
+        LinkInterface::TYPE_ABOUT_US,
+        LinkInterface::TYPE_FAQ,
+        LinkInterface::TYPE_SUPPORT,
+    ];
+
     /**
      * @param string $value
      * @return self
@@ -47,16 +62,21 @@ class LinkTypeColumn extends Select
         return parent::_toHtml();
     }
     /**
-     * GetSourceOptions function
+     * Driven off the generated constants so the options cannot drift from the spec's enum.
      *
-     * @return array<int, array{label: string, value: int}>
+     * @return array<int, array{label: string, value: string}>
      */
     private function getSourceOptions(): array
     {
-        return [
-            ['label' => 'Terms of Use', 'value' => 'terms_of_use'],
-            ['label' => 'Privacy Policy', 'value' => 'privacy_policy'],
-            ['label' => 'Seller Shop Policies', 'value' => 'seller_shop_policies'],
-        ];
+        $options = [];
+
+        foreach (self::TYPES as $value) {
+            $options[] = [
+                'label' => ucwords(str_replace('_', ' ', $value)),
+                'value' => $value,
+            ];
+        }
+
+        return $options;
     }
 }

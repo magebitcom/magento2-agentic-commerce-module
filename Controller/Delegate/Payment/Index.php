@@ -22,7 +22,7 @@ use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magebit\AgenticCommerce\Service\RequestValidationService;
 use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Service\DelegatePaymentService;
-use Magebit\AgenticCommerce\Model\Data\Response\DelegatePaymentResponse;
+use Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentResponse;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 

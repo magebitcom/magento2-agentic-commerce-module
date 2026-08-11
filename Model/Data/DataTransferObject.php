@@ -49,6 +49,27 @@ abstract class DataTransferObject extends DataObject
      * @param callable(array<mixed>): T $factory
      * @return T|null
      */
+    /**
+     * A list of objects that were already built, which is what the response DTOs hold.
+     *
+     * @template T of object
+     * @param string $key Field name
+     * @param class-string<T> $interface Expected element type
+     * @return list<T>
+     */
+    protected function getDataListOf(string $key, string $interface): array
+    {
+        $values = [];
+
+        foreach ((array)($this->getData($key) ?? []) as $value) {
+            if ($value instanceof $interface) {
+                $values[] = $value;
+            }
+        }
+
+        return $values;
+    }
+
     protected function getDataInstance(string $key, string $interface, callable $factory): mixed
     {
         $data = $this->getData($key);

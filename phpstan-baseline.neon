@@ -13,12 +13,6 @@ parameters:
 			path: Block/Adminhtml/Form/Field/AcStatusColumn.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\LinkTypeColumn\:\:getSourceOptions\(\) should return array\<int, array\{label\: string, value\: int\}\> but returns array\{array\{label\: ''Terms of Use'', value\: ''terms_of_use''\}, array\{label\: ''Privacy Policy'', value\: ''privacy_policy''\}, array\{label\: ''Seller Shop Policies'', value\: ''seller_shop_policies''\}\}\.$#'
-			identifier: return.type
-			count: 1
-			path: Block/Adminhtml/Form/Field/LinkTypeColumn.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\:\:setInputName\(\) should return \$this\(Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\) but returns Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\.$#'
 			identifier: return.type
 			count: 1
@@ -625,6 +619,12 @@ parameters:
 			path: Model/Data/PaymentData.php
 
 		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CompleteCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
 			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, payment_data\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -647,6 +647,18 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
 
 		-
 			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Required, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
@@ -673,13 +685,19 @@ parameters:
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getAllowance\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AllowanceInterface but returns Magebit\\AgenticCommerce\\Api\\Data\\AllowanceInterface\|null\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getAllowance\(\) should return Magebit\\AcpSpec\\Api\\DelegatePayment\\AllowanceInterface but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/DelegatePaymentRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getPaymentMethod\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface but returns Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface\|null\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getBillingAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getPaymentMethod\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/DelegatePaymentRequest.php
@@ -713,6 +731,18 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
 
 		-
 			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_option_id\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: true\} given\.$#'
@@ -775,12 +805,6 @@ parameters:
 			path: Model/Data/Response/CheckoutSessionResponse.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getLinks\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\LinkInterface\> but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getMessages\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\MessageInterface\> but returns array\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -788,12 +812,6 @@ parameters:
 
 		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getPaymentProvider\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentProviderInterface\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getTotals\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\TotalInterface\> but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Response/CheckoutSessionResponse.php

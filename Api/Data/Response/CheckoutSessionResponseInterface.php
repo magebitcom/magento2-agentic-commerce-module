@@ -16,10 +16,10 @@ use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
 use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
-use Magebit\AgenticCommerce\Api\Data\LinkInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface;
-use Magebit\AgenticCommerce\Api\Data\TotalInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 
 interface CheckoutSessionResponseInterface
 {
@@ -167,14 +167,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get totals
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\TotalInterface[]
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface[]
      */
     public function getTotals(): array;
 
     /**
      * Set totals
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\TotalInterface[] $totals
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface[] $totals
      * @return $this
      */
     public function setTotals(array $totals): self;
@@ -182,14 +182,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get links
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\LinkInterface[]
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface[]
      */
     public function getLinks(): array;
 
     /**
      * Set links
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\LinkInterface[] $links
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface[] $links
      * @return $this
      */
     public function setLinks(array $links): self;

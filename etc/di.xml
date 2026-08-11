@@ -30,13 +30,13 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentProvider" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\AllowanceInterface" type="Magebit\AgenticCommerce\Model\Data\Allowance" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\RiskSignalInterface" type="Magebit\AgenticCommerce\Model\Data\RiskSignal" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface" type="Magebit\AcpSpec\Data\DelegatePayment\Allowance" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />
     <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\TotalInterface" type="Magebit\AgenticCommerce\Model\Data\Total" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Total" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentDataInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentData" />
     <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\LinkInterface" type="Magebit\AgenticCommerce\Model\Data\Link" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Link" />
     <preference for="Magebit\AgenticCommerce\Api\Data\MessageInterface" type="Magebit\AgenticCommerce\Model\Data\Message" />
 
     <!-- Fulfillment Option Interfaces -->
@@ -48,7 +48,7 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionWithOrderResponse" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Response\DelegatePaymentResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\DelegatePaymentResponse" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentResponseInterface" type="Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentResponse" />
 
     <!-- Webhook Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface" type="Magebit\AgenticCommerce\Model\Data\Webhook\WebhookEvent" />
