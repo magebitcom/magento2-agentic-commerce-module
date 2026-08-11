@@ -16,8 +16,8 @@ use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterfaceFactory;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterfaceFactory;
+use Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterfaceFactory;
@@ -31,14 +31,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 class DelegatePaymentRequest extends DataTransferObject implements DelegatePaymentRequestInterface
 {
     /**
-     * @param PaymentMethodInterfaceFactory $paymentMethodInterfaceFactory
+     * @param PaymentMethodCardInterfaceFactory $paymentMethodCardFactory
      * @param AllowanceInterfaceFactory $allowanceInterfaceFactory
      * @param AddressInterfaceFactory $addressInterfaceFactory
      * @param RiskSignalInterfaceFactory $riskSignalInterfaceFactory
      * @param array<mixed> $data
      */
     public function __construct(
-        private readonly PaymentMethodInterfaceFactory $paymentMethodInterfaceFactory,
+        private readonly PaymentMethodCardInterfaceFactory $paymentMethodCardFactory,
         private readonly AllowanceInterfaceFactory $allowanceInterfaceFactory,
         private readonly AddressInterfaceFactory $addressInterfaceFactory,
         private readonly RiskSignalInterfaceFactory $riskSignalInterfaceFactory,
@@ -50,15 +50,15 @@ class DelegatePaymentRequest extends DataTransferObject implements DelegatePayme
     /**
      * @inheritDoc
      */
-    public function getPaymentMethod(): PaymentMethodInterface
+    public function getPaymentMethod(): PaymentMethodCardInterface
     {
-        return $this->getDataInstance('payment_method', PaymentMethodInterface::class, $this->paymentMethodInterfaceFactory->create(...));
+        return $this->getDataInstance('payment_method', PaymentMethodCardInterface::class, $this->paymentMethodCardFactory->create(...));
     }
 
     /**
      * @inheritDoc
      */
-    public function setPaymentMethod(PaymentMethodInterface $paymentMethod): DelegatePaymentRequestInterface
+    public function setPaymentMethod(PaymentMethodCardInterface $paymentMethod): DelegatePaymentRequestInterface
     {
         return $this->setData('payment_method', $paymentMethod);
     }

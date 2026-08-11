@@ -14,7 +14,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 /**
@@ -28,17 +28,17 @@ interface DelegatePaymentRequestInterface extends RequestInterface, ValidatableD
     /**
      * Get payment method
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface
+     * @return \Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface
      */
-    public function getPaymentMethod(): PaymentMethodInterface;
+    public function getPaymentMethod(): PaymentMethodCardInterface;
 
     /**
      * Set payment method
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface $paymentMethod
+     * @param \Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface $paymentMethod
      * @return $this
      */
-    public function setPaymentMethod(PaymentMethodInterface $paymentMethod): self;
+    public function setPaymentMethod(PaymentMethodCardInterface $paymentMethod): self;
 
     /**
      * Get allowance

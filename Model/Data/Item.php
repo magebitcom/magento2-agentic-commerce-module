@@ -12,36 +12,22 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Data;
 
+use Magebit\AcpSpec\Data\AgenticCheckout\Item as SpecItem;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
-use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
- * Item Data Transfer Object
+ * The generated item plus the `quantity` the spec's schema omits.
  */
-class Item extends DataTransferObject implements ItemInterface
+class Item extends SpecItem implements ItemInterface
 {
-    /**
-     * @inheritDoc
-     */
-    public function getId(): string
-    {
-        return $this->getDataString('id');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setId(string $id): ItemInterface
-    {
-        return $this->setData('id', $id);
-    }
+    private const KEY_QUANTITY = 'quantity';
 
     /**
      * @inheritDoc
      */
     public function getQuantity(): int
     {
-        return $this->getDataInt('quantity');
+        return $this->requireInt(self::KEY_QUANTITY);
     }
 
     /**
@@ -49,6 +35,6 @@ class Item extends DataTransferObject implements ItemInterface
      */
     public function setQuantity(int $quantity): ItemInterface
     {
-        return $this->setData('quantity', $quantity);
+        return $this->set(self::KEY_QUANTITY, $quantity);
     }
 }

@@ -649,7 +649,7 @@ parameters:
 			path: Model/Data/Request/DelegatePaymentRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getPaymentMethod\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getPaymentMethod\(\) should return Magebit\\AcpSpec\\Api\\DelegatePayment\\PaymentMethodCardInterface but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/DelegatePaymentRequest.php

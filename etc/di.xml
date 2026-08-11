@@ -28,7 +28,7 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Address" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Buyer" />
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface" type="Magebit\AcpSpec\Data\DelegatePayment\PaymentMethodCard" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface" type="Magebit\AcpSpec\Data\DelegatePayment\Allowance" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\LineItem" />

@@ -12,38 +12,23 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface as SpecItemInterface;
+
 /**
- * Item interface
+ * The spec's `Item` plus the `quantity` every upstream example sends. `Item` is
+ * `additionalProperties: false` and does not declare it, which is the defect recorded in the
+ * acp-php-spec README — accepted leniently here rather than rejected.
  */
-interface ItemInterface
+interface ItemInterface extends SpecItemInterface
 {
     /**
-     * Get item ID
-     *
-     * @return string
-     */
-    public function getId(): string;
-
-    /**
-     * Set item ID
-     *
-     * @param string $id
-     * @return $this
-     */
-    public function setId(string $id): self;
-
-    /**
-     * Get quantity
-     *
      * @return int
      */
     public function getQuantity(): int;
 
     /**
-     * Set quantity
-     *
      * @param int $quantity
-     * @return $this
+     * @return self
      */
     public function setQuantity(int $quantity): self;
 }
