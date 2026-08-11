@@ -8,6 +8,8 @@
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Model\Convert;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
@@ -25,6 +27,8 @@ class CartToFulfillmentAddress
     }
 
     /**
+     * Builds the optional ACP fulfillment_address, or null when the quote has no usable address yet.
+     *
      * @param Quote $cart
      * @return AddressInterface|null
      */
@@ -32,32 +36,55 @@ class CartToFulfillmentAddress
     {
         $shippingAddress = $cart->getShippingAddress();
 
-        // Check if required address fields are present
-        if (!$shippingAddress->getCity()
-            || !$shippingAddress->getCountry()
-            || !$shippingAddress->getPostcode()
-            || !$shippingAddress->getStreet()
-        ) {
+        $name = trim(
+            $this->toTrimmedString($shippingAddress->getFirstname())
+            . ' '
+            . $this->toTrimmedString($shippingAddress->getLastname())
+        );
+        $street = $this->getStreetLines($shippingAddress->getStreet());
+        $city = $this->toTrimmedString($shippingAddress->getCity());
+        $country = $this->toTrimmedString($shippingAddress->getCountry());
+        $postalCode = $this->toTrimmedString($shippingAddress->getPostcode());
+
+        // Every one of these is non-nullable on AddressInterface, so a quote missing any cannot be represented.
+        if ($name === '' || $street === [] || $city === '' || $country === '' || $postalCode === '') {
             return null;
         }
 
-        $name = trim($shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname());
-
-        // If name is empty, use a placeholder or return null
-        if (empty($name)) {
-            return null;
-        }
+        // State stays optional: a shipping-estimate quote may carry country and postcode but no region.
+        $state = $this->toTrimmedString($shippingAddress->getRegion());
 
         /** @var AddressInterface $address */
         $address = $this->addressInterfaceFactory->create();
         $address->setName($name);
-        $address->setLineOne($shippingAddress->getStreet()[0]);
-        $address->setLineTwo($shippingAddress->getStreet()[1] ?? null);
-        $address->setCity($shippingAddress->getCity());
-        $address->setState($shippingAddress->getRegion());
-        $address->setCountry($shippingAddress->getCountry());
-        $address->setPostalCode($shippingAddress->getPostcode());
+        $address->setLineOne($street[0]);
+        $address->setLineTwo($street[1] ?? null);
+        $address->setCity($city);
+        $address->setState($state !== '' ? $state : null);
+        $address->setCountry($country);
+        $address->setPostalCode($postalCode);
 
         return $address;
+    }
+
+    /**
+     * @param mixed $street
+     * @return string[]
+     */
+    private function getStreetLines(mixed $street): array
+    {
+        // Quote\Address::getStreet() yields [''] for an unset street, and may hold blank trailing lines.
+        $lines = array_map($this->toTrimmedString(...), is_array($street) ? $street : [$street]);
+
+        return array_values(array_filter($lines, static fn (string $line): bool => $line !== ''));
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    private function toTrimmedString(mixed $value): string
+    {
+        return is_scalar($value) ? trim((string) $value) : '';
     }
 }

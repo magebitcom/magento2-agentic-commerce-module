@@ -34,6 +34,7 @@ class CartToTotals
     public function execute(Quote $cart): array
     {
         $totals = [];
+        $currencyCode = $cart->getCurrency()?->getStoreCurrencyCode() ?? 'USD';
 
         foreach ($cart->getTotals() as $cartTotal) {
             /** @var TotalInterface $total */
@@ -41,7 +42,7 @@ class CartToTotals
 
             $total->setType($cartTotal->getCode());
             $total->setDisplayText((string) $cartTotal->getTitle());
-            $total->setAmount($this->convertPrice->execute($cartTotal->getValue()));
+            $total->setAmount($this->convertPrice->execute($cartTotal->getValue(), $currencyCode));
             $totals[] = $total;
         }
 

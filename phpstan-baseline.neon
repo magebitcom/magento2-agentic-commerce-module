@@ -1,0 +1,1033 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \$products of method Magebit\\AgenticCommerce\\Api\\ProductFeedWriterInterface\:\:write\(\) has invalid type Magebit\\AgenticCommerce\\Api\\FeedProductInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Api/ProductFeedWriterInterface.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\AcStatusColumn\:\:setInputName\(\) should return \$this\(Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\AcStatusColumn\) but returns Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\AcStatusColumn\.$#'
+			identifier: return.type
+			count: 1
+			path: Block/Adminhtml/Form/Field/AcStatusColumn.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\LinkTypeColumn\:\:getSourceOptions\(\) should return array\<int, array\{label\: string, value\: int\}\> but returns array\{array\{label\: ''Terms of Use'', value\: ''terms_of_use''\}, array\{label\: ''Privacy Policy'', value\: ''privacy_policy''\}, array\{label\: ''Seller Shop Policies'', value\: ''seller_shop_policies''\}\}\.$#'
+			identifier: return.type
+			count: 1
+			path: Block/Adminhtml/Form/Field/LinkTypeColumn.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\:\:setInputName\(\) should return \$this\(Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\) but returns Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\MagentoOrderStatusColumn\.$#'
+			identifier: return.type
+			count: 1
+			path: Block/Adminhtml/Form/Field/MagentoOrderStatusColumn.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\OrderStatusMap\:\:getAcStatusRenderer\(\) has Magento\\Framework\\Exception\\LocalizedException in PHPDoc @throws tag but it''s not thrown\.$#'
+			identifier: throws.unusedType
+			count: 1
+			path: Block/Adminhtml/Form/Field/OrderStatusMap.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Block\\Adminhtml\\Form\\Field\\OrderStatusMap\:\:getMagentoStatusRenderer\(\) has Magento\\Framework\\Exception\\LocalizedException in PHPDoc @throws tag but it''s not thrown\.$#'
+			identifier: throws.unusedType
+			count: 1
+			path: Block/Adminhtml/Form/Field/OrderStatusMap.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 2
+			path: Block/Adminhtml/Form/Field/OrderStatusMap.php
+
+		-
+			message: '#^Parameter \#1 \$feedFilePath of method Magebit\\AgenticCommerce\\Model\\Export\\ProductFeed\:\:setFeedFilePath\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Console/Command/ExportFeed.php
+
+		-
+			message: '#^Parameter \#1 \$storeId of method Magebit\\AgenticCommerce\\Model\\Export\\ProductFeed\:\:setStoreId\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Console/Command/ExportFeed.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: Model/Config.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\:\:getMappingsForType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\:\:getMappingsForTypes\(\) has parameter \$types with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\:\:getMappingsForTypes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$arrays of function array_merge expects array, array\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Config/ProductFeedMapping.php
+
+		-
+			message: '#^Call to an undefined method DOMNode\:\:getAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Model/Config/ProductFeedMapping/Converter.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\\Converter\:\:convert\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping/Converter.php
+
+		-
+			message: '#^Cannot access offset ''value'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Cannot access offset ''xsi\:type'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\\Data\:\:__construct\(\) has parameter \$cacheTags with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\\Data\:\:getMappingsForType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$id$#'
+			identifier: parameter.notFound
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Parameter \#1 \$data of method Magento\\Framework\\Data\\Argument\\InterpreterInterface\:\:evaluate\(\) expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_map expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Config/ProductFeedMapping/Data.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Config\\ProductFeedMapping\\DataInterface\:\:getMappingsForType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Config/ProductFeedMapping/DataInterface.php
+
+		-
+			message: '#^Cannot call method getData\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: Model/Config/Source/GtinSource.php
+
+		-
+			message: '#^Parameter \#1 \$quantity of method Magebit\\AgenticCommerce\\Api\\Data\\ItemInterface\:\:setQuantity\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Convert/CartItemToLineItem.php
+
+		-
+			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Data\\Order is not subtype of native type Magento\\Sales\\Api\\Data\\OrderInterface\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: Model/Convert/OrderToOrderCreatedUpdatedWebhook.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAdditionalImageLink\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAgeGroup\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAgeRestriction\(\) should return int\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getApplicableTaxesFees\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAvailability\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getAvailabilityDate\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getBaseMeasure\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getBrand\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getColor\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCondition\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant1Category\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant1Option\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant2Category\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant2Option\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant3Category\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getCustomVariant3Option\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getDeliveryEstimate\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getDescription\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getDimensions\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getExpirationDate\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getGender\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getGeoAvailability\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getGeoPrice\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getGtin\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getHeight\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getId\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getImageLink\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getInventoryQuantity\(\) should return int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getItemGroupId\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getItemGroupTitle\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getLength\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getLink\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getMaterial\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getModel3DLink\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getMpn\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getOfferId\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getPickupMethod\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getPickupSla\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getPopularityScore\(\) should return float\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getPrice\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getPricingTrend\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getProductCategory\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getProductReviewCount\(\) should return int\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getProductReviewRating\(\) should return float\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getQAndA\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getRawReviewData\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getRelatedProductId\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getRelationshipType\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getReturnPolicy\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getReturnRate\(\) should return float\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getReturnWindow\(\) should return int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSalePrice\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSalePriceEffectiveDate\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSellerName\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSellerPrivacyPolicy\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSellerTos\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSellerUrl\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getShipping\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSize\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getSizeSystem\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getStoreReviewCount\(\) should return int\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getStoreReviewRating\(\) should return float\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getTitle\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getUnitPricingMeasure\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getVideoLink\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getWarning\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getWarningUrl\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getWeight\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Feed\\Product\:\:getWidth\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Feed/Product.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getCarrier\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/FulfillmentOptionShipping.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getEarliestDeliveryTime\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/FulfillmentOptionShipping.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\FulfillmentOptionShipping\:\:getLatestDeliveryTime\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/FulfillmentOptionShipping.php
+
+		-
+			message: '#^Call to an undefined static method Magebit\\AgenticCommerce\\Model\\Data\\Item\:\:from\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: Model/Data/LineItem.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 5
+			path: Model/Data/LineItem.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: Model/Data/LineItem.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: Model/Data/PaymentData.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\PaymentData\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Data/PaymentData.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, payment_data\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{first_name\: Symfony\\Component\\Validator\\Constraints\\Required, last_name\: Symfony\\Component\\Validator\\Constraints\\Required, email\: Symfony\\Component\\Validator\\Constraints\\Required, phone_number\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{token\: Symfony\\Component\\Validator\\Constraints\\Required, provider\: Symfony\\Component\\Validator\\Constraints\\Required, billing_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Required, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{first_name\: Symfony\\Component\\Validator\\Constraints\\Required, last_name\: Symfony\\Component\\Validator\\Constraints\\Required, email\: Symfony\\Component\\Validator\\Constraints\\Required, phone_number\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{id\: Symfony\\Component\\Validator\\Constraints\\Required, quantity\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getAllowance\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AllowanceInterface but returns Magebit\\AgenticCommerce\\Api\\Data\\AllowanceInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\DelegatePaymentRequest\:\:getPaymentMethod\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface but returns Magebit\\AgenticCommerce\\Api\\Data\\PaymentMethodInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{payment_method\: Symfony\\Component\\Validator\\Constraints\\Required, allowance\: Symfony\\Component\\Validator\\Constraints\\Required, billing_address\: Symfony\\Component\\Validator\\Constraints\\Optional, risk_signals\: Symfony\\Component\\Validator\\Constraints\\Required, metadata\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{reason\: Symfony\\Component\\Validator\\Constraints\\Required, max_amount\: Symfony\\Component\\Validator\\Constraints\\Required, currency\: Symfony\\Component\\Validator\\Constraints\\Required, checkout_session_id\: Symfony\\Component\\Validator\\Constraints\\Required, merchant_id\: Symfony\\Component\\Validator\\Constraints\\Required, expires_at\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{type\: Symfony\\Component\\Validator\\Constraints\\Required, card_number_type\: Symfony\\Component\\Validator\\Constraints\\Required, number\: Symfony\\Component\\Validator\\Constraints\\Required, display_card_funding_type\: Symfony\\Component\\Validator\\Constraints\\Required, metadata\: Symfony\\Component\\Validator\\Constraints\\Required, exp_month\: Symfony\\Component\\Validator\\Constraints\\Optional, exp_year\: Symfony\\Component\\Validator\\Constraints\\Optional, name\: Symfony\\Component\\Validator\\Constraints\\Optional, \.\.\.\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{type\: Symfony\\Component\\Validator\\Constraints\\Required, score\: Symfony\\Component\\Validator\\Constraints\\Required, action\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/DelegatePaymentRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_option_id\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{first_name\: Symfony\\Component\\Validator\\Constraints\\Required, last_name\: Symfony\\Component\\Validator\\Constraints\\Required, email\: Symfony\\Component\\Validator\\Constraints\\Required, phone_number\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{id\: Symfony\\Component\\Validator\\Constraints\\Required, quantity\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentOptionId\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentOptions\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\FulfillmentOptionInterface\> but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getLineItems\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\LineItemInterface\> but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getLinks\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\LinkInterface\> but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getMessages\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\MessageInterface\> but returns array\<mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getPaymentProvider\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentProviderInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getTotals\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\TotalInterface\> but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionResponse.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionWithOrderResponse\:\:getOrder\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\OrderInterface but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Response/CheckoutSessionWithOrderResponse.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Export\\ProductFeed\:\:export\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Parameter \#1 \$feedFilePath of method Magebit\\AgenticCommerce\\Api\\ProductFeedWriterInterface\:\:setFeedFilePath\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Parameter \#1 \$product of method Magebit\\AgenticCommerce\\Model\\Export\\ProductFeed\:\:mapProduct\(\) expects Magento\\Catalog\\Api\\Data\\ProductInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Parameter \#1 \$products of method Magebit\\AgenticCommerce\\Api\\ProductFeedWriterInterface\:\:write\(\) expects array\<Magebit\\AgenticCommerce\\Api\\FeedProductInterface\>, array\<Magebit\\AgenticCommerce\\Api\\Data\\FeedProductInterface\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Parameter \#2 \$condition of method Magento\\Catalog\\Model\\ResourceModel\\Product\\Collection\:\:addAttributeToFilter\(\) expects array\|null, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Parameter \#2 \$page of method Magebit\\AgenticCommerce\\Api\\ProductFeedWriterInterface\:\:write\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Variable \$data might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: Model/Export/ProductFeed.php
+
+		-
+			message: '#^Call to method getData\(\) on an unknown class Magebit\\AgenticCommerce\\Model\\Export\\Writer\\FeedProductInterface\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Model/Export/Writer/CsvWriter.php
+
+		-
+			message: '#^Parameter \$products of method Magebit\\AgenticCommerce\\Model\\Export\\Writer\\CsvWriter\:\:write\(\) has invalid type Magebit\\AgenticCommerce\\Model\\Export\\Writer\\FeedProductInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Model/Export/Writer/CsvWriter.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: Model/Idempotency/Model.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 5
+			path: Model/Idempotency/Model.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\AbstractMapper\:\:formatValue\(\) has parameter \$mapping with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Mapping/AbstractMapper.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\AbstractMapper\:\:getAttributeValue\(\) has parameter \$mapping with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Mapping/AbstractMapper.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\AbstractMapper\:\:mapAttribute\(\) has parameter \$mapping with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: Model/Mapping/AbstractMapper.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$productTypeMappers$#'
+			identifier: parameter.notFound
+			count: 1
+			path: Model/Mapping/AbstractMapper.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductInterface\:\:getData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:addVariantAttributes\(\) with return type void returns array\<string, mixed\> but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:getChildProducts\(\) should return array\<Magento\\Catalog\\Model\\Product\> but returns array\<Magento\\Catalog\\Api\\Data\\ProductInterface\>\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$arrays of function array_merge expects array, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Result of method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:addVariantAttributes\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Variable \$data might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: Model/Mapping/ConfigurableProductMapper.php
+
+		-
+			message: '#^Call to method getData\(\) on an unknown class Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Model/Mapping/Formatter/EnableSearch.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$product contains unknown class Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Model/Mapping/Formatter/EnableSearch.php
+
+		-
+			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product is not subtype of native type Magento\\Catalog\\Api\\Data\\ProductInterface\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: Model/Mapping/Formatter/EnableSearch.php
+
+		-
+			message: '#^Call to method getStoreId\(\) on an unknown class Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Model/Mapping/Formatter/Price.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: Model/Mapping/Formatter/Price.php
+
+		-
+			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product is not subtype of native type Magento\\Catalog\\Api\\Data\\ProductInterface\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: Model/Mapping/Formatter/Price.php
+
+		-
+			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Model/Mapping/Source/SalePriceEffectiveDate.php
+
+		-
+			message: '#^Property Magebit\\AgenticCommerce\\Model\\Mapping\\Source\\SalePriceEffectiveDate\:\:\$imageUrlBuilder is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: Model/Mapping/Source/SalePriceEffectiveDate.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductInterface\:\:getData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Model/Mapping/Source/SellerPrivacyPolicy.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductInterface\:\:getData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Model/Mapping/Source/SellerTos.php
+
+		-
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Product\\Attribute\\Source\\EnableSearch\:\:getAllOptions\(\) should return array\<array\{value\: string, label\: string\}\> but returns array\{array\{value\: ''visibility'', label\: Magento\\Framework\\Phrase\}, array\{value\: ''enabled'', label\: Magento\\Framework\\Phrase\}, array\{value\: ''disabled'', label\: Magento\\Framework\\Phrase\}\}\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Product/Attribute/Source/EnableSearch.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: Service/CheckoutSessionService.php
+
+		-
+			message: '#^Parameter \#1 \$region of method Magento\\Quote\\Api\\Data\\AddressInterface\:\:setRegion\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Service/CheckoutSessionService.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: Service/CheckoutSessionService.php
+
+		-
+			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Data\\Webhook\\EventData is not subtype of native type Magebit\\AgenticCommerce\\Api\\Data\\Webhook\\WebhookEventInterface\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: Service/WebhookService.php
+
+		-
+			message: '#^Return type \(void\) of method Magebit\\AgenticCommerce\\Setup\\Patch\\Data\\AddProductAttributes\:\:apply\(\) should be compatible with return type \(\$this\(Magento\\Framework\\Setup\\Patch\\PatchInterface\)\) of method Magento\\Framework\\Setup\\Patch\\PatchInterface\:\:apply\(\)$#'
+			identifier: method.childReturnType
+			count: 2
+			path: Setup/Patch/Data/AddProductAttributes.php
