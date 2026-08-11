@@ -18,7 +18,9 @@ use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
 use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 
 interface CheckoutSessionResponseInterface
@@ -60,19 +62,18 @@ interface CheckoutSessionResponseInterface
     public function setBuyer(?BuyerInterface $buyer): self;
 
     /**
-     * Get payment provider
+     * Seller capabilities, which is where the payment handlers live; the flat `payment_provider`
+     * field earlier revisions carried does not exist in the spec.
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface|null
      */
-    public function getPaymentProvider(): ?PaymentProviderInterface;
+    public function getCapabilities(): ?CapabilitiesInterface;
 
     /**
-     * Set payment provider
-     *
-     * @param \Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface|null $paymentProvider
-     * @return $this
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface|null $capabilities
+     * @return self
      */
-    public function setPaymentProvider(?PaymentProviderInterface $paymentProvider): self;
+    public function setCapabilities(?CapabilitiesInterface $capabilities): self;
 
     /**
      * Get status
@@ -120,19 +121,15 @@ interface CheckoutSessionResponseInterface
     public function setLineItems(array $lineItems): self;
 
     /**
-     * Get fulfillment address
-     *
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface|null
      */
-    public function getFulfillmentAddress(): ?AddressInterface;
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
 
     /**
-     * Set fulfillment address
-     *
-     * @param \Magebit\AgenticCommerce\Api\Data\AddressInterface|null $address
-     * @return $this
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface|null $fulfillmentDetails
+     * @return self
      */
-    public function setFulfillmentAddress(?AddressInterface $address): self;
+    public function setFulfillmentDetails(?FulfillmentDetailsInterface $fulfillmentDetails): self;
 
     /**
      * Get fulfillment options
@@ -150,19 +147,17 @@ interface CheckoutSessionResponseInterface
     public function setFulfillmentOptions(array $options): self;
 
     /**
-     * Get fulfillment option ID
+     * One selection per fulfillment group, replacing the single option id.
      *
-     * @return string|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface[]
      */
-    public function getFulfillmentOptionId(): ?string;
+    public function getSelectedFulfillmentOptions(): array;
 
     /**
-     * Set fulfillment option ID
-     *
-     * @param string|null $fulfillmentOptionId
-     * @return $this
+     * @param \Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface[] $options
+     * @return self
      */
-    public function setFulfillmentOptionId(?string $fulfillmentOptionId): self;
+    public function setSelectedFulfillmentOptions(array $options): self;
 
     /**
      * Get totals

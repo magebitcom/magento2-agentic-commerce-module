@@ -655,13 +655,25 @@ parameters:
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getCapabilities\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\CapabilitiesInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Required, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\CreateCheckoutSessionRequest\:\:getFulfillmentDetails\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\FulfillmentDetailsInterface\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\<string, Symfony\\Component\\Validator\\Constraints\\Optional\|Symfony\\Component\\Validator\\Constraints\\Required\>, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CreateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, line_items\: Symfony\\Component\\Validator\\Constraints\\Required, currency\: Symfony\\Component\\Validator\\Constraints\\Required, capabilities\: Symfony\\Component\\Validator\\Constraints\\Required, fulfillment_details\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: false\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
@@ -679,7 +691,7 @@ parameters:
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Optional, phone_number\: Symfony\\Component\\Validator\\Constraints\\Optional, email\: Symfony\\Component\\Validator\\Constraints\\Optional, address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/CreateCheckoutSessionRequest.php
@@ -739,13 +751,19 @@ parameters:
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
+			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Request\\UpdateCheckoutSessionRequest\:\:getFulfillmentDetails\(\) should return Magebit\\AcpSpec\\Api\\AgenticCheckout\\FulfillmentDetailsInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, items\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_address\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_option_id\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: true\} given\.$#'
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\<string, Symfony\\Component\\Validator\\Constraints\\Optional\|Symfony\\Component\\Validator\\Constraints\\Required\>, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{buyer\: Symfony\\Component\\Validator\\Constraints\\Optional, line_items\: Symfony\\Component\\Validator\\Constraints\\Optional, fulfillment_details\: Symfony\\Component\\Validator\\Constraints\\Optional, selected_fulfillment_options\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true, allowMissingFields\: true\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
@@ -763,7 +781,13 @@ parameters:
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Optional, phone_number\: Symfony\\Component\\Validator\\Constraints\\Optional, email\: Symfony\\Component\\Validator\\Constraints\\Optional, address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{type\: Symfony\\Component\\Validator\\Constraints\\Required, option_id\: Symfony\\Component\\Validator\\Constraints\\Required, item_ids\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/UpdateCheckoutSessionRequest.php
@@ -776,18 +800,6 @@ parameters:
 
 		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getBuyer\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\BuyerInterface\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentAddress\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\AddressInterface\|null but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getFulfillmentOptionId\(\) should return string\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Response/CheckoutSessionResponse.php
@@ -806,12 +818,6 @@ parameters:
 
 		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getMessages\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\MessageInterface\> but returns array\<mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getPaymentProvider\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\PaymentProviderInterface\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: Model/Data/Response/CheckoutSessionResponse.php

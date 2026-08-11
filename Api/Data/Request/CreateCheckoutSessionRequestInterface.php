@@ -10,23 +10,35 @@
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 interface CreateCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
 {
     /**
-     * Get items
+     * Items to add to the session. Each carries a `quantity` the spec's `Item` does not declare;
+     * see the `Item.quantity` defect recorded in the acp-php-spec README.
      *
      * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
      */
-    public function getItems(): array;
+    public function getLineItems(): array;
 
     /**
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
+     * @return string ISO 4217 currency code
      */
-    public function getFulfillmentAddress(): ?AddressInterface;
+    public function getCurrency(): string;
+
+    /**
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface|null
+     */
+    public function getCapabilities(): ?CapabilitiesInterface;
+
+    /**
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface|null
+     */
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
 
     /**
      * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null

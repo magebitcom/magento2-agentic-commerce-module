@@ -12,15 +12,17 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Test\Unit\Model\Convert;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentAddress;
-use Magebit\AgenticCommerce\Model\Data\Address;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterfaceFactory;
+use Magebit\AcpSpec\Data\AgenticCheckout\Address;
+use Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentDetails;
+use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentDetails;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class CartToFulfillmentAddressTest extends TestCase
+class CartToFulfillmentDetailsTest extends TestCase
 {
     /**
      * @var AddressInterfaceFactory&MockObject
@@ -28,9 +30,9 @@ class CartToFulfillmentAddressTest extends TestCase
     private AddressInterfaceFactory $addressFactory;
 
     /**
-     * @var CartToFulfillmentAddress
+     * @var CartToFulfillmentDetails
      */
-    private CartToFulfillmentAddress $cartToFulfillmentAddress;
+    private CartToFulfillmentDetails $converter;
 
     /**
      * @return void
@@ -43,7 +45,13 @@ class CartToFulfillmentAddressTest extends TestCase
             ->getMock();
         $this->addressFactory->method('create')->willReturnCallback(static fn (): Address => new Address());
 
-        $this->cartToFulfillmentAddress = new CartToFulfillmentAddress($this->addressFactory);
+        $detailsFactory = $this->getMockBuilder(FulfillmentDetailsInterfaceFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['create'])
+            ->getMock();
+        $detailsFactory->method('create')->willReturnCallback(static fn (): FulfillmentDetails => new FulfillmentDetails());
+
+        $this->converter = new CartToFulfillmentDetails($detailsFactory, $this->addressFactory);
     }
 
     /**
@@ -55,7 +63,7 @@ class CartToFulfillmentAddressTest extends TestCase
     {
         $cart = $this->createCart([]);
 
-        $this->assertNull($this->cartToFulfillmentAddress->execute($cart));
+        $this->assertNull($this->converter->execute($cart));
     }
 
     /**
@@ -69,7 +77,7 @@ class CartToFulfillmentAddressTest extends TestCase
     {
         $cart = $this->createCart($data);
 
-        $this->assertNull($this->cartToFulfillmentAddress->execute($cart));
+        $this->assertNull($this->converter->execute($cart));
     }
 
     /**
@@ -111,12 +119,14 @@ class CartToFulfillmentAddressTest extends TestCase
             'postcode' => '78701',
         ]);
 
-        $address = $this->cartToFulfillmentAddress->execute($cart);
+        $details = $this->converter->execute($cart);
 
-        $this->assertNotNull($address);
+        $this->assertNotNull($details);
+        $address = $details->getAddress();
         $this->assertSame('123 Main St', $address->getLineOne());
         $this->assertNull($address->getLineTwo());
-        $this->assertNull($address->getState());
+        // `state` is required by the spec, so a regionless country sends it empty rather than absent.
+        $this->assertSame('', $address->getState());
     }
 
     /**
@@ -133,9 +143,10 @@ class CartToFulfillmentAddressTest extends TestCase
             'postcode' => '78701',
         ]);
 
-        $address = $this->cartToFulfillmentAddress->execute($cart);
+        $details = $this->converter->execute($cart);
 
-        $this->assertNotNull($address);
+        $this->assertNotNull($details);
+        $address = $details->getAddress();
         $this->assertSame('123 Main St', $address->getLineOne());
         $this->assertSame('Apt 4', $address->getLineTwo());
     }
@@ -156,9 +167,10 @@ class CartToFulfillmentAddressTest extends TestCase
             'postcode' => '78701',
         ]);
 
-        $address = $this->cartToFulfillmentAddress->execute($cart);
+        $details = $this->converter->execute($cart);
 
-        $this->assertNotNull($address);
+        $this->assertNotNull($details);
+        $address = $details->getAddress();
         $this->assertSame('Apt 4', $address->getLineOne());
         $this->assertNull($address->getLineTwo());
     }
@@ -178,17 +190,18 @@ class CartToFulfillmentAddressTest extends TestCase
             'postcode' => '78701',
         ]);
 
-        $address = $this->cartToFulfillmentAddress->execute($cart);
+        $details = $this->converter->execute($cart);
 
-        $this->assertNotNull($address);
+        $this->assertNotNull($details);
+        $address = $details->getAddress();
         $this->assertSame([
             'name' => 'Ada Lovelace',
             'line_one' => '123 Main St',
-            'line_two' => 'Apt 4',
             'city' => 'Austin',
             'state' => 'Texas',
             'country' => 'US',
             'postal_code' => '78701',
+            'line_two' => 'Apt 4',
         ], $address->toArray());
     }
 
@@ -208,6 +221,8 @@ class CartToFulfillmentAddressTest extends TestCase
                 'getRegion',
                 'getCountry',
                 'getPostcode',
+                'getEmail',
+                'getTelephone',
             ])
             ->getMock();
 
@@ -221,12 +236,16 @@ class CartToFulfillmentAddressTest extends TestCase
         $quoteAddress->method('getRegion')->willReturn($addressData['region'] ?? null);
         $quoteAddress->method('getCountry')->willReturn($addressData['country'] ?? null);
         $quoteAddress->method('getPostcode')->willReturn($addressData['postcode'] ?? null);
+        $quoteAddress->method('getEmail')->willReturn($addressData['email'] ?? null);
+        $quoteAddress->method('getTelephone')->willReturn($addressData['telephone'] ?? null);
 
         $cart = $this->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['getShippingAddress'])
+            ->addMethods(['getCustomerEmail'])
             ->getMock();
         $cart->method('getShippingAddress')->willReturn($quoteAddress);
+        $cart->method('getCustomerEmail')->willReturn($addressData['customer_email'] ?? null);
 
         return $cart;
     }

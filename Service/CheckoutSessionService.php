@@ -14,6 +14,9 @@ namespace Magebit\AgenticCommerce\Service;
 
 use LogicException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
@@ -34,10 +37,10 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magebit\AgenticCommerce\Model\Convert\CartItemToLineItem;
-use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentAddress;
+use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentDetails;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
-use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
+use Magebit\AgenticCommerce\Model\Convert\CartToCapabilities;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterface;
 use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
@@ -65,10 +68,11 @@ class CheckoutSessionService
      * @param GuestCartRepositoryInterface $guestCartRepository
      * @param ProductRepositoryInterface $productRepository
      * @param CartItemToLineItem $cartItemToLineItem
-     * @param CartToFulfillmentAddress $cartToFulfillmentAddress
+     * @param CartToFulfillmentDetails $cartToFulfillmentDetails
      * @param CartToTotals $cartToTotals
      * @param CartToFulfillmentOptions $cartToFulfillmentOptions
-     * @param CartToPaymentProvider $cartToPaymentProvider
+     * @param CartToCapabilities $cartToCapabilities
+     * @param SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory
      * @param CartValidatorInterface $cartValidator
      * @param MessageInterfaceFactory $messageInterfaceFactory
      * @param PaymentHandlerPool $paymentHandlerPool
@@ -87,10 +91,11 @@ class CheckoutSessionService
         protected readonly GuestCartRepositoryInterface $guestCartRepository,
         protected readonly ProductRepositoryInterface $productRepository,
         protected readonly CartItemToLineItem $cartItemToLineItem,
-        protected readonly CartToFulfillmentAddress $cartToFulfillmentAddress,
+        protected readonly CartToFulfillmentDetails $cartToFulfillmentDetails,
         protected readonly CartToTotals $cartToTotals,
         protected readonly CartToFulfillmentOptions $cartToFulfillmentOptions,
-        protected readonly CartToPaymentProvider $cartToPaymentProvider,
+        protected readonly CartToCapabilities $cartToCapabilities,
+        protected readonly SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory,
         protected readonly CartValidatorInterface $cartValidator,
         protected readonly MessageInterfaceFactory $messageInterfaceFactory,
         protected readonly PaymentHandlerPool $paymentHandlerPool,
@@ -268,21 +273,26 @@ class CheckoutSessionService
         CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
     ): void {
         /** @var Quote $cart */
-        if ($checkoutSessionsRequest->getItems()) {
-            $this->addItemsToCart($cart, $checkoutSessionsRequest->getItems());
+        if ($checkoutSessionsRequest->getLineItems()) {
+            $this->addItemsToCart($cart, $checkoutSessionsRequest->getLineItems());
         }
 
         if ($checkoutSessionsRequest->getBuyer()) {
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
-        if ($checkoutSessionsRequest->getFulfillmentAddress()) {
-            $this->addFulfillmentAddressToCart($cart, $checkoutSessionsRequest->getFulfillmentAddress());
+        $fulfillmentDetails = $checkoutSessionsRequest->getFulfillmentDetails();
+
+        if ($fulfillmentDetails?->getAddress() !== null) {
+            $this->addFulfillmentAddressToCart($cart, $fulfillmentDetails->getAddress());
         }
 
         if ($checkoutSessionsRequest instanceof UpdateCheckoutSessionRequestInterface) {
-            if ($checkoutSessionsRequest->getFulfillmentOptionId()) {
-                $cart->getShippingAddress()->setShippingMethod($checkoutSessionsRequest->getFulfillmentOptionId());
+            // Magento carries one shipping method per address, so the first selection is the one applied.
+            $selected = $checkoutSessionsRequest->getSelectedFulfillmentOptions()[0] ?? null;
+
+            if ($selected !== null) {
+                $cart->getShippingAddress()->setShippingMethod($selected->getOptionId());
             }
         }
     }
@@ -302,10 +312,10 @@ class CheckoutSessionService
             $lineItems[] = $lineItem;
         }
 
-        $fulfillmentAddress = $this->cartToFulfillmentAddress->execute($cart);
+        $fulfillmentDetails = $this->cartToFulfillmentDetails->execute($cart);
         $totals = $this->cartToTotals->execute($cart);
         $fulfillmentOptions = $this->cartToFulfillmentOptions->execute($cart);
-        $paymentProvider = $this->cartToPaymentProvider->execute($cart);
+        $capabilities = $this->cartToCapabilities->execute($cart);
         $buyer = $this->cartToBuyer->execute($cart);
         $links = $this->getLinks();
         $validationErrors = $this->cartValidator->validate($cart);
@@ -316,13 +326,13 @@ class CheckoutSessionService
 
         $response->setLineItems($lineItems);
 
-        if ($fulfillmentAddress) {
-            $response->setFulfillmentAddress($fulfillmentAddress);
+        if ($fulfillmentDetails) {
+            $response->setFulfillmentDetails($fulfillmentDetails);
         }
 
         $response->setTotals($totals);
         $response->setFulfillmentOptions($fulfillmentOptions);
-        $response->setPaymentProvider($paymentProvider);
+        $response->setCapabilities($capabilities);
         $response->setCurrency($currency);
 
         if ($buyer) {
@@ -333,11 +343,7 @@ class CheckoutSessionService
         $response->setMessages($this->getCartMessages($cart, $validationErrors));
         $response->setStatus($this->getCartStatus($cart, $validationErrors));
 
-        $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
-
-        if ($shippingMethod) {
-            $response->setFulfillmentOptionId($shippingMethod);
-        }
+        $response->setSelectedFulfillmentOptions($this->getSelectedFulfillmentOptions($cart));
     }
 
     /**
@@ -477,10 +483,10 @@ class CheckoutSessionService
 
     /**
      * @param CartInterface $cart
-     * @param AddressInterface $address
+     * @param FulfillmentAddressInterface $address
      * @return void
      */
-    public function addFulfillmentAddressToCart(CartInterface $cart, AddressInterface $address): void
+    public function addFulfillmentAddressToCart(CartInterface $cart, FulfillmentAddressInterface $address): void
     {
         /** @var Quote $cart */
         $shippingAddress = $cart->getShippingAddress();
@@ -514,6 +520,36 @@ class CheckoutSessionService
     }
 
     /**
+     * Magento selects one shipping method for the whole cart, so this is a single-element list
+     * covering every item until fulfillment groups are implemented.
+     *
+     * @param Quote $cart
+     * @return SelectedFulfillmentOptionInterface[]
+     */
+    protected function getSelectedFulfillmentOptions(Quote $cart): array
+    {
+        $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
+
+        if (!$shippingMethod) {
+            return [];
+        }
+
+        $itemIds = [];
+
+        foreach ($cart->getAllItems() as $item) {
+            $itemIds[] = (string)$item->getId();
+        }
+
+        /** @var SelectedFulfillmentOptionInterface $selected */
+        $selected = $this->selectedFulfillmentOptionFactory->create();
+        $selected->setType(SelectedFulfillmentOptionInterface::TYPE_SHIPPING);
+        $selected->setOptionId($shippingMethod);
+        $selected->setItemIds($itemIds);
+
+        return [$selected];
+    }
+
+    /**
      * @param CartInterface $cart
      * @return void
      */
@@ -528,12 +564,17 @@ class CheckoutSessionService
     }
 
     /**
+     * Both address shapes declare the same accessors, so one mapper serves the fulfillment address
+     * and the delegate-payment billing address alike.
+     *
      * @param QuoteAddressInterface $cartAddress
-     * @param AddressInterface $address
+     * @param AddressInterface|FulfillmentAddressInterface $address
      * @return void
      */
-    protected function addDataToQuoteAddress(QuoteAddressInterface $cartAddress, AddressInterface $address): void
-    {
+    protected function addDataToQuoteAddress(
+        QuoteAddressInterface $cartAddress,
+        AddressInterface|FulfillmentAddressInterface $address
+    ): void {
         if (!$this->isValidName($address->getName())) {
             return;
         }

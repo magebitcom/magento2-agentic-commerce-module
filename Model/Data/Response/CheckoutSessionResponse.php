@@ -14,7 +14,9 @@ namespace Magebit\AgenticCommerce\Model\Data\Response;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
@@ -60,17 +62,17 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
     /**
      * @inheritDoc
      */
-    public function getPaymentProvider(): ?PaymentProviderInterface
+    public function getCapabilities(): ?CapabilitiesInterface
     {
-        return $this->getData('payment_provider');
+        return $this->getDataOf('capabilities', CapabilitiesInterface::class);
     }
 
     /**
      * @inheritDoc
      */
-    public function setPaymentProvider(?PaymentProviderInterface $paymentProvider): CheckoutSessionResponseInterface
+    public function setCapabilities(?CapabilitiesInterface $capabilities): CheckoutSessionResponseInterface
     {
-        return $this->setData('payment_provider', $paymentProvider);
+        return $this->setData('capabilities', $capabilities);
     }
 
     /**
@@ -124,17 +126,18 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
     /**
      * @inheritDoc
      */
-    public function getFulfillmentAddress(): ?AddressInterface
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface
     {
-        return $this->getData('fulfillment_address');
+        return $this->getDataOf('fulfillment_details', FulfillmentDetailsInterface::class);
     }
 
     /**
      * @inheritDoc
      */
-    public function setFulfillmentAddress(?AddressInterface $address): CheckoutSessionResponseInterface
-    {
-        return $this->setData('fulfillment_address', $address);
+    public function setFulfillmentDetails(
+        ?FulfillmentDetailsInterface $fulfillmentDetails
+    ): CheckoutSessionResponseInterface {
+        return $this->setData('fulfillment_details', $fulfillmentDetails);
     }
 
     /**
@@ -156,17 +159,17 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
     /**
      * @inheritDoc
      */
-    public function getFulfillmentOptionId(): ?string
+    public function getSelectedFulfillmentOptions(): array
     {
-        return $this->getData('fulfillment_option_id');
+        return $this->getDataListOf('selected_fulfillment_options', SelectedFulfillmentOptionInterface::class);
     }
 
     /**
      * @inheritDoc
      */
-    public function setFulfillmentOptionId(?string $fulfillmentOptionId): CheckoutSessionResponseInterface
+    public function setSelectedFulfillmentOptions(array $options): CheckoutSessionResponseInterface
     {
-        return $this->setData('fulfillment_option_id', $fulfillmentOptionId);
+        return $this->setData('selected_fulfillment_options', $options);
     }
 
     /**

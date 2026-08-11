@@ -10,23 +10,21 @@
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 interface UpdateCheckoutSessionRequestInterface extends RequestInterface, ValidatableDataInterface
 {
     /**
-     * Get items
-     *
      * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
      */
-    public function getItems(): array;
+    public function getLineItems(): array;
 
     /**
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface|null
      */
-    public function getFulfillmentAddress(): ?AddressInterface;
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
 
     /**
      * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
@@ -34,7 +32,9 @@ interface UpdateCheckoutSessionRequestInterface extends RequestInterface, Valida
     public function getBuyer(): ?BuyerInterface;
 
     /**
-     * @return null|string
+     * A selection per fulfillment group, replacing the single option id earlier revisions carried.
+     *
+     * @return \Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface[]
      */
-    public function getFulfillmentOptionId(): ?string;
+    public function getSelectedFulfillmentOptions(): array;
 }

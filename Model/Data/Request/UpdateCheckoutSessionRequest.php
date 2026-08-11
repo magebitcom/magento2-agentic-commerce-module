@@ -10,12 +10,14 @@
 
 namespace Magebit\AgenticCommerce\Model\Data\Request;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
@@ -28,13 +30,15 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
 {
     /**
      * @param ItemInterfaceFactory $itemInterfaceFactory
-     * @param AddressInterfaceFactory $addressInterfaceFactory
+     * @param FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory
+     * @param SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionInterfaceFactory
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
      * @param array<mixed> $data
      */
     public function __construct(
         private readonly ItemInterfaceFactory $itemInterfaceFactory,
-        private readonly AddressInterfaceFactory $addressInterfaceFactory,
+        private readonly FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory,
+        private readonly SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionInterfaceFactory,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
         array $data = []
     ) {
@@ -44,20 +48,24 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
     /**
      * @inheritDoc
      */
-    public function getItems(): array
+    public function getLineItems(): array
     {
-        return $this->getDataInstanceArray('items', ItemInterface::class, $this->itemInterfaceFactory->create(...));
+        return $this->getDataInstanceArray(
+            'line_items',
+            ItemInterface::class,
+            $this->itemInterfaceFactory->create(...)
+        );
     }
 
     /**
      * @inheritDoc
      */
-    public function getFulfillmentAddress(): ?AddressInterface
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface
     {
         return $this->getDataInstance(
-            'fulfillment_address',
-            AddressInterface::class,
-            $this->addressInterfaceFactory->create(...)
+            'fulfillment_details',
+            FulfillmentDetailsInterface::class,
+            $this->fulfillmentDetailsInterfaceFactory->create(...)
         );
     }
 
@@ -72,9 +80,13 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
     /**
      * @inheritDoc
      */
-    public function getFulfillmentOptionId(): ?string
+    public function getSelectedFulfillmentOptions(): array
     {
-        return $this->getDataStringOrNull('fulfillment_option_id');
+        return $this->getDataInstanceArray(
+            'selected_fulfillment_options',
+            SelectedFulfillmentOptionInterface::class,
+            $this->selectedFulfillmentOptionInterfaceFactory->create(...)
+        );
     }
 
     /**
@@ -108,16 +120,16 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
                         'allowExtraFields' => true,
                     ]),
                 ]),
-                'items' => new Assert\Optional([
+                'line_items' => new Assert\Optional([
                     new Assert\Type('array'),
                     new Assert\All([
                         new Assert\Collection([
                             'fields' => [
                                 'id' => new Assert\Required([
-                                    new Assert\NotBlank(message: 'Item id is required'),
+                                    new Assert\NotBlank(message: 'Line item id is required'),
                                 ]),
                                 'quantity' => new Assert\Required([
-                                    new Assert\NotBlank(message: 'Item quantity is required'),
+                                    new Assert\NotBlank(message: 'Line item quantity is required'),
                                     new Assert\Type('int'),
                                     new Assert\GreaterThan(0, message: 'Quantity must be greater than 0'),
                                 ]),
@@ -126,43 +138,41 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
                         ]),
                     ]),
                 ]),
-                'fulfillment_address' => new Assert\Optional([
+                'fulfillment_details' => new Assert\Optional([
                     new Assert\Type('array'),
                     new Assert\Collection([
                         'fields' => [
-                            'name' => new Assert\Required([
-                                new Assert\NotBlank(),
+                            'name' => new Assert\Optional([
                                 new Assert\Length(max: 256),
                             ]),
-                            'line_one' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 60),
+                            'phone_number' => new Assert\Optional(),
+                            'email' => new Assert\Optional([
+                                new Assert\Email(message: 'Email must be a valid email address'),
                             ]),
-                            'line_two' => new Assert\Optional([
-                                new Assert\Length(max: 60),
-                            ]),
-                            'city' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 60),
-                            ]),
-                            'state' => new Assert\Optional(),
-                            'country' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(min: 2, max: 2),
-                                new Assert\Regex(
-                                    '/^[A-Z]{2}$/',
-                                    message: 'Country must be ISO-3166-1 alpha-2 (e.g., "US")'
-                                ),
-                            ]),
-                            'postal_code' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 20),
+                            'address' => new Assert\Optional([
+                                new Assert\Type('array'),
+                                new Assert\Collection([
+                                    'fields' => CreateCheckoutSessionRequest::addressFields(),
+                                    'allowExtraFields' => true,
+                                ]),
                             ]),
                         ],
                         'allowExtraFields' => true,
                     ]),
                 ]),
-                'fulfillment_option_id' => new Assert\Optional(),
+                'selected_fulfillment_options' => new Assert\Optional([
+                    new Assert\Type('array'),
+                    new Assert\All([
+                        new Assert\Collection([
+                            'fields' => [
+                                'type' => new Assert\Required([new Assert\NotBlank()]),
+                                'option_id' => new Assert\Required([new Assert\NotBlank()]),
+                                'item_ids' => new Assert\Required([new Assert\Type('array')]),
+                            ],
+                            'allowExtraFields' => true,
+                        ]),
+                    ]),
+                ]),
             ],
             'allowExtraFields' => true,
             'allowMissingFields' => true,

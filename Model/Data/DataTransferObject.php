@@ -50,6 +50,21 @@ abstract class DataTransferObject extends DataObject
      * @return T|null
      */
     /**
+     * An object that was already built, which is what the response DTOs hold.
+     *
+     * @template T of object
+     * @param string $key Field name
+     * @param class-string<T> $interface Expected type
+     * @return T|null
+     */
+    protected function getDataOf(string $key, string $interface): ?object
+    {
+        $value = $this->getData($key);
+
+        return $value instanceof $interface ? $value : null;
+    }
+
+    /**
      * A list of objects that were already built, which is what the response DTOs hold.
      *
      * @template T of object

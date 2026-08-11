@@ -28,7 +28,6 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
     <preference for="Magebit\AgenticCommerce\Api\Data\BuyerInterface" type="Magebit\AgenticCommerce\Model\Data\Buyer" />
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentProvider" />
     <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface" type="Magebit\AcpSpec\Data\DelegatePayment\Allowance" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />

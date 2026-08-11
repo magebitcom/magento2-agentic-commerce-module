@@ -10,12 +10,14 @@
 
 namespace Magebit\AgenticCommerce\Model\Data\Request;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\AddressInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
@@ -28,13 +30,15 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
 {
     /**
      * @param ItemInterfaceFactory $itemInterfaceFactory
-     * @param AddressInterfaceFactory $addressInterfaceFactory
+     * @param FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory
+     * @param CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
      * @param array<mixed> $data
      */
     public function __construct(
         private readonly ItemInterfaceFactory $itemInterfaceFactory,
-        private readonly AddressInterfaceFactory $addressInterfaceFactory,
+        private readonly FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory,
+        private readonly CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
         array $data = []
     ) {
@@ -44,20 +48,44 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
     /**
      * @inheritDoc
      */
-    public function getItems(): array
+    public function getLineItems(): array
     {
-        return $this->getDataInstanceArray('items', ItemInterface::class, $this->itemInterfaceFactory->create(...));
+        return $this->getDataInstanceArray(
+            'line_items',
+            ItemInterface::class,
+            $this->itemInterfaceFactory->create(...)
+        );
     }
 
     /**
      * @inheritDoc
      */
-    public function getFulfillmentAddress(): ?AddressInterface
+    public function getCurrency(): string
+    {
+        return $this->getDataStringOrNull('currency') ?? '';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCapabilities(): ?CapabilitiesInterface
     {
         return $this->getDataInstance(
-            'fulfillment_address',
-            AddressInterface::class,
-            $this->addressInterfaceFactory->create(...)
+            'capabilities',
+            CapabilitiesInterface::class,
+            $this->capabilitiesInterfaceFactory->create(...)
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface
+    {
+        return $this->getDataInstance(
+            'fulfillment_details',
+            FulfillmentDetailsInterface::class,
+            $this->fulfillmentDetailsInterfaceFactory->create(...)
         );
     }
 
@@ -67,6 +95,43 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
     public function getBuyer(): ?BuyerInterface
     {
         return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
+    }
+
+    /**
+     * Constraints on the `address` inside `fulfillment_details`. Shared with the update request, and
+     * a method rather than a constant because Symfony constraints are objects.
+     *
+     * @return array<string, Assert\Required|Assert\Optional>
+     */
+    public static function addressFields(): array
+    {
+        return [
+            'name' => new Assert\Required([
+                new Assert\NotBlank(),
+                new Assert\Length(max: 256),
+            ]),
+            'line_one' => new Assert\Required([
+                new Assert\NotBlank(),
+                new Assert\Length(max: 60),
+            ]),
+            'line_two' => new Assert\Optional([
+                new Assert\Length(max: 60),
+            ]),
+            'city' => new Assert\Required([
+                new Assert\NotBlank(),
+                new Assert\Length(max: 60),
+            ]),
+            'state' => new Assert\Optional(),
+            'country' => new Assert\Required([
+                new Assert\NotBlank(),
+                new Assert\Length(min: 2, max: 2),
+                new Assert\Regex('/^[A-Z]{2}$/', message: 'Country must be ISO-3166-1 alpha-2 (e.g., "US")'),
+            ]),
+            'postal_code' => new Assert\Required([
+                new Assert\NotBlank(),
+                new Assert\Length(max: 20),
+            ]),
+        ];
     }
 
     /**
@@ -100,18 +165,20 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
                         'allowExtraFields' => true,
                     ]),
                 ]),
-                'items' => new Assert\Required([
-                    new Assert\NotBlank(message: 'Items are required'),
+                'line_items' => new Assert\Required([
+                    new Assert\NotBlank(message: 'Line items are required'),
                     new Assert\Type('array'),
-                    new Assert\Count(min: 1, minMessage: 'At least one item is required'),
+                    new Assert\Count(min: 1, minMessage: 'At least one line item is required'),
                     new Assert\All([
                         new Assert\Collection([
                             'fields' => [
                                 'id' => new Assert\Required([
-                                    new Assert\NotBlank(message: 'Item id is required'),
+                                    new Assert\NotBlank(message: 'Line item id is required'),
                                 ]),
+                                // Accepted despite the spec's Item being additionalProperties:false
+                                // without it — every upstream example sends it. See step 38.
                                 'quantity' => new Assert\Required([
-                                    new Assert\NotBlank(message: 'Item quantity is required'),
+                                    new Assert\NotBlank(message: 'Line item quantity is required'),
                                     new Assert\Type('int'),
                                     new Assert\GreaterThan(0, message: 'Quantity must be greater than 0'),
                                 ]),
@@ -120,37 +187,30 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
                         ]),
                     ]),
                 ]),
-                'fulfillment_address' => new Assert\Optional([
+                'currency' => new Assert\Required([
+                    new Assert\NotBlank(message: 'Currency is required'),
+                    new Assert\Regex('/^[A-Z]{3}$/', message: 'Currency must be an ISO 4217 code (e.g., "USD")'),
+                ]),
+                'capabilities' => new Assert\Required([
+                    new Assert\Type('array'),
+                ]),
+                'fulfillment_details' => new Assert\Optional([
                     new Assert\Type('array'),
                     new Assert\Collection([
                         'fields' => [
-                            'name' => new Assert\Required([
-                                new Assert\NotBlank(),
+                            'name' => new Assert\Optional([
                                 new Assert\Length(max: 256),
                             ]),
-                            'line_one' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 60),
+                            'phone_number' => new Assert\Optional(),
+                            'email' => new Assert\Optional([
+                                new Assert\Email(message: 'Email must be a valid email address'),
                             ]),
-                            'line_two' => new Assert\Optional([
-                                new Assert\Length(max: 60),
-                            ]),
-                            'city' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 60),
-                            ]),
-                            'state' => new Assert\Optional(),
-                            'country' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(min: 2, max: 2),
-                                new Assert\Regex(
-                                    '/^[A-Z]{2}$/',
-                                    message: 'Country must be ISO-3166-1 alpha-2 (e.g., "US")'
-                                ),
-                            ]),
-                            'postal_code' => new Assert\Required([
-                                new Assert\NotBlank(),
-                                new Assert\Length(max: 20),
+                            'address' => new Assert\Optional([
+                                new Assert\Type('array'),
+                                new Assert\Collection([
+                                    'fields' => self::addressFields(),
+                                    'allowExtraFields' => true,
+                                ]),
                             ]),
                         ],
                         'allowExtraFields' => true,
