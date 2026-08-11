@@ -25,7 +25,7 @@ use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\Exception\LocalizedException;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Service\RequestValidationService;
 
@@ -105,7 +105,7 @@ class Update extends ApiController implements HttpPostActionInterface
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->update($sessionId, $checkoutSessionsRequest);
 
-            /** @var CheckoutSessionResponse $checkoutSessionResponse */
+            /** @var CheckoutSession $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
             $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
 

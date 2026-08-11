@@ -22,7 +22,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
@@ -90,7 +90,7 @@ class Retrieve extends ApiController implements HttpGetActionInterface
         try {
 
             /** @var string $sessionId */
-            /** @var CheckoutSessionResponse $response */
+            /** @var CheckoutSession $response */
             $response = $this->checkoutSessionService->retrieve((string) $sessionId);
             $response = $this->makeJsonResponse($response);
 

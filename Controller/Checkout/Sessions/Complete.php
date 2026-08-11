@@ -22,7 +22,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterfaceFactory;
@@ -107,7 +107,7 @@ class Complete extends ApiController implements HttpPostActionInterface
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->complete($sessionId, $checkoutSessionsRequest);
 
-            /** @var CheckoutSessionResponse $checkoutSessionResponse */
+            /** @var CheckoutSession $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
             $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
 

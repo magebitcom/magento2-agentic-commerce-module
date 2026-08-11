@@ -14,7 +14,7 @@ use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magebit\AgenticCommerce\Controller\ApiController;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
@@ -92,7 +92,7 @@ class Index extends ApiController implements HttpPostActionInterface
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->create($checkoutSessionsRequest);
 
-            /** @var CheckoutSessionResponse $checkoutSessionResponse */
+            /** @var CheckoutSession $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
             $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
 

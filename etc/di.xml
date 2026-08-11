@@ -44,8 +44,8 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionDigitalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionDigital" />
 
     <!-- Response Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionWithOrderResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionWithOrderInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSessionWithOrder" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentResponseInterface" type="Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentResponse" />
 

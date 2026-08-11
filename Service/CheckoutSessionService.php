@@ -15,13 +15,12 @@ namespace Magebit\AgenticCommerce\Service;
 use LogicException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface as SpecCheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
 use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
-use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Quote\Api\GuestCartManagementInterface;
@@ -65,7 +64,7 @@ class CheckoutSessionService
      * @param ConfigInterface $config
      * @param CartRepositoryInterface $cartRepository
      * @param GuestCartManagementInterface $guestCartManagement
-     * @param CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory
+     * @param CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory
      * @param LinkInterfaceFactory $linkInterfaceFactory
      * @param GuestCartRepositoryInterface $guestCartRepository
      * @param ProductRepositoryInterface $productRepository
@@ -89,7 +88,7 @@ class CheckoutSessionService
         protected readonly ConfigInterface $config,
         protected readonly CartRepositoryInterface $cartRepository,
         protected readonly GuestCartManagementInterface $guestCartManagement,
-        protected readonly CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory,
+        protected readonly CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory,
         protected readonly LinkInterfaceFactory $linkInterfaceFactory,
         protected readonly GuestCartRepositoryInterface $guestCartRepository,
         protected readonly ProductRepositoryInterface $productRepository,
@@ -113,14 +112,14 @@ class CheckoutSessionService
 
     /**
      * @param CreateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function create(CreateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function create(CreateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         $maskedCartId = $this->guestCartManagement->createEmptyCart();
         $cart = $this->guestCartRepository->get($maskedCartId);
 
-        /** @var CheckoutSessionResponseInterface $response */
+        /** @var CheckoutSessionInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($maskedCartId);
 
@@ -136,9 +135,9 @@ class CheckoutSessionService
     /**
      * @param string $sessionId
      * @param UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function update(string $sessionId, UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function update(string $sessionId, UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         /** @var Quote $cart */
         $cart = $this->guestCartRepository->get($sessionId);
@@ -159,9 +158,9 @@ class CheckoutSessionService
     /**
      * @param string $sessionId
      * @param CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function complete(string $sessionId, CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function complete(string $sessionId, CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
 
@@ -209,11 +208,11 @@ class CheckoutSessionService
             $sessionId
         );
 
-        /** @var CheckoutSessionResponseInterface $response */
+        /** @var CheckoutSessionInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
-        $response->setStatus(SpecCheckoutSessionInterface::STATUS_COMPLETED);
+        $response->setStatus(CheckoutSessionInterface::STATUS_COMPLETED);
         $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);
@@ -225,9 +224,9 @@ class CheckoutSessionService
 
     /**
      * @param string $sessionId
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function retrieve(string $sessionId): CheckoutSessionResponseInterface
+    public function retrieve(string $sessionId): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
         /** @var Quote $cart */
@@ -241,9 +240,9 @@ class CheckoutSessionService
 
     /**
      * @param string $sessionId
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function cancel(string $sessionId): CheckoutSessionResponseInterface
+    public function cancel(string $sessionId): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
 
@@ -300,10 +299,10 @@ class CheckoutSessionService
 
     /**
      * @param CartInterface $cart
-     * @param CheckoutSessionResponseInterface $response
+     * @param CheckoutSessionInterface $response
      * @return void
      */
-    public function assignCartDataToResponse(CartInterface $cart, CheckoutSessionResponseInterface $response): void
+    public function assignCartDataToResponse(CartInterface $cart, CheckoutSessionInterface $response): void
     {
         /** @var Quote $cart */
         $lineItems = [];
@@ -375,17 +374,17 @@ class CheckoutSessionService
     {
         if (!$cart->getIsActive()) {
             if ($cart->getReservedOrderId() !== null) {
-                return SpecCheckoutSessionInterface::STATUS_COMPLETED;
+                return CheckoutSessionInterface::STATUS_COMPLETED;
             }
 
-            return SpecCheckoutSessionInterface::STATUS_CANCELED;
+            return CheckoutSessionInterface::STATUS_CANCELED;
         }
 
         if (empty($errors)) {
-            return SpecCheckoutSessionInterface::STATUS_READY_FOR_PAYMENT;
+            return CheckoutSessionInterface::STATUS_READY_FOR_PAYMENT;
         }
 
-        return SpecCheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT;
+        return CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT;
     }
 
     /**

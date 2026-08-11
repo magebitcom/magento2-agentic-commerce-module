@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Controller;
 
 use InvalidArgumentException;
+use JsonSerializable;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magento\Framework\App\ActionInterface;
@@ -105,11 +106,11 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
     }
 
     /**
-     * @param array<mixed>|DataObject $data
+     * @param array<mixed>|DataObject|JsonSerializable $data
      * @param int $statusCode
      * @return ResultJson
      */
-    public function makeJsonResponse(array|DataObject $data, int $statusCode = 200): ResultJson
+    public function makeJsonResponse(array|DataObject|JsonSerializable $data, int $statusCode = 200): ResultJson
     {
         $resultJson = $this->resultJsonFactory->create();
         $resultJson->setData($data);
