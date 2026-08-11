@@ -138,6 +138,7 @@ class DelegatePaymentRequest extends DataTransferObject implements DelegatePayme
      */
     public static function loadValidatorMetadata(ClassMetadata $metadata): void
     {
+        // allowExtraFields stays true: ACP adds optional fields between releases; ignore, never reject.
         $metadata->addGetterConstraint('rawData', new Assert\Collection([
             'fields' => [
                 'payment_method' => new Assert\Required([
@@ -224,7 +225,7 @@ class DelegatePaymentRequest extends DataTransferObject implements DelegatePayme
                                 ),
                             ]),
                         ],
-                        'allowExtraFields' => false,
+                        'allowExtraFields' => true,
                     ]),
                 ]),
                 'billing_address' => new Assert\Optional([
@@ -257,7 +258,7 @@ class DelegatePaymentRequest extends DataTransferObject implements DelegatePayme
                                 new Assert\Length(max: 20),
                             ]),
                         ],
-                        'allowExtraFields' => false,
+                        'allowExtraFields' => true,
                     ]),
                 ]),
                 'risk_signals' => new Assert\Required([
@@ -278,7 +279,7 @@ class DelegatePaymentRequest extends DataTransferObject implements DelegatePayme
                                     new Assert\Choice(['blocked', 'manual_review', 'authorized'], message: 'Action must be "blocked", "manual_review", or "authorized"'),
                                 ]),
                             ],
-                            'allowExtraFields' => false,
+                            'allowExtraFields' => true,
                         ]),
                     ]),
                 ]),

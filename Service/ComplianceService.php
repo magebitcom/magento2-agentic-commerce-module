@@ -23,7 +23,16 @@ use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class ComplianceService
 {
-    public const API_VERSION = '2025-10-01';
+    /** Newest first — returned to clients as a preference list. */
+    public const SUPPORTED_API_VERSIONS = [
+        '2026-04-17',
+        '2026-01-30',
+        '2025-12-12',
+        '2025-09-29',
+    ];
+
+    /** The version we emit, not the newest we accept. */
+    public const API_VERSION = '2025-09-29';
 
     /**
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
@@ -47,7 +56,16 @@ class ComplianceService
      */
     public function validateApiVersion(Http $request): bool
     {
-        return $request->getHeader('API-Version') === self::API_VERSION;
+        return in_array($this->getRequestedApiVersion($request), self::SUPPORTED_API_VERSIONS, true);
+    }
+
+    /**
+     * @param Http $request
+     * @return string
+     */
+    public function getRequestedApiVersion(Http $request): string
+    {
+        return trim((string) $request->getHeader('API-Version'));
     }
 
     /**
@@ -72,10 +90,17 @@ class ComplianceService
     public function validateRequest(Http $request): ?ErrorResponseInterface
     {
         if (!$this->validateApiVersion($request)) {
+            $requestedVersion = $this->getRequestedApiVersion($request);
+
             return $this->errorResponseFactory->create(['data' => [
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
-                'code' => 'invalid_api_version',
-                'message' => 'Invalid API version',
+                'code' => $requestedVersion === ''
+                    ? 'missing_api_version'
+                    : 'unsupported_api_version',
+                'message' => $requestedVersion === ''
+                    ? 'The API-Version header is required.'
+                    : 'The requested API version is not supported.',
+                ErrorResponseInterface::KEY_SUPPORTED_VERSIONS => self::SUPPORTED_API_VERSIONS,
             ]]);
         }
 
