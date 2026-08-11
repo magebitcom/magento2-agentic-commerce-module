@@ -17,7 +17,8 @@ use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface;
 use Magebit\AgenticCommerce\Api\Data\LineItemInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
-use Magebit\AgenticCommerce\Api\Data\MessageInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
@@ -187,14 +188,14 @@ interface CheckoutSessionResponseInterface
     /**
      * Get messages
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\MessageInterface[]
+     * @return array<MessageInfoInterface|MessageErrorInterface>
      */
     public function getMessages(): array;
 
     /**
      * Set messages
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\MessageInterface[] $messages
+     * @param array<MessageInfoInterface|MessageErrorInterface> $messages
      * @return $this
      */
     public function setMessages(array $messages): self;

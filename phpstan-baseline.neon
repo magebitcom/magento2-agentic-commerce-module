@@ -793,12 +793,6 @@ parameters:
 			path: Model/Data/Response/CheckoutSessionResponse.php
 
 		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionResponse\:\:getMessages\(\) should return array\<Magebit\\AgenticCommerce\\Api\\Data\\MessageInterface\> but returns array\<mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: Model/Data/Response/CheckoutSessionResponse.php
-
-		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Data\\Response\\CheckoutSessionWithOrderResponse\:\:getOrder\(\) should return Magebit\\AgenticCommerce\\Api\\Data\\OrderInterface but returns mixed\.$#'
 			identifier: return.type
 			count: 1

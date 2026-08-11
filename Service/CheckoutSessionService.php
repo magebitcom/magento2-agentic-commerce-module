@@ -43,8 +43,10 @@ use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
 use Magebit\AgenticCommerce\Model\Convert\CartToCapabilities;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
-use Magebit\AgenticCommerce\Api\Data\MessageInterface;
-use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
@@ -75,7 +77,8 @@ class CheckoutSessionService
      * @param CartToCapabilities $cartToCapabilities
      * @param SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory
      * @param CartValidatorInterface $cartValidator
-     * @param MessageInterfaceFactory $messageInterfaceFactory
+     * @param MessageInfoInterfaceFactory $messageInfoFactory
+     * @param MessageErrorInterfaceFactory $messageErrorFactory
      * @param PaymentHandlerPool $paymentHandlerPool
      * @param CartToBuyer $cartToBuyer
      * @param OrderRepositoryInterface $orderRepository
@@ -98,7 +101,8 @@ class CheckoutSessionService
         protected readonly CartToCapabilities $cartToCapabilities,
         protected readonly SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory,
         protected readonly CartValidatorInterface $cartValidator,
-        protected readonly MessageInterfaceFactory $messageInterfaceFactory,
+        protected readonly MessageInfoInterfaceFactory $messageInfoFactory,
+        protected readonly MessageErrorInterfaceFactory $messageErrorFactory,
         protected readonly PaymentHandlerPool $paymentHandlerPool,
         protected readonly CartToBuyer $cartToBuyer,
         protected readonly OrderRepositoryInterface $orderRepository,
@@ -211,12 +215,7 @@ class CheckoutSessionService
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
         $response->setStatus(SpecCheckoutSessionInterface::STATUS_COMPLETED);
-        $message = $this->messageInterfaceFactory->create(['data' => [
-            'type' => MessageInterface::TYPE_INFO,
-            'code' => 'order_placed',
-            'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-            'content' => sprintf('Order placed successfully: %s', $order->getIncrementId()),
-        ]]);
+        $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);
 
@@ -393,40 +392,67 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param string[] $errors
-     * @return MessageInterface[]
+     * @return array<MessageInfoInterface|MessageErrorInterface>
      */
     public function getCartMessages(CartInterface $cart, array $errors): array
     {
         if (!$cart->getIsActive()) {
             if ($cart->getReservedOrderId() !== null) {
                 return [
-                    $this->messageInterfaceFactory->create(['data' => [
-                        'type' => MessageInterface::TYPE_INFO,
-                        'code' => 'order_placed',
-                        'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                        'content' => sprintf('Order placed successfully: %s', $cart->getReservedOrderId()),
-                    ]]),
+                    $this->infoMessage(
+                        sprintf('Order placed successfully: %s', $cart->getReservedOrderId())
+                    ),
                 ];
             }
 
+            // `cart_not_active` is not one of the spec's codes; a spent session is a conflict.
             return [
-                $this->messageInterfaceFactory->create(['data' => [
-                    'type' => MessageInterface::TYPE_ERROR,
-                    'code' => 'cart_not_active',
-                    'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                    'content' => 'Cart is not active. Please create a new checkout session',
-                ]]),
+                $this->errorMessage(
+                    MessageErrorInterface::CODE_CONFLICT,
+                    'Cart is not active. Please create a new checkout session'
+                ),
             ];
         }
 
-        return array_map(function ($error) {
-            return $this->messageInterfaceFactory->create(['data' => [
-                'type' => MessageInterface::TYPE_ERROR,
-                'code' => 'invalid',
-                'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                'content' => $error,
-            ]]);
-        }, $errors);
+        return array_map(
+            fn (string $error): MessageErrorInterface => $this->errorMessage(
+                MessageErrorInterface::CODE_INVALID,
+                $error
+            ),
+            $errors
+        );
+    }
+
+    /**
+     * @param string $content
+     * @return MessageInfoInterface
+     */
+    protected function infoMessage(string $content): MessageInfoInterface
+    {
+        /** @var MessageInfoInterface $message */
+        $message = $this->messageInfoFactory->create();
+        $message->setType(MessageInfoInterface::TYPE_INFO);
+        $message->setContentType(MessageInfoInterface::CONTENT_TYPE_PLAIN);
+        $message->setContent($content);
+
+        return $message;
+    }
+
+    /**
+     * @param string $code One of the spec's MessageError codes
+     * @param string $content
+     * @return MessageErrorInterface
+     */
+    protected function errorMessage(string $code, string $content): MessageErrorInterface
+    {
+        /** @var MessageErrorInterface $message */
+        $message = $this->messageErrorFactory->create();
+        $message->setType(MessageErrorInterface::TYPE_ERROR);
+        $message->setCode($code);
+        $message->setContentType(MessageErrorInterface::CONTENT_TYPE_PLAIN);
+        $message->setContent($content);
+
+        return $message;
     }
 
     /**

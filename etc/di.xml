@@ -36,7 +36,8 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentData" />
     <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Link" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\MessageInterface" type="Magebit\AgenticCommerce\Model\Data\Message" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageInfo" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageError" />
 
     <!-- Fulfillment Option Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOption" />

@@ -15,6 +15,8 @@ namespace Magebit\AgenticCommerce\Model\Data\Response;
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
@@ -209,8 +211,16 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getMessages(): array
     {
-        $messages = $this->getData('messages');
-        return is_array($messages) ? $messages : [];
+        $messages = [];
+
+        // The spec types `messages` as a union, so both variants are accepted here.
+        foreach ((array)($this->getData('messages') ?? []) as $message) {
+            if ($message instanceof MessageInfoInterface || $message instanceof MessageErrorInterface) {
+                $messages[] = $message;
+            }
+        }
+
+        return $messages;
     }
 
     /**
