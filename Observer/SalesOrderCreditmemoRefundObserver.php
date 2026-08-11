@@ -54,10 +54,13 @@ class SalesOrderCreditmemoRefundObserver implements ObserverInterface
             return;
         }
 
+        // Grand total is denominated in the order currency, not the base currency.
+        $currencyCode = (string) ($creditmemo->getOrderCurrencyCode() ?: 'USD');
+
         /** @var RefundInterface $refund */
         $refund = $this->refundInterfaceFactory->create(['data' => [
             'type' => 'original_payment',
-            'amount' => $this->convertPrice->execute($creditmemo->getGrandTotal()),
+            'amount' => $this->convertPrice->execute((float) $creditmemo->getGrandTotal(), $currencyCode),
         ]]);
 
         $webhookEvent = $this->orderToOrderCreatedUpdatedWebhook->execute(

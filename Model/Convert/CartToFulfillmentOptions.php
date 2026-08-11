@@ -40,6 +40,7 @@ class CartToFulfillmentOptions
     {
         $fulfillmentOptions = [];
         $shippingMethods = $this->getShippingMethods($cart);
+        $currencyCode = $cart->getCurrency()?->getStoreCurrencyCode() ?? 'USD';
 
         foreach ($shippingMethods as $shippingMethod) {
             /** @var FulfillmentOptionInterface $fulfillmentOption */
@@ -52,9 +53,9 @@ class CartToFulfillmentOptions
             $priceInclTax = $shippingMethod->getPriceInclTax();
             $tax = $priceInclTax - $priceExclTax;
 
-            $fulfillmentOption->setSubtotal($this->convertPrice->execute($priceExclTax));
-            $fulfillmentOption->setTax($this->convertPrice->execute($tax));
-            $fulfillmentOption->setTotal($this->convertPrice->execute($priceInclTax));
+            $fulfillmentOption->setSubtotal($this->convertPrice->execute($priceExclTax, $currencyCode));
+            $fulfillmentOption->setTax($this->convertPrice->execute($tax, $currencyCode));
+            $fulfillmentOption->setTotal($this->convertPrice->execute($priceInclTax, $currencyCode));
             $fulfillmentOptions[] = $fulfillmentOption;
         }
 

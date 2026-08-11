@@ -1,0 +1,89 @@
+{
+    "id": "checkout_session_placeholder_0001",
+    "line_items": [
+        {
+            "id": "1001",
+            "base_amount": 9600,
+            "subtotal": 9600,
+            "discount": 0,
+            "total": 9600,
+            "tax": 0,
+            "item": {
+                "id": "24-MB04",
+                "quantity": 3
+            }
+        }
+    ],
+    "fulfillment_address": {
+        "name": "Ada Lovelace",
+        "line_one": "123 Main St",
+        "line_two": null,
+        "city": "Austin",
+        "state": "Texas",
+        "country": "US",
+        "postal_code": "78701"
+    },
+    "totals": [
+        {
+            "type": "subtotal",
+            "display_text": "Subtotal",
+            "amount": 9600
+        },
+        {
+            "type": "shipping",
+            "display_text": "Shipping & Handling",
+            "amount": 0
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 0
+        },
+        {
+            "type": "grand_total",
+            "display_text": "Grand Total",
+            "amount": 9600
+        }
+    ],
+    "fulfillment_options": [
+        {
+            "type": "shipping",
+            "id": "flatrate_flatrate",
+            "title": "Flat Rate",
+            "subtotal": 1500,
+            "tax": 0,
+            "total": 1500
+        },
+        {
+            "type": "shipping",
+            "id": "tablerate_bestway",
+            "title": "Best Way",
+            "subtotal": 1500,
+            "tax": 0,
+            "total": 1500
+        }
+    ],
+    "payment_provider": {
+        "provider": "stripe",
+        "supported_payment_methods": [
+            "card"
+        ]
+    },
+    "currency": "USD",
+    "buyer": {
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "email": "ada@example.com",
+        "phone_number": "+15555550123"
+    },
+    "links": [],
+    "messages": [
+        {
+            "type": "error",
+            "code": "invalid",
+            "content_type": "plain",
+            "content": "Shipping method is required"
+        }
+    ],
+    "status": "not_ready_for_payment"
+}

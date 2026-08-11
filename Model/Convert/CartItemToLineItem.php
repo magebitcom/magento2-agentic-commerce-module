@@ -46,11 +46,13 @@ class CartItemToLineItem
         $total = $cartItem->getRowTotalInclTax();
         $tax = $cartItem->getTaxAmount();
 
-        $lineItem->setBaseAmount($this->convertPrice->execute($baseAmount));
-        $lineItem->setSubtotal($this->convertPrice->execute($subtotal));
-        $lineItem->setDiscount($this->convertPrice->execute($discount));
-        $lineItem->setTotal($this->convertPrice->execute($total));
-        $lineItem->setTax($this->convertPrice->execute($tax));
+        $currencyCode = $cartItem->getQuote()->getCurrency()?->getStoreCurrencyCode() ?? 'USD';
+
+        $lineItem->setBaseAmount($this->convertPrice->execute($baseAmount, $currencyCode));
+        $lineItem->setSubtotal($this->convertPrice->execute($subtotal, $currencyCode));
+        $lineItem->setDiscount($this->convertPrice->execute($discount, $currencyCode));
+        $lineItem->setTotal($this->convertPrice->execute($total, $currencyCode));
+        $lineItem->setTax($this->convertPrice->execute($tax, $currencyCode));
         $lineItem->setItem($item);
 
         return $lineItem;
