@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\AllowanceInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
@@ -43,14 +43,14 @@ interface DelegatePaymentRequestInterface extends RequestInterface, ValidatableD
     /**
      * Get allowance
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\AllowanceInterface
+     * @return \Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface
      */
     public function getAllowance(): AllowanceInterface;
 
     /**
      * Set allowance
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\AllowanceInterface $allowance
+     * @param \Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface $allowance
      * @return $this
      */
     public function setAllowance(AllowanceInterface $allowance): self;
@@ -73,14 +73,14 @@ interface DelegatePaymentRequestInterface extends RequestInterface, ValidatableD
     /**
      * Get risk signals
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\RiskSignalInterface[]
+     * @return \Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface[]
      */
     public function getRiskSignals(): array;
 
     /**
      * Set risk signals
      *
-     * @param \Magebit\AgenticCommerce\Api\Data\RiskSignalInterface[] $riskSignals
+     * @param \Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface[] $riskSignals
      * @return $this
      */
     public function setRiskSignals(array $riskSignals): self;

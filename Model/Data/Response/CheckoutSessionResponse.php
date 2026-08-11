@@ -16,6 +16,8 @@ use Magebit\AgenticCommerce\Api\Data\AddressInterface;
 use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
 use Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
 
 /**
@@ -172,7 +174,7 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getTotals(): array
     {
-        return $this->getData('totals');
+        return $this->getDataListOf('totals', TotalInterface::class);
     }
 
     /**
@@ -188,7 +190,7 @@ class CheckoutSessionResponse extends DataTransferObject implements CheckoutSess
      */
     public function getLinks(): array
     {
-        return $this->getData('links');
+        return $this->getDataListOf('links', LinkInterface::class);
     }
 
     /**
