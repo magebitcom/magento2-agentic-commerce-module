@@ -50,11 +50,12 @@ class WebhookService
             /** @var Curl $curl */
             $curl = $this->curlFactory->create();
             $payload = (string) json_encode($webhookEvent->toArray());
-            $signature = $this->getSignature($payload);
+            $timestamp = time();
+            $signature = $this->getSignature($payload, $timestamp);
 
             $curl->addHeader('Merchant-Signature', $signature);
             $curl->addHeader('Request-Id', $sessionId);
-            $curl->addHeader('Timestamp', (string) date('c'));
+            $curl->addHeader('Timestamp', gmdate(\DateTimeInterface::RFC3339, $timestamp));
             $curl->addHeader('Content-Type', 'application/json');
             $curl->addHeader('Content-Length', (string) strlen($payload));
 
@@ -85,11 +86,17 @@ class WebhookService
     }
 
     /**
-     * @param string $payload
-     * @return string
+     * The receiver checks `t` for replay before verifying `v1`, so the timestamp is both signed and
+     * carried in the header rather than derived from either side's clock.
+     *
+     * @param string $payload Raw request body, exactly as it will be sent
+     * @param int $timestamp Unix seconds
+     * @return string Signature in the spec's `t=<unix>,v1=<64 hex>` form
      */
-    protected function getSignature(string $payload): string
+    protected function getSignature(string $payload, int $timestamp): string
     {
-        return hash_hmac('sha256', $payload, $this->config->getWebhookSecret());
+        $digest = hash_hmac('sha256', $timestamp . '.' . $payload, $this->config->getWebhookSecret());
+
+        return 't=' . $timestamp . ',v1=' . $digest;
     }
 }
