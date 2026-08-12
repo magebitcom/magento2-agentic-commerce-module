@@ -53,6 +53,8 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
+use Magebit\AgenticCore\Model\Checkout\CheckoutState;
+use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -83,6 +85,7 @@ class CheckoutSessionService
      * @param WebhookService $webhookService
      * @param OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook
      * @param LoggerInterface $logger
+     * @param StateResolver $stateResolver
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -107,6 +110,7 @@ class CheckoutSessionService
         protected readonly WebhookService $webhookService,
         protected readonly OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook,
         protected readonly LoggerInterface $logger,
+        protected readonly StateResolver $stateResolver,
     ) {
     }
 
@@ -372,19 +376,19 @@ class CheckoutSessionService
      */
     public function getCartStatus(CartInterface $cart, array $errors): string
     {
-        if (!$cart->getIsActive()) {
-            if ($cart->getReservedOrderId() !== null) {
-                return CheckoutSessionInterface::STATUS_COMPLETED;
-            }
+        // A reserved increment id is a weak proxy for a placed order: reserveOrderId() can run before
+        // placement, so an abandoned payment reports completed. Left as-is here deliberately —
+        // replacing it needs the session-to-order link, and changing behaviour inside an extraction
+        // would make any regression impossible to attribute.
+        $hasOrder = !$cart->getIsActive() && $cart->getReservedOrderId() !== null;
+        $state = $this->stateResolver->resolve($cart, $hasOrder, $errors !== []);
 
-            return CheckoutSessionInterface::STATUS_CANCELED;
-        }
-
-        if (empty($errors)) {
-            return CheckoutSessionInterface::STATUS_READY_FOR_PAYMENT;
-        }
-
-        return CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT;
+        return match ($state) {
+            CheckoutState::Completed => CheckoutSessionInterface::STATUS_COMPLETED,
+            CheckoutState::Canceled => CheckoutSessionInterface::STATUS_CANCELED,
+            CheckoutState::Ready => CheckoutSessionInterface::STATUS_READY_FOR_PAYMENT,
+            CheckoutState::Incomplete => CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT,
+        };
     }
 
     /**

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Convert;
 
+use Magebit\AgenticCore\Model\Money\MinorUnits;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
@@ -26,13 +27,13 @@ class CartItemToLineItem
      * @param LineItemInterfaceFactory $lineItemFactory
      * @param ItemInterfaceFactory $itemFactory
      * @param TotalInterfaceFactory $totalFactory
-     * @param ConvertPrice $convertPrice
+     * @param MinorUnits $minorUnits
      */
     public function __construct(
         protected readonly LineItemInterfaceFactory $lineItemFactory,
         protected readonly ItemInterfaceFactory $itemFactory,
         protected readonly TotalInterfaceFactory $totalFactory,
-        protected readonly ConvertPrice $convertPrice,
+        protected readonly MinorUnits $minorUnits,
     ) {
     }
 
@@ -98,7 +99,7 @@ class CartItemToLineItem
             /** @var TotalInterface $total */
             $total = $this->totalFactory->create();
             $total->setType($type);
-            $total->setAmount($this->convertPrice->execute($amount, $currencyCode));
+            $total->setAmount($this->minorUnits->convert($amount, $currencyCode));
 
             $totals[] = $total;
         }

@@ -13,17 +13,17 @@ namespace Magebit\AgenticCommerce\Model\Convert;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
+use Magebit\AgenticCore\Model\Money\MinorUnits;
 
 class CartToTotals
 {
     /**
      * @param TotalInterfaceFactory $totalInterfaceFactory
-     * @param ConvertPrice $convertPrice
+     * @param MinorUnits $minorUnits
      */
     public function __construct(
         protected readonly TotalInterfaceFactory $totalInterfaceFactory,
-        protected readonly ConvertPrice $convertPrice,
+        protected readonly MinorUnits $minorUnits,
     ) {
     }
 
@@ -42,7 +42,7 @@ class CartToTotals
 
             $total->setType($cartTotal->getCode());
             $total->setDisplayText((string) $cartTotal->getTitle());
-            $total->setAmount($this->convertPrice->execute($cartTotal->getValue(), $currencyCode));
+            $total->setAmount($this->minorUnits->convert($cartTotal->getValue(), $currencyCode));
             $totals[] = $total;
         }
 

@@ -15,7 +15,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterfaceFactor
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
+use Magebit\AgenticCore\Model\Money\MinorUnits;
 use Magento\Quote\Api\ShippingMethodManagementInterface;
 use Magento\Quote\Model\Cart\ShippingMethodConverter;
 use Magento\Quote\Api\Data\ShippingMethodInterface;
@@ -27,14 +27,14 @@ class CartToFulfillmentOptions
      * @param TotalInterfaceFactory $totalFactory
      * @param ShippingMethodManagementInterface $shippingMethodManagement
      * @param ShippingMethodConverter $shippingMethodConverter
-     * @param ConvertPrice $convertPrice
+     * @param MinorUnits $minorUnits
      */
     public function __construct(
         protected readonly FulfillmentOptionShippingInterfaceFactory $fulfillmentOptionFactory,
         protected readonly TotalInterfaceFactory $totalFactory,
         protected readonly ShippingMethodManagementInterface $shippingMethodManagement,
         protected readonly ShippingMethodConverter $shippingMethodConverter,
-        protected readonly ConvertPrice $convertPrice,
+        protected readonly MinorUnits $minorUnits,
     ) {
     }
 
@@ -97,7 +97,7 @@ class CartToFulfillmentOptions
             /** @var TotalInterface $total */
             $total = $this->totalFactory->create();
             $total->setType($type);
-            $total->setAmount($this->convertPrice->execute($amount, $currencyCode));
+            $total->setAmount($this->minorUnits->convert($amount, $currencyCode));
 
             $totals[] = $total;
         }

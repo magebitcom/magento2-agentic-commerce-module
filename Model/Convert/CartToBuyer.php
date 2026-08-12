@@ -12,94 +12,52 @@ namespace Magebit\AgenticCommerce\Model\Convert;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
+use Magebit\AgenticCore\Model\Buyer\BuyerResolver;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCommerce\Model\Convert\ConvertPrice;
 
 class CartToBuyer
 {
     /**
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
-     * @param ConvertPrice $convertPrice
+     * @param BuyerResolver $buyerResolver
      */
     public function __construct(
         protected readonly BuyerInterfaceFactory $buyerInterfaceFactory,
-        protected readonly ConvertPrice $convertPrice,
+        protected readonly BuyerResolver $buyerResolver,
     ) {
     }
 
     /**
+     * `Buyer` declares `email` required and nothing else, so a name without an email cannot be
+     * reported at all, while an email on its own is already a complete buyer.
+     *
      * @param Quote $cart
      * @return BuyerInterface|null
      */
     public function execute(Quote $cart): ?BuyerInterface
     {
+        $identity = $this->buyerResolver->resolve($cart);
+
+        if ($identity->email === null) {
+            return null;
+        }
+
         /** @var BuyerInterface $buyer */
         $buyer = $this->buyerInterfaceFactory->create();
+        $buyer->setEmail($identity->email);
 
-        $firstName = $this->getBuyerFirstName($cart);
-
-        if (!$firstName) {
-            return null;
+        if ($identity->firstName !== null) {
+            $buyer->setFirstName($identity->firstName);
         }
 
-        $buyer->setFirstName($firstName);
-
-        $lastName = $this->getBuyerLastName($cart);
-
-        if (!$lastName) {
-            return null;
+        if ($identity->lastName !== null) {
+            $buyer->setLastName($identity->lastName);
         }
 
-        $buyer->setLastName($lastName);
-
-        $email = $cart->getCustomerEmail();
-
-        if (!$email) {
-            return null;
+        if ($identity->phoneNumber !== null) {
+            $buyer->setPhoneNumber($identity->phoneNumber);
         }
-
-        $buyer->setEmail($email);
-
-        $buyer->setPhoneNumber($cart->getShippingAddress()->getTelephone());
 
         return $buyer;
-    }
-
-    /**
-     * @param Quote $cart
-     * @return string|null
-     */
-    public function getBuyerFirstName(Quote $cart): ?string
-    {
-        if ($cart->getCustomerFirstname()) {
-            return $cart->getCustomerFirstname();
-        }
-
-        $shippingAddress = $cart->getShippingAddress();
-
-        if ($shippingAddress->getFirstname()) {
-            return $shippingAddress->getFirstname();
-        }
-
-        return null;
-    }
-
-    /**
-     * @param Quote $cart
-     * @return string|null
-     */
-    public function getBuyerLastName(Quote $cart): ?string
-    {
-        if ($cart->getCustomerLastname()) {
-            return $cart->getCustomerLastname();
-        }
-
-        $shippingAddress = $cart->getShippingAddress();
-
-        if ($shippingAddress->getLastname()) {
-            return $shippingAddress->getLastname();
-        }
-
-        return null;
     }
 }
