@@ -154,14 +154,27 @@
     </type>
     <type name="Magebit\AgenticCommerce\Cron\DispatchWebhooks">
         <arguments>
+            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
             <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
         </arguments>
     </type>
 
-    <!-- A preference rather than a per-consumer argument, because this is currently the only module
-         with webhooks. When the other one gains them this becomes a virtual type per module. -->
     <preference for="Magebit\AgenticCore\Api\Webhook\SecretProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\SecretProvider"/>
-    <preference for="Magebit\AgenticCore\Api\Webhook\DeliveryHeadersProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\DeliveryHeadersProvider"/>
+
+    <!-- Two modules now deliver webhooks with different headers, so the shared queue is a virtual type
+         per consumer rather than one preference. The base binds no default header provider: a consumer
+         that forgets to supply one should fail at compile rather than send an unattributable request. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\Webhook\Dispatcher" type="Magebit\AgenticCore\Model\Webhook\Dispatcher">
+        <arguments>
+            <argument name="headersProvider" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\DeliveryHeadersProvider</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magebit\AgenticCommerce\Service\WebhookService">
+        <arguments>
+            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
+        </arguments>
+    </type>
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>

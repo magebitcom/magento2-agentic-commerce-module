@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Model\Webhook;
 
+use Magebit\AgenticCore\Api\Data\WebhookDeliveryInterface;
 use Magebit\AgenticCore\Api\Webhook\DeliveryHeadersProviderInterface;
 use Magebit\AgenticCore\Api\Webhook\SecretProviderInterface;
 use Magebit\AgenticCore\Model\Webhook\Signer;
@@ -39,15 +40,17 @@ class DeliveryHeadersProvider implements DeliveryHeadersProviderInterface
     /**
      * @inheritDoc
      */
-    public function getHeaders(string $scope, string $payload, int $timestamp, string $reference): array
+    public function getHeaders(WebhookDeliveryInterface $delivery, int $attemptTimestamp): array
     {
         return [
+            // The attempt's timestamp rather than the event's: the receiver checks it for replay
+            // against its own clock before verifying the digest.
             self::SIGNATURE_HEADER => $this->signer->sign(
-                $payload,
-                $timestamp,
-                $this->secretProvider->getSecret($scope)
+                (string) $delivery->getPayload(),
+                $attemptTimestamp,
+                $this->secretProvider->getSecret((string) $delivery->getScope())
             ),
-            self::REFERENCE_HEADER => $reference,
+            self::REFERENCE_HEADER => (string) $delivery->getReference(),
         ];
     }
 }
