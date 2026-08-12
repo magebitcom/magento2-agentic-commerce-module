@@ -161,6 +161,7 @@
     <!-- A preference rather than a per-consumer argument, because this is currently the only module
          with webhooks. When the other one gains them this becomes a virtual type per module. -->
     <preference for="Magebit\AgenticCore\Api\Webhook\SecretProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\SecretProvider"/>
+    <preference for="Magebit\AgenticCore\Api\Webhook\DeliveryHeadersProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\DeliveryHeadersProvider"/>
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>
