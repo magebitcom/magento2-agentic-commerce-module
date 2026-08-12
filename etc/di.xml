@@ -52,6 +52,8 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryResponse" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryProtocolInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryProtocol" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryCapabilitiesInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryCapabilities" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrument" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentCredentialInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrumentCredential" />
 
     <!-- Response Interfaces -->
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession" />

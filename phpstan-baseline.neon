@@ -577,13 +577,25 @@ parameters:
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
 
 		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{handler_id\: Symfony\\Component\\Validator\\Constraints\\Required, instrument\: Symfony\\Component\\Validator\\Constraints\\Required, billing_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
 			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{name\: Symfony\\Component\\Validator\\Constraints\\Required, line_one\: Symfony\\Component\\Validator\\Constraints\\Required, line_two\: Symfony\\Component\\Validator\\Constraints\\Optional, city\: Symfony\\Component\\Validator\\Constraints\\Required, state\: Symfony\\Component\\Validator\\Constraints\\Optional, country\: Symfony\\Component\\Validator\\Constraints\\Required, postal_code\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
 
 		-
-			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{token\: Symfony\\Component\\Validator\\Constraints\\Required, provider\: Symfony\\Component\\Validator\\Constraints\\Required, billing_address\: Symfony\\Component\\Validator\\Constraints\\Optional\}, allowExtraFields\: true\} given\.$#'
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{type\: Symfony\\Component\\Validator\\Constraints\\Required, credential\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$fields of class Symfony\\Component\\Validator\\Constraints\\Collection constructor expects array\<string, list\<Symfony\\Component\\Validator\\Constraint\>\|Symfony\\Component\\Validator\\Constraint\>\|null, array\{fields\: array\{type\: Symfony\\Component\\Validator\\Constraints\\Required, token\: Symfony\\Component\\Validator\\Constraints\\Required\}, allowExtraFields\: true\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: Model/Data/Request/CompleteCheckoutSessionRequest.php
@@ -929,7 +941,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: Service/CheckoutSessionService.php
-
 
 		-
 			message: '#^Return type \(void\) of method Magebit\\AgenticCommerce\\Setup\\Patch\\Data\\AddProductAttributes\:\:apply\(\) should be compatible with return type \(\$this\(Magento\\Framework\\Setup\\Patch\\PatchInterface\)\) of method Magento\\Framework\\Setup\\Patch\\PatchInterface\:\:apply\(\)$#'

@@ -13,7 +13,6 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 use Magebit\AgenticCommerce\Model\Data\DataTransferObject;
@@ -25,12 +24,12 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
     ValidatableDataInterface
 {
     /**
-     * @param PaymentDataInterfaceFactory $paymentDataInterfaceFactory
+     * @param PaymentDataBuilder $paymentDataBuilder
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
      * @param array<mixed> $data
      */
     public function __construct(
-        private readonly PaymentDataInterfaceFactory $paymentDataInterfaceFactory,
+        private readonly PaymentDataBuilder $paymentDataBuilder,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
         array $data = []
     ) {
@@ -53,7 +52,7 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
         $data = $this->getDataInstance(
             'payment_data',
             PaymentDataInterface::class,
-            $this->paymentDataInterfaceFactory->create(...)
+            $this->paymentDataBuilder->create(...)
         );
 
         if (!$data instanceof PaymentDataInterface) {
@@ -100,15 +99,48 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
                     new Assert\Type('array'),
                     new Assert\Collection([
                         'fields' => [
-                            'token' => new Assert\Required([
-                                new Assert\NotBlank(message: 'Payment token is required'),
-                            ]),
-                            'provider' => new Assert\Required([
-                                new Assert\NotBlank(message: 'Payment provider is required'),
+                            // The flat `token` / `provider` pair these constraints used to require is
+                            // not what the spec carries, nor what the service and handler pool read:
+                            // the token moved inside instrument.credential, and the handler is chosen
+                            // by handler_id. Requiring the old shape made completion unreachable from
+                            // either side.
+                            'handler_id' => new Assert\Required([
+                                new Assert\NotBlank(message: 'Payment handler_id is required'),
                                 new Assert\Choice(
                                     ['stripe'],
-                                    message: 'Payment provider must be "stripe"'
+                                    message: 'Payment handler_id must be "stripe"'
                                 ),
+                            ]),
+                            'instrument' => new Assert\Required([
+                                new Assert\NotBlank(message: 'Payment instrument is required'),
+                                new Assert\Type('array'),
+                                new Assert\Collection([
+                                    'fields' => [
+                                        'type' => new Assert\Required([
+                                            new Assert\NotBlank(message: 'Instrument type is required'),
+                                        ]),
+                                        'credential' => new Assert\Required([
+                                            new Assert\NotBlank(message: 'Instrument credential is required'),
+                                            new Assert\Type('array'),
+                                            new Assert\Collection([
+                                                'fields' => [
+                                                    'type' => new Assert\Required([
+                                                        new Assert\NotBlank(
+                                                            message: 'Credential type is required'
+                                                        ),
+                                                    ]),
+                                                    'token' => new Assert\Required([
+                                                        new Assert\NotBlank(
+                                                            message: 'Payment token is required'
+                                                        ),
+                                                    ]),
+                                                ],
+                                                'allowExtraFields' => true,
+                                            ]),
+                                        ]),
+                                    ],
+                                    'allowExtraFields' => true,
+                                ]),
                             ]),
                             'billing_address' => new Assert\Optional([
                                 new Assert\Type('array'),

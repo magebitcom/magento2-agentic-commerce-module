@@ -13,7 +13,6 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
@@ -30,14 +29,14 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
 {
     /**
      * @param ItemInterfaceFactory $itemInterfaceFactory
-     * @param FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory
+     * @param FulfillmentDetailsBuilder $fulfillmentDetailsBuilder
      * @param CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
      * @param array<mixed> $data
      */
     public function __construct(
         private readonly ItemInterfaceFactory $itemInterfaceFactory,
-        private readonly FulfillmentDetailsInterfaceFactory $fulfillmentDetailsInterfaceFactory,
+        private readonly FulfillmentDetailsBuilder $fulfillmentDetailsBuilder,
         private readonly CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
         array $data = []
@@ -85,7 +84,7 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
         return $this->getDataInstance(
             'fulfillment_details',
             FulfillmentDetailsInterface::class,
-            $this->fulfillmentDetailsInterfaceFactory->create(...)
+            $this->fulfillmentDetailsBuilder->create(...)
         );
     }
 
