@@ -150,6 +150,15 @@
             <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
         </arguments>
     </type>
+    <type name="Magebit\AgenticCommerce\Cron\DispatchWebhooks">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- A preference rather than a per-consumer argument, because this is currently the only module
+         with webhooks. When the other one gains them this becomes a virtual type per module. -->
+    <preference for="Magebit\AgenticCore\Api\Webhook\SecretProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\SecretProvider"/>
 
     <virtualType name="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\SchemaLocator" type="Magento\Framework\Config\GenericSchemaLocator">
         <arguments>

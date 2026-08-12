@@ -930,11 +930,6 @@ parameters:
 			count: 1
 			path: Service/CheckoutSessionService.php
 
-		-
-			message: '#^PHPDoc tag @var with type Magebit\\AgenticCommerce\\Model\\Data\\Webhook\\EventData is not subtype of native type Magebit\\AgenticCommerce\\Api\\Data\\Webhook\\WebhookEventInterface\.$#'
-			identifier: varTag.nativeType
-			count: 1
-			path: Service/WebhookService.php
 
 		-
 			message: '#^Return type \(void\) of method Magebit\\AgenticCommerce\\Setup\\Patch\\Data\\AddProductAttributes\:\:apply\(\) should be compatible with return type \(\$this\(Magento\\Framework\\Setup\\Patch\\PatchInterface\)\) of method Magento\\Framework\\Setup\\Patch\\PatchInterface\:\:apply\(\)$#'
