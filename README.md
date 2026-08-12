@@ -19,7 +19,7 @@ This is the first Open-Source module that enables Agentic Commerce features in M
 
 ## Requirements
 
-- PHP >= 8.1
+- PHP >= 8.2
 - Stripe Payments (only if using checkout)
 
 ## Installation
