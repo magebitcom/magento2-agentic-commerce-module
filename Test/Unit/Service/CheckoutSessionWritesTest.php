@@ -40,6 +40,7 @@ use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
 use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Magebit\AgenticCore\Model\Quote\AddressWriter;
+use Magebit\AgenticCore\Model\Quote\RegionResolver;
 use Magebit\AgenticCore\Model\Quote\LineItemOutcome;
 use Magebit\AgenticCore\Model\Quote\LineItemResult;
 use Magebit\AgenticCore\Model\Quote\LineItemWriter;
@@ -97,7 +98,7 @@ class CheckoutSessionWritesTest extends TestCase
             $this->createMock(LinkInterfaceFactory::class),
             $this->createMock(GuestCartRepositoryInterface::class),
             $this->lineItemWriter,
-            new AddressWriter(),
+            new AddressWriter($this->createMock(RegionResolver::class)),
             new PersonalInformationCopier(),
             $this->shippingMethodWriter,
             $this->createMock(CartItemToLineItem::class),
