@@ -41,6 +41,18 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionShipping" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionDigitalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionDigital" />
 
+    <!-- Spec types the module builds through a factory but had no preference for, so every endpoint
+         that emitted one raised "cannot instantiate interface" at runtime. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentDetails" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\SelectedFulfillmentOption" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Capabilities" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Item" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Payment" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentHandler" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryProtocolInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryProtocol" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryCapabilitiesInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryCapabilities" />
+
     <!-- Response Interfaces -->
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionWithOrderInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSessionWithOrder" />

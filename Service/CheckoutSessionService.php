@@ -17,12 +17,12 @@ use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
-use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
+
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
+
 use Magento\Quote\Api\GuestCartManagementInterface;
 use Magento\Quote\Api\GuestCartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
@@ -32,8 +32,14 @@ use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
+use Magebit\AgenticCore\Model\Quote\AddressWriter;
+use Magebit\AgenticCore\Model\Quote\LineItemOutcome;
+use Magebit\AgenticCore\Model\Quote\LineItemResult;
+use Magebit\AgenticCore\Model\Quote\LineItemWriter;
+use Magebit\AgenticCore\Model\Quote\PersonalInformationCopier;
+use Magebit\AgenticCore\Model\Quote\PersonName;
+use Magebit\AgenticCore\Model\Quote\PostalAddress;
+use Magebit\AgenticCore\Model\Quote\ShippingMethodWriter;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magebit\AgenticCommerce\Model\Convert\CartItemToLineItem;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentDetails;
@@ -69,7 +75,10 @@ class CheckoutSessionService
      * @param CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory
      * @param LinkInterfaceFactory $linkInterfaceFactory
      * @param GuestCartRepositoryInterface $guestCartRepository
-     * @param ProductRepositoryInterface $productRepository
+     * @param LineItemWriter $lineItemWriter
+     * @param AddressWriter $addressWriter
+     * @param PersonalInformationCopier $personalInformationCopier
+     * @param ShippingMethodWriter $shippingMethodWriter
      * @param CartItemToLineItem $cartItemToLineItem
      * @param CartToFulfillmentDetails $cartToFulfillmentDetails
      * @param CartToTotals $cartToTotals
@@ -94,7 +103,10 @@ class CheckoutSessionService
         protected readonly CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory,
         protected readonly LinkInterfaceFactory $linkInterfaceFactory,
         protected readonly GuestCartRepositoryInterface $guestCartRepository,
-        protected readonly ProductRepositoryInterface $productRepository,
+        protected readonly LineItemWriter $lineItemWriter,
+        protected readonly AddressWriter $addressWriter,
+        protected readonly PersonalInformationCopier $personalInformationCopier,
+        protected readonly ShippingMethodWriter $shippingMethodWriter,
         protected readonly CartItemToLineItem $cartItemToLineItem,
         protected readonly CartToFulfillmentDetails $cartToFulfillmentDetails,
         protected readonly CartToTotals $cartToTotals,
@@ -127,9 +139,9 @@ class CheckoutSessionService
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($maskedCartId);
 
-        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
+        $lineItemResults = $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
-        $this->assignCartDataToResponse($cart, $response);
+        $this->assignCartDataToResponse($cart, $response, $lineItemResults);
 
         $this->logger->info('Checkout session created', ['cart_id' => $maskedCartId]);
 
@@ -146,13 +158,13 @@ class CheckoutSessionService
         /** @var Quote $cart */
         $cart = $this->guestCartRepository->get($sessionId);
 
-        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
+        $lineItemResults = $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $cart->collectTotals();
         $this->cartRepository->save($cart);
 
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
-        $this->assignCartDataToResponse($cart, $response);
+        $this->assignCartDataToResponse($cart, $response, $lineItemResults);
 
         $this->logger->info('Checkout session updated', ['cart_id' => $sessionId]);
 
@@ -270,15 +282,17 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return void
+     * @return LineItemResult[] One per submitted item, for the response to report
      */
     public function processSessionsRequest(
         CartInterface $cart,
         CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-    ): void {
+    ): array {
         /** @var Quote $cart */
+        $lineItemResults = [];
+
         if ($checkoutSessionsRequest->getLineItems()) {
-            $this->addItemsToCart($cart, $checkoutSessionsRequest->getLineItems());
+            $lineItemResults = $this->addItemsToCart($cart, $checkoutSessionsRequest->getLineItems());
         }
 
         if ($checkoutSessionsRequest->getBuyer()) {
@@ -296,18 +310,24 @@ class CheckoutSessionService
             $selected = $checkoutSessionsRequest->getSelectedFulfillmentOptions()[0] ?? null;
 
             if ($selected !== null) {
-                $cart->getShippingAddress()->setShippingMethod($selected->getOptionId());
+                $this->shippingMethodWriter->write($cart, $selected->getOptionId());
             }
         }
+
+        return $lineItemResults;
     }
 
     /**
      * @param CartInterface $cart
      * @param CheckoutSessionInterface $response
+     * @param LineItemResult[] $lineItemResults Outcomes for items submitted on this request, if any
      * @return void
      */
-    public function assignCartDataToResponse(CartInterface $cart, CheckoutSessionInterface $response): void
-    {
+    public function assignCartDataToResponse(
+        CartInterface $cart,
+        CheckoutSessionInterface $response,
+        array $lineItemResults = []
+    ): void {
         /** @var Quote $cart */
         $lineItems = [];
 
@@ -344,7 +364,10 @@ class CheckoutSessionService
         }
 
         $response->setLinks($links);
-        $response->setMessages($this->getCartMessages($cart, $validationErrors));
+        $response->setMessages(array_merge(
+            $this->getCartMessages($cart, $validationErrors),
+            $this->lineItemMessages($lineItemResults)
+        ));
         $response->setStatus($this->getCartStatus($cart, $validationErrors));
 
         $response->setSelectedFulfillmentOptions($this->getSelectedFulfillmentOptions($cart));
@@ -353,20 +376,49 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param ItemInterface[] $items
-     * @return void
+     * @return LineItemResult[]
      */
-    public function addItemsToCart(CartInterface $cart, array $items): void
+    public function addItemsToCart(CartInterface $cart, array $items): array
     {
         /** @var Quote $cart */
-        $cart->removeAllItems();
+        return $this->lineItemWriter->write($cart, array_map(
+            fn (ItemInterface $item): array => [
+                'sku' => (string) $item->getId(),
+                'quantity' => $item->getQuantity(),
+            ],
+            array_values($items)
+        ));
+    }
 
-        foreach ($items as $item) {
-            /** @var Product $product */
-            $product = $this->getProduct($item);
+    /**
+     * Every unaddable item reports as invalid: the spec's MessageError.code enum is closed and has no
+     * out-of-stock value, so the distinction the other protocol can draw is not available here.
+     *
+     * @param LineItemResult[] $results
+     * @return MessageErrorInterface[]
+     */
+    private function lineItemMessages(array $results): array
+    {
+        $messages = [];
 
-            /** @var Quote $cart */
-            $cart->addProduct($product, $item->getQuantity());
+        foreach ($results as $result) {
+            $content = match ($result->outcome) {
+                LineItemOutcome::Added => null,
+                LineItemOutcome::NotFound => sprintf('Product "%s" does not exist.', $result->sku),
+                LineItemOutcome::NotSalable => sprintf(
+                    'Product "%s" is not available for purchase.',
+                    $result->sku
+                ),
+                LineItemOutcome::Rejected => $result->reason
+                    ?? sprintf('Product "%s" could not be added.', $result->sku),
+            };
+
+            if ($content !== null) {
+                $messages[] = $this->errorMessage(MessageErrorInterface::CODE_INVALID, $content);
+            }
         }
+
+        return $messages;
     }
 
     /**
@@ -504,15 +556,6 @@ class CheckoutSessionService
     }
 
     /**
-     * @param ItemInterface $item
-     * @return ProductInterface
-     */
-    public function getProduct(ItemInterface $item): ProductInterface
-    {
-        return $this->productRepository->get($item->getId());
-    }
-
-    /**
      * @param CartInterface $cart
      * @param FulfillmentAddressInterface $address
      * @return void
@@ -520,15 +563,15 @@ class CheckoutSessionService
     public function addFulfillmentAddressToCart(CartInterface $cart, FulfillmentAddressInterface $address): void
     {
         /** @var Quote $cart */
-        $shippingAddress = $cart->getShippingAddress();
-        $this->addDataToQuoteAddress($shippingAddress, $address);
+        $this->addressWriter->write($cart->getShippingAddress(), $this->toPostalAddress($address));
 
         if (!$cart->getCustomerFirstname() || !$cart->getCustomerLastname()) {
-            if (!$this->isValidName($address->getName())) {
+            [$firstName, $lastName] = PersonName::split($address->getName());
+
+            if ($firstName === null) {
                 return;
             }
 
-            [$firstName, $lastName] = explode(' ', $address->getName(), 2);
             $cart->setCustomerFirstname($firstName);
             $cart->setCustomerLastname($lastName);
         }
@@ -543,7 +586,7 @@ class CheckoutSessionService
     {
         /** @var Quote $cart */
         $billingAddress = $cart->getBillingAddress();
-        $this->addDataToQuoteAddress($billingAddress, $address);
+        $this->addressWriter->write($billingAddress, $this->toPostalAddress($address));
 
         if ($billingAddress && !$billingAddress->getTelephone() && $cart->getShippingAddress()) {
             $billingAddress->setTelephone($cart->getShippingAddress()->getTelephone());
@@ -595,29 +638,25 @@ class CheckoutSessionService
     }
 
     /**
-     * @param QuoteAddressInterface $cartAddress
+     * Turns the spec address into the shared writer's protocol-free value object.
+     *
      * @param FulfillmentAddressInterface $address
-     * @return void
+     * @return PostalAddress
      */
-    protected function addDataToQuoteAddress(
-        QuoteAddressInterface $cartAddress,
-        FulfillmentAddressInterface $address
-    ): void {
-        if (!$this->isValidName($address->getName())) {
-            return;
-        }
+    protected function toPostalAddress(FulfillmentAddressInterface $address): PostalAddress
+    {
+        [$firstName, $lastName] = PersonName::split($address->getName());
 
-        [$firstName, $lastName] = explode(' ', $address->getName(), 2);
-
-        $street = array_filter([$address->getLineOne(), $address->getLineTwo()]);
-
-        $cartAddress->setFirstname($firstName);
-        $cartAddress->setLastname($lastName);
-        $cartAddress->setStreet($street);
-        $cartAddress->setCity($address->getCity());
-        $cartAddress->setRegion($address->getState());
-        $cartAddress->setCountryId($address->getCountry());
-        $cartAddress->setPostcode($address->getPostalCode());
+        return new PostalAddress(
+            streetLine: $address->getLineOne(),
+            extendedLine: $address->getLineTwo(),
+            locality: $address->getCity(),
+            region: $address->getState(),
+            country: $address->getCountry(),
+            postalCode: $address->getPostalCode(),
+            firstName: $firstName,
+            lastName: $lastName
+        );
     }
 
     /**
@@ -630,23 +669,7 @@ class CheckoutSessionService
         $shippingAddress = $cart->getShippingAddress();
         $billingAddress = $cart->getBillingAddress();
 
-        $billingAddress->setFirstname($shippingAddress->getFirstname());
-        $billingAddress->setLastname($shippingAddress->getLastname());
-        $billingAddress->setStreet($shippingAddress->getStreet());
-        $billingAddress->setCity($shippingAddress->getCity());
-        $billingAddress->setRegionId($shippingAddress->getRegionId());
-        $billingAddress->setCountryId($shippingAddress->getCountryId());
-        $billingAddress->setPostcode($shippingAddress->getPostcode());
-        $billingAddress->setTelephone($shippingAddress->getTelephone());
-        $billingAddress->setEmail($shippingAddress->getEmail());
-    }
-
-    /**
-     * @param string|null $name
-     * @return bool
-     */
-    protected function isValidName(?string $name): bool
-    {
-        return !empty($name) && strpos($name, ' ') !== false;
+        $this->personalInformationCopier->copyIdentity($shippingAddress, $billingAddress);
+        $this->personalInformationCopier->copyPostalFields($shippingAddress, $billingAddress);
     }
 }

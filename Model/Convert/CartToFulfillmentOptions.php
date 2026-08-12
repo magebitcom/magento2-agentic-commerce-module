@@ -14,27 +14,21 @@ use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
+use Magebit\AgenticCore\Model\Fulfillment\ShippingOption;
+use Magebit\AgenticCore\Model\Fulfillment\ShippingOptionResolver;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCore\Model\Money\MinorUnits;
-use Magento\Quote\Api\ShippingMethodManagementInterface;
-use Magento\Quote\Model\Cart\ShippingMethodConverter;
-use Magento\Quote\Api\Data\ShippingMethodInterface;
 
 class CartToFulfillmentOptions
 {
     /**
      * @param FulfillmentOptionShippingInterfaceFactory $fulfillmentOptionFactory
      * @param TotalInterfaceFactory $totalFactory
-     * @param ShippingMethodManagementInterface $shippingMethodManagement
-     * @param ShippingMethodConverter $shippingMethodConverter
-     * @param MinorUnits $minorUnits
+     * @param ShippingOptionResolver $shippingOptionResolver
      */
     public function __construct(
         protected readonly FulfillmentOptionShippingInterfaceFactory $fulfillmentOptionFactory,
         protected readonly TotalInterfaceFactory $totalFactory,
-        protected readonly ShippingMethodManagementInterface $shippingMethodManagement,
-        protected readonly ShippingMethodConverter $shippingMethodConverter,
-        protected readonly MinorUnits $minorUnits,
+        protected readonly ShippingOptionResolver $shippingOptionResolver
     ) {
     }
 
@@ -44,85 +38,59 @@ class CartToFulfillmentOptions
      */
     public function execute(Quote $cart): array
     {
-        $fulfillmentOptions = [];
-        $shippingMethods = $this->getShippingMethods($cart);
-        $currencyCode = $cart->getCurrency()?->getStoreCurrencyCode() ?? 'USD';
+        $options = [];
 
-        foreach ($shippingMethods as $shippingMethod) {
+        foreach ($this->shippingOptionResolver->resolve($cart) as $option) {
             /** @var FulfillmentOptionShippingInterface $fulfillmentOption */
             $fulfillmentOption = $this->fulfillmentOptionFactory->create();
             $fulfillmentOption->setType(FulfillmentOptionShippingInterface::TYPE_SHIPPING);
-            $fulfillmentOption->setId($shippingMethod->getCarrierCode() . '_' . $shippingMethod->getMethodCode());
-            $fulfillmentOption->setTitle((string) $shippingMethod->getCarrierTitle());
+            $fulfillmentOption->setId($option->id);
+            $fulfillmentOption->setTitle($option->carrier);
 
-            if ($shippingMethod->getMethodTitle()) {
-                $fulfillmentOption->setDescription((string) $shippingMethod->getMethodTitle());
+            if ($option->description !== null) {
+                $fulfillmentOption->setDescription($option->description);
             }
 
-            $fulfillmentOption->setCarrier((string) $shippingMethod->getCarrierTitle());
-            $fulfillmentOption->setTotals($this->buildTotals($shippingMethod, $currencyCode));
+            $fulfillmentOption->setCarrier($option->carrier);
+            $fulfillmentOption->setTotals($this->buildTotals($option));
 
-            $fulfillmentOptions[] = $fulfillmentOption;
+            $options[] = $fulfillmentOption;
         }
 
-        return $fulfillmentOptions;
+        return $options;
     }
 
     /**
-     * The spec keeps option money in a typed breakdown, not flat subtotal/tax/total fields.
+     * The spec keeps option money in a typed breakdown, not flat subtotal/tax/total fields. The
+     * amounts arrive already in minor units, so nothing is recomputed from floats here.
      *
-     * @param ShippingMethodInterface $shippingMethod
-     * @param string $currencyCode
+     * @param ShippingOption $option
      * @return TotalInterface[]
      */
-    private function buildTotals(ShippingMethodInterface $shippingMethod, string $currencyCode): array
+    private function buildTotals(ShippingOption $option): array
     {
-        $priceExclTax = (float) $shippingMethod->getPriceExclTax();
-        $priceInclTax = (float) $shippingMethod->getPriceInclTax();
-
         $amounts = [
-            TotalInterface::TYPE_SUBTOTAL => $priceExclTax,
-            TotalInterface::TYPE_TAX => $priceInclTax - $priceExclTax,
-            TotalInterface::TYPE_TOTAL => $priceInclTax,
+            TotalInterface::TYPE_SUBTOTAL => $option->amountExclTax,
+            TotalInterface::TYPE_TAX => $option->taxAmount,
+            TotalInterface::TYPE_TOTAL => $option->amountInclTax,
         ];
 
         $totals = [];
 
         foreach ($amounts as $type => $amount) {
             // A free shipping method still has a subtotal and total; only zero tax is noise.
-            if ($amount === 0.0 && $type === TotalInterface::TYPE_TAX) {
+            if ($amount === 0 && $type === TotalInterface::TYPE_TAX) {
                 continue;
             }
 
             /** @var TotalInterface $total */
             $total = $this->totalFactory->create();
             $total->setType($type);
-            $total->setAmount($this->minorUnits->convert($amount, $currencyCode));
+            $total->setAmount($amount);
 
             $totals[] = $total;
         }
 
         return $totals;
-    }
-
-    /**
-     * @param Quote $cart
-     * @return ShippingMethodInterface[]
-     */
-    public function getShippingMethods(Quote $cart): array
-    {
-        $shippingAddress = $cart->getShippingAddress();
-        if (!$shippingAddress->getCountryId()) {
-            return [];
-        }
-        $shippingAddress->collectShippingRates();
-        $shippingRates = $shippingAddress->getGroupedAllShippingRates();
-        $output = [];
-        foreach ($shippingRates as $carrierRates) {
-            foreach ($carrierRates as $rate) {
-                $output[] = $this->shippingMethodConverter->modelToDataObject($rate, $cart->getQuoteCurrencyCode());
-            }
-        }
-        return $output;
     }
 }
