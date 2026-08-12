@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Test\Unit\Service;
 
+use Magebit\AgenticCore\Model\Idempotency\ClaimOutcome;
+use Magebit\AgenticCore\Model\Idempotency\ClaimResult;
+use Magebit\AgenticCore\Model\Idempotency\Coordinator;
+use Magebit\AgenticCore\Model\Idempotency\RequestHasher;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Api\Data\IdempotencyInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
-use Magebit\AgenticCommerce\Model\Idempotency\Management;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -31,7 +33,6 @@ use PHPUnit\Framework\TestCase;
 class IdempotencyTriadTest extends TestCase
 {
     private const KEY = 'idem_123';
-    private const HASH = 'hash_of_this_body';
 
     /**
      * @return void
@@ -61,9 +62,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testKeyReusedWithADifferentBodyIsRejectedWithFourTwentyTwo(): void
     {
-        $error = $this->service(
-            $this->record(requestHash: 'hash_of_another_body', response: 'stored')
-        )->validateIdempotency($this->request(self::KEY));
+        $error = $this->service(ClaimOutcome::Conflict)->validateIdempotency($this->request(self::KEY));
 
         $this->assertNotNull($error);
         $this->assertSame(ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT, $error->getCode());
@@ -77,25 +76,12 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testInFlightCollisionIsRejectedWithFourOhNineAndRetryAfter(): void
     {
-        $error = $this->service($this->record(response: null))->validateIdempotency($this->request(self::KEY));
+        $error = $this->service(ClaimOutcome::InFlight)->validateIdempotency($this->request(self::KEY));
 
         $this->assertNotNull($error);
         $this->assertSame(ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT, $error->getCode());
         $this->assertSame(409, $this->statusOf($error));
-        $this->assertGreaterThan(0, (int)$this->dataOf($error, '_retryAfter'));
-    }
-
-    /**
-     * Losing the race to claim the key means another request is already doing the work.
-     *
-     * @return void
-     */
-    public function testLosingTheClaimRaceReportsInFlight(): void
-    {
-        $error = $this->service(null, reserved: false)->validateIdempotency($this->request(self::KEY));
-
-        $this->assertNotNull($error);
-        $this->assertSame(ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT, $error->getCode());
+        $this->assertGreaterThan(0, (int) $this->dataOf($error, '_retryAfter'));
     }
 
     /**
@@ -103,7 +89,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testFirstRequestWithAFreshKeyProceeds(): void
     {
-        $this->assertNull($this->service()->validateIdempotency($this->request(self::KEY)));
+        $this->assertNull($this->service(ClaimOutcome::Claimed)->validateIdempotency($this->request(self::KEY)));
     }
 
     /**
@@ -113,24 +99,29 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testCompletedRecordWithTheSameBodyProceedsToReplay(): void
     {
-        $this->assertNull(
-            $this->service($this->record(response: 'stored'))->validateIdempotency($this->request(self::KEY))
-        );
+        $this->assertNull($this->service(ClaimOutcome::Replay)->validateIdempotency($this->request(self::KEY)));
     }
 
     /**
-     * @param IdempotencyInterface|null $existing Record already stored under the key
-     * @param bool $reserved Whether the key could be claimed
+     * This module had no takeover: a request that died before storing a response wedged its key
+     * until the TTL expired, so an agent retrying a crashed call got 409 rather than proceeding.
+     * The shared coordinator reports Claimed once it has taken the abandoned claim over.
+     *
+     * @return void
+     */
+    public function testAnAbandonedClaimLetsTheRetryProceed(): void
+    {
+        $this->assertNull($this->service(ClaimOutcome::Claimed)->validateIdempotency($this->request(self::KEY)));
+    }
+
+    /**
+     * @param ClaimOutcome|null $outcome What the coordinator reports for this key
      * @return ComplianceService
      */
-    private function service(?IdempotencyInterface $existing = null, bool $reserved = true): ComplianceService
+    private function service(?ClaimOutcome $outcome = null): ComplianceService
     {
-        $management = $this->createMock(Management::class);
-        $management->method('canHandleIdempotency')
-            ->willReturnCallback(static fn (Http $r): bool => in_array($r->getMethod(), ['POST', 'PUT', 'PATCH'], true));
-        $management->method('hashRequest')->willReturn(self::HASH);
-        $management->method('getIdempotency')->willReturn($existing);
-        $management->method('reserve')->willReturn($reserved);
+        $coordinator = $this->createMock(Coordinator::class);
+        $coordinator->method('claim')->willReturn(new ClaimResult($outcome ?? ClaimOutcome::Claimed));
 
         $errorFactory = $this->createMock(ErrorResponseInterfaceFactory::class);
         $errorFactory->method('create')->willReturnCallback(
@@ -139,26 +130,12 @@ class IdempotencyTriadTest extends TestCase
 
         return new ComplianceService(
             $errorFactory,
-            $management,
+            $coordinator,
+            new RequestHasher(),
             $this->createMock(JsonFactory::class),
             $this->createMock(EncryptorInterface::class),
             $this->createMock(ConfigInterface::class)
         );
-    }
-
-    /**
-     * @param string $requestHash Hash stored against the key
-     * @param string|null $response Stored response, or null while the original is in flight
-     * @return IdempotencyInterface
-     */
-    private function record(string $requestHash = self::HASH, ?string $response = null): IdempotencyInterface
-    {
-        $record = $this->createMock(IdempotencyInterface::class);
-        $record->method('getRequestHash')->willReturn($requestHash);
-        $record->method('getResponse')->willReturn($response);
-        $record->method('getExpiresAt')->willReturn(date('Y-m-d H:i:s', time() + 3600));
-
-        return $record;
     }
 
     /**
@@ -171,6 +148,9 @@ class IdempotencyTriadTest extends TestCase
         $request = $this->createMock(Http::class);
         $request->method('getHeader')->willReturn($key ?? false);
         $request->method('getMethod')->willReturn($method);
+        $request->method('getPathInfo')->willReturn('/agentic/checkout');
+        $request->method('getQuery')->willReturn([]);
+        $request->method('getContent')->willReturn('{}');
 
         return $request;
     }
@@ -181,7 +161,7 @@ class IdempotencyTriadTest extends TestCase
      */
     private function statusOf(ErrorResponseInterface $error): int
     {
-        return (int)$this->dataOf($error, '_statusCode');
+        return (int) $this->dataOf($error, '_statusCode');
     }
 
     /**

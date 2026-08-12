@@ -10,14 +10,14 @@
 
 namespace Magebit\AgenticCommerce\Service;
 
-use LDAP\Result;
-use Magebit\AgenticCommerce\Api\Data\IdempotencyInterface;
+use Magebit\AgenticCore\Model\Idempotency\ClaimOutcome;
+use Magebit\AgenticCore\Model\Idempotency\Coordinator;
+use Magebit\AgenticCore\Model\Idempotency\RequestHasher;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Idempotency\Management as IdempotencyManagement;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 
@@ -38,15 +38,28 @@ class ComplianceService
     public const IN_FLIGHT_RETRY_AFTER_SECONDS = 1;
 
     /**
+     * Partitions this module's rows in the shared table.
+     */
+    public const IDEMPOTENCY_SCOPE = 'acp';
+
+    /**
+     * This protocol requires a key on writes, so the list is an allow-list of methods it applies to
+     * rather than a deny-list of safe ones.
+     */
+    private const ALLOWED_METHODS = ['POST', 'PUT', 'PATCH'];
+
+    /**
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
-     * @param IdempotencyManagement $idempotencyManagement
+     * @param Coordinator $coordinator
+     * @param RequestHasher $hasher
      * @param JsonFactory $resultJsonFactory
      * @param EncryptorInterface $encryptor
      * @param ConfigInterface $config
      */
     public function __construct(
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly IdempotencyManagement $idempotencyManagement,
+        protected readonly Coordinator $coordinator,
+        protected readonly RequestHasher $hasher,
         protected readonly JsonFactory $resultJsonFactory,
         protected readonly EncryptorInterface $encryptor,
         protected readonly ConfigInterface $config
@@ -129,7 +142,7 @@ class ComplianceService
      */
     public function validateIdempotency(Http $request): ?ErrorResponseInterface
     {
-        if (!$this->idempotencyManagement->canHandleIdempotency($request)) {
+        if (!$this->appliesTo($request)) {
             return null;
         }
 
@@ -143,31 +156,27 @@ class ComplianceService
             );
         }
 
-        $idempotency = $this->getIdempotency($request);
+        $result = $this->coordinator->claim(self::IDEMPOTENCY_SCOPE, $key, $this->hasher->hash($request));
 
-        if (!$idempotency) {
-            // Claim the key; losing the race means another request is already doing this work.
-            if (!$this->idempotencyManagement->reserve($request)) {
-                return $this->inFlightError();
-            }
-
-            return null;
-        }
-
-        if ($idempotency->getRequestHash() !== $this->idempotencyManagement->hashRequest($request)) {
-            return $this->idempotencyError(
+        return match ($result->outcome) {
+            // A stored response is replayed by handleIdempotency(), not rejected here.
+            ClaimOutcome::Claimed, ClaimOutcome::Replay => null,
+            ClaimOutcome::InFlight => $this->inFlightError(),
+            ClaimOutcome::Conflict => $this->idempotencyError(
                 ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT,
                 'Idempotency-Key has already been used with a different request body',
                 422
-            );
-        }
+            ),
+        };
+    }
 
-        // A claimed key with no stored response yet is the original request, still running.
-        if ($idempotency->getResponse() === null && !$this->hasExpired($idempotency)) {
-            return $this->inFlightError();
-        }
-
-        return null;
+    /**
+     * @param Http $request
+     * @return bool
+     */
+    private function appliesTo(Http $request): bool
+    {
+        return in_array(strtoupper($request->getMethod()), self::ALLOWED_METHODS, true);
     }
 
     /**
@@ -216,65 +225,55 @@ class ComplianceService
     }
 
     /**
-     * @param IdempotencyInterface $idempotency
-     * @return bool
-     */
-    private function hasExpired(IdempotencyInterface $idempotency): bool
-    {
-        return (string) $idempotency->getExpiresAt() < date('Y-m-d H:i:s');
-    }
-
-    /**
+     * Expiry is now `created_at` plus the TTL read at purge time, so a TTL change also applies to
+     * rows already written.
+     *
      * @param Http $request
      * @return null|ResultJson
      */
     public function handleIdempotency(Http $request): ?ResultJson
     {
-        $idempotency = $this->getIdempotency($request);
+        $key = trim((string) $request->getHeader('Idempotency-Key'));
 
-        if (!$idempotency) {
+        if ($key === '' || !$this->appliesTo($request)) {
             return null;
         }
 
-        if ($idempotency->getExpiresAt() < date('Y-m-d H:i:s')) {
+        $result = $this->coordinator->claim(self::IDEMPOTENCY_SCOPE, $key, $this->hasher->hash($request));
+
+        if ($result->outcome !== ClaimOutcome::Replay || $result->record === null) {
             return null;
         }
 
         return $this->resultJsonFactory
             ->create()
-            ->setJsonData((string) $this->encryptor->decrypt((string) $idempotency->getResponse()))
-            ->setHttpResponseCode((int) $idempotency->getStatus());
+            ->setJsonData((string) $this->encryptor->decrypt((string) $result->record->getResponseBody()))
+            ->setHttpResponseCode((int) $result->record->getResponseStatus());
     }
 
     /**
      * @param Http $request
      * @param string $response
      * @param int $status
-     * @return null|IdempotencyInterface
+     * @return void
      */
-    public function storeResponse(Http $request, string $response, int $status): ?IdempotencyInterface
+    public function storeResponse(Http $request, string $response, int $status): void
     {
-        return $this->idempotencyManagement->storeResponse($request, $response, $status);
-    }
+        $key = trim((string) $request->getHeader('Idempotency-Key'));
 
-    /**
-     * @param Http $request
-     * @return null|IdempotencyInterface
-     */
-    protected function getIdempotency(Http $request): ?IdempotencyInterface
-    {
-        $idempotencyKey = $request->getHeader('Idempotency-Key');
-
-        if (!$idempotencyKey || !$this->idempotencyManagement->canHandleIdempotency($request)) {
-            return null;
+        if ($key === '' || !$this->appliesTo($request)) {
+            return;
         }
 
-        $idempotency = $this->idempotencyManagement->getIdempotency((string) $idempotencyKey);
-
-        if (!$idempotency) {
-            return null;
-        }
-
-        return $idempotency;
+        $this->coordinator->storeResponse(
+            self::IDEMPOTENCY_SCOPE,
+            $key,
+            $this->hasher->hash($request),
+            $status,
+            // Encryption stays here rather than moving into the shared base: the other consumer
+            // stores plaintext, and unifying that inside an extraction would change one module's
+            // storage while attributing any regression to the other's refactor.
+            $this->encryptor->encrypt($response)
+        );
     }
 }

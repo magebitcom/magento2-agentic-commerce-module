@@ -14,8 +14,6 @@
     <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Export\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\IdempotencyInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Model" />
-    <preference for="Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Repository" />
     <preference for="Magebit\AgenticCommerce\Api\CartValidatorInterface" type="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite" />
 
     <!-- Request Interfaces -->
@@ -136,12 +134,6 @@
         </arguments>
     </type>
     <type name="Magebit\AgenticCommerce\Cron\CleanExpiredIdempotency">
-        <arguments>
-            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
-        </arguments>
-    </type>
-
-    <type name="Magebit\AgenticCommerce\Model\Idempotency\Repository">
         <arguments>
             <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
         </arguments>

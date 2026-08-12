@@ -1,0 +1,25 @@
+{
+    "magebit_ac_idempotency": {
+        "column": {
+            "entity_id": true,
+            "key": true,
+            "requestHash": true,
+            "response": true,
+            "status": true,
+            "expires_at": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MAGEBIT_AC_IDEMPOTENCY_KEY": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "ac_order_id": true
+        },
+        "index": {
+            "SALES_ORDER_AC_ORDER_ID": true
+        }
+    }
+}
