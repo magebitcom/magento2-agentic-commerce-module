@@ -53,12 +53,14 @@ use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
+use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
 use Magebit\AgenticCore\Model\Checkout\CheckoutState;
 use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Psr\Log\LoggerInterface;
@@ -95,6 +97,7 @@ class CheckoutSessionService
      * @param OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook
      * @param LoggerInterface $logger
      * @param StateResolver $stateResolver
+     * @param OrderLinkRepositoryInterface $orderLinkRepository
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -123,6 +126,7 @@ class CheckoutSessionService
         protected readonly OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook,
         protected readonly LoggerInterface $logger,
         protected readonly StateResolver $stateResolver,
+        protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
     ) {
     }
 
@@ -212,8 +216,13 @@ class CheckoutSessionService
 
         /** @var Order $order */
         $order = $this->orderRepository->get($orderId);
-        $order->setAcOrderId($sessionId);
-        $this->orderRepository->save($order);
+        $quoteId = $order->getQuoteId();
+        $this->orderLinkRepository->link(
+            ComplianceService::IDEMPOTENCY_SCOPE,
+            $sessionId,
+            is_numeric($quoteId) ? (int) $quoteId : null,
+            (int) $orderId
+        );
 
         $this->webhookService->dispatch(
             $this->orderToOrderCreatedUpdatedWebhook->execute(
@@ -365,10 +374,10 @@ class CheckoutSessionService
 
         $response->setLinks($links);
         $response->setMessages(array_merge(
-            $this->getCartMessages($cart, $validationErrors),
+            $this->getCartMessages($cart, $validationErrors, (string) $response->getId()),
             $this->lineItemMessages($lineItemResults)
         ));
-        $response->setStatus($this->getCartStatus($cart, $validationErrors));
+        $response->setStatus($this->getCartStatus($cart, $validationErrors, (string) $response->getId()));
 
         $response->setSelectedFulfillmentOptions($this->getSelectedFulfillmentOptions($cart));
     }
@@ -424,16 +433,12 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param string[] $errors
+     * @param string $sessionId Masked cart id the caller issued, not the quote's numeric id
      * @return string
      */
-    public function getCartStatus(CartInterface $cart, array $errors): string
+    public function getCartStatus(CartInterface $cart, array $errors, string $sessionId): string
     {
-        // A reserved increment id is a weak proxy for a placed order: reserveOrderId() can run before
-        // placement, so an abandoned payment reports completed. Left as-is here deliberately —
-        // replacing it needs the session-to-order link, and changing behaviour inside an extraction
-        // would make any regression impossible to attribute.
-        $hasOrder = !$cart->getIsActive() && $cart->getReservedOrderId() !== null;
-        $state = $this->stateResolver->resolve($cart, $hasOrder, $errors !== []);
+        $state = $this->stateResolver->resolve($cart, $this->hasOrder($sessionId), $errors !== []);
 
         return match ($state) {
             CheckoutState::Completed => CheckoutSessionInterface::STATUS_COMPLETED,
@@ -446,15 +451,21 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param string[] $errors
+     * @param string $sessionId Masked cart id the caller issued, not the quote's numeric id
      * @return array<MessageInfoInterface|MessageErrorInterface>
      */
-    public function getCartMessages(CartInterface $cart, array $errors): array
+    public function getCartMessages(CartInterface $cart, array $errors, string $sessionId): array
     {
         if (!$cart->getIsActive()) {
-            if ($cart->getReservedOrderId() !== null) {
+            $orderId = $this->orderLinkRepository->findOrderId(
+                ComplianceService::IDEMPOTENCY_SCOPE,
+                $sessionId
+            );
+
+            if ($orderId !== null) {
                 return [
                     $this->infoMessage(
-                        sprintf('Order placed successfully: %s', $cart->getReservedOrderId())
+                        sprintf('Order placed successfully: %s', $this->incrementIdOf($orderId))
                     ),
                 ];
             }
@@ -475,6 +486,36 @@ class CheckoutSessionService
             ),
             $errors
         );
+    }
+
+    /**
+     * A placed order is now a recorded fact rather than an inference from the reserved increment id,
+     * which Magento sets at reservation and not at placement.
+     *
+     * @param string $sessionId
+     * @return bool
+     */
+    private function hasOrder(string $sessionId): bool
+    {
+        return $this->orderLinkRepository->findOrderId(
+            ComplianceService::IDEMPOTENCY_SCOPE,
+            $sessionId
+        ) !== null;
+    }
+
+    /**
+     * @param int $orderId
+     * @return string
+     */
+    private function incrementIdOf(int $orderId): string
+    {
+        try {
+            return (string) $this->orderRepository->get($orderId)->getIncrementId();
+        } catch (NoSuchEntityException $exception) {
+            // The link outlives nothing — the order cascades on delete — but a mid-flight read can
+            // still miss it, and reporting the internal id beats failing the whole response.
+            return (string) $orderId;
+        }
     }
 
     /**

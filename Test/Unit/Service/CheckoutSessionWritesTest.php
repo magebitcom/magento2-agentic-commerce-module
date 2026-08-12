@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Test\Unit\Service;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
@@ -36,7 +37,7 @@ use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Magebit\AgenticCommerce\Service\WebhookService;
-use Magebit\AgenticCore\Model\Checkout\CheckoutState;
+use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
 use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Magebit\AgenticCore\Model\Quote\AddressWriter;
 use Magebit\AgenticCore\Model\Quote\LineItemOutcome;
@@ -65,6 +66,8 @@ class CheckoutSessionWritesTest extends TestCase
 
     private ShippingMethodWriter&MockObject $shippingMethodWriter;
 
+    private OrderLinkRepositoryInterface&MockObject $orderLinkRepository;
+
     private CheckoutSessionService $service;
 
     /**
@@ -74,12 +77,14 @@ class CheckoutSessionWritesTest extends TestCase
     {
         $this->lineItemWriter = $this->createMock(LineItemWriter::class);
         $this->shippingMethodWriter = $this->createMock(ShippingMethodWriter::class);
+        $this->orderLinkRepository = $this->createMock(OrderLinkRepositoryInterface::class);
 
         $messageErrorFactory = $this->createMock(MessageErrorInterfaceFactory::class);
         $messageErrorFactory->method('create')->willReturnCallback(static fn (): MessageError => new MessageError());
 
-        $stateResolver = $this->createMock(StateResolver::class);
-        $stateResolver->method('resolve')->willReturn(CheckoutState::Incomplete);
+        // The real resolver: it is a pure shared primitive, and stubbing it would hide exactly the
+        // mapping these status tests exist to check.
+        $stateResolver = new StateResolver();
 
         $sessionFactory = $this->createMock(CheckoutSessionInterfaceFactory::class);
         $sessionFactory->method('create')->willReturnCallback(static fn (): CheckoutSession => new CheckoutSession());
@@ -110,7 +115,8 @@ class CheckoutSessionWritesTest extends TestCase
             $this->createMock(WebhookService::class),
             $this->createMock(OrderToOrderCreatedUpdatedWebhook::class),
             $this->createMock(LoggerInterface::class),
-            $stateResolver
+            $stateResolver,
+            $this->orderLinkRepository
         );
     }
 
@@ -189,6 +195,7 @@ class CheckoutSessionWritesTest extends TestCase
     {
         $cart = $this->cart();
         $response = new CheckoutSession();
+        $response->setId('sess_123');
 
         $results = [
             new LineItemResult(0, 'does-not-exist', LineItemOutcome::NotFound),
@@ -217,6 +224,7 @@ class CheckoutSessionWritesTest extends TestCase
     {
         $cart = $this->cart();
         $response = new CheckoutSession();
+        $response->setId('sess_123');
 
         $this->service->assignCartDataToResponse(
             $cart,
@@ -249,6 +257,65 @@ class CheckoutSessionWritesTest extends TestCase
             ->willReturn([]);
 
         $this->service->addItemsToCart($cart, [$this->item('24-MB04', 2)]);
+    }
+
+    /**
+     * getCartStatus() inferred a placed order from getReservedOrderId(), which Magento sets at
+     * reservation rather than at placement — so a buyer who reached payment and abandoned it was told
+     * their order was complete.
+     *
+     * @return void
+     */
+    public function testAReservedButUnplacedQuoteIsNotComplete(): void
+    {
+        $cart = $this->cart();
+        $cart->setData('is_active', false);
+        $cart->setData('reserved_order_id', '000000123');
+
+        $this->orderLinkRepository->method('findOrderId')->willReturn(null);
+
+        $this->assertSame(
+            CheckoutSessionInterface::STATUS_CANCELED,
+            $this->service->getCartStatus($cart, [], 'sess_abandoned')
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testALinkedOrderIsComplete(): void
+    {
+        $cart = $this->cart();
+        $cart->setData('is_active', false);
+        $cart->setData('reserved_order_id', null);
+
+        $this->orderLinkRepository->method('findOrderId')->willReturn(100);
+
+        $this->assertSame(
+            CheckoutSessionInterface::STATUS_COMPLETED,
+            $this->service->getCartStatus($cart, [], 'sess_completed')
+        );
+    }
+
+    /**
+     * The same defect in the message path: a spent-but-unplaced session reported "Order placed
+     * successfully" rather than a conflict.
+     *
+     * @return void
+     */
+    public function testAReservedButUnplacedQuoteDoesNotClaimAnOrderWasPlaced(): void
+    {
+        $cart = $this->cart();
+        $cart->setData('is_active', false);
+        $cart->setData('reserved_order_id', '000000123');
+
+        $this->orderLinkRepository->method('findOrderId')->willReturn(null);
+
+        $messages = $this->service->getCartMessages($cart, [], 'sess_abandoned');
+
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(MessageErrorInterface::class, $messages[0]);
+        $this->assertSame(MessageErrorInterface::CODE_CONFLICT, $messages[0]->getCode());
     }
 
     /**
