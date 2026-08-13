@@ -59,6 +59,7 @@ use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
 use Magebit\AgenticCore\Model\Checkout\CheckoutState;
@@ -98,6 +99,7 @@ class CheckoutSessionService
      * @param LoggerInterface $logger
      * @param StateResolver $stateResolver
      * @param OrderLinkRepositoryInterface $orderLinkRepository
+     * @param OrderToAcpOrder $orderToAcpOrder
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -127,6 +129,7 @@ class CheckoutSessionService
         protected readonly LoggerInterface $logger,
         protected readonly StateResolver $stateResolver,
         protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
+        protected readonly OrderToAcpOrder $orderToAcpOrder,
     ) {
     }
 
@@ -238,6 +241,9 @@ class CheckoutSessionService
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
         $response->setStatus(CheckoutSessionInterface::STATUS_COMPLETED);
+        // Required on completion: the spec returns CheckoutSessionWithOrder here, and without it an
+        // agent gets no machine-readable reference to the order it just created.
+        $response->setOrder($this->orderToAcpOrder->convert($order, $sessionId));
         $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);

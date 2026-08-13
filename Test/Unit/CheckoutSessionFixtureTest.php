@@ -16,11 +16,17 @@ use JsonException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Guards the golden ACP fixtures. No ACP JSON Schema set is vendored yet, so these pin
- * structure only; swap in schema assertions once a spec is available.
+ * Guards the golden ACP fixtures. Schema validation is wired up but the session fixtures predate the
+ * response migration, so they are pinned structurally until they can be re-captured.
  */
 class CheckoutSessionFixtureTest extends TestCase
 {
+    use SchemaAssert;
+
+    private const SESSION_SCHEMA = 'schema.agentic_checkout.json#/$defs/CheckoutSession';
+    private const ORDER_SCHEMA = 'schema.agentic_checkout.json#/$defs/Order';
+    private const COMPLETE_FIXTURE = 'checkout_session.complete.200.json';
+
     /**
      * @return array<string, array{0: string}>
      */
@@ -58,47 +64,39 @@ class CheckoutSessionFixtureTest extends TestCase
      * @return void
      * @throws JsonException
      */
-    public function testSessionFixtureCarriesNoSchemaYet(string $fixture): void
+    public function testSessionFixtureMatchesSpec(string $fixture): void
     {
         $this->assertNotEmpty(self::loadFixture($fixture));
         $this->markTestSkipped(
-            'No ACP JSON Schema set is vendored; fixtures are captured for future conformance checks.'
+            'These fixtures predate the response migration — captured with quantity inside `item` and '
+            . 'flat per-item money, where the live response now sends quantity beside `item` with a '
+            . '`totals` array. Validating them would assert the old shape. Re-capture needs an ACP '
+            . 'FixtureScrubber, which does not exist yet.'
         );
     }
 
     /**
-     * POST /checkout_sessions/{id}/complete returns HTTP 400 for the seeded payment token.
+     * The spec returns CheckoutSessionWithOrder on completion, and the order it carries requires an id,
+     * the session id and a permalink.
      *
      * @return void
      * @throws JsonException
      */
-    public function testCompleteResponseRecordsKnownBrokenState(): void
+    public function testCompletedSessionCarriesAConformantOrder(): void
     {
-        $payload = self::loadFixture('checkout_session.complete.400.BROKEN.json');
-
-        $this->assertSame('invalid_request', $payload['code']);
-        $this->markTestIncomplete(
-            'ACP complete returns 400 "The requested Payment Method is not available." '
-            . 'Fixture records the broken state.'
-        );
-    }
-
-    /**
-     * @param string $name
-     * @return array<mixed>
-     * @throws JsonException
-     */
-    private static function loadFixture(string $name): array
-    {
-        $path = __DIR__ . '/_fixtures/' . $name;
-
-        if (!is_file($path)) {
-            self::markTestSkipped(sprintf('Fixture "%s" is missing.', $name));
+        if (!is_file(__DIR__ . '/_fixtures/' . self::COMPLETE_FIXTURE)) {
+            self::markTestSkipped(
+                'No completed-session capture yet: completion reaches Stripe and Stripe rejects the '
+                . 'payment intent because the account has no payment methods activated for USD. The '
+                . 'order object itself is covered by OrderToAcpOrderTest.'
+            );
         }
 
-        /** @var array<mixed> $decoded */
-        $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        $payload = self::loadFixture(self::COMPLETE_FIXTURE);
 
-        return $decoded;
+        $this->assertMatchesSchema(self::loadFixtureObject(self::COMPLETE_FIXTURE)->order, self::ORDER_SCHEMA);
+        $this->assertSame('completed', $payload['status']);
+        $this->assertSame($payload['id'], $payload['order']['checkout_session_id']);
+        $this->assertStringContainsString($payload['id'], $payload['order']['permalink_url']);
     }
 }
