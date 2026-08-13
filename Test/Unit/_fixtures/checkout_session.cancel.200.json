@@ -2,7 +2,7 @@
     "id": "checkout_session_placeholder_0001",
     "line_items": [
         {
-            "id": "id-9ae2bdd7",
+            "id": "id-3d3286f7",
             "item": {
                 "id": "24-MB04",
                 "name": "Strive Shoulder Pack"
@@ -121,7 +121,17 @@
                     "config": {}
                 }
             ]
-        }
+        },
+        "extensions": [
+            {
+                "name": "discount",
+                "extends": [
+                    "$.CheckoutSession.discounts",
+                    "$.CheckoutSessionCreateRequest.discounts"
+                ],
+                "schema": "https://merchant.example/schemas/discount.json"
+            }
+        ]
     },
     "currency": "USD",
     "buyer": {

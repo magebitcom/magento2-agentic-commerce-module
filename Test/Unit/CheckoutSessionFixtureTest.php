@@ -168,4 +168,21 @@ class CheckoutSessionFixtureTest extends TestCase
         $this->assertGreaterThan(0, $applied['amount']);
         $this->assertSame($applied['code'], $applied['coupon']['id']);
     }
+
+    /**
+     * An agent learns which extra fields to expect from the declaration rather than by inspecting the
+     * payload, so every extension the session serves is named here.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testActiveExtensionsAreDeclared(string $fixture): void
+    {
+        $extensions = self::loadFixture($fixture)['capabilities']['extensions'] ?? [];
+
+        $this->assertSame(['discount'], array_column($extensions, 'name'));
+        $this->assertContains('$.CheckoutSession.discounts', $extensions[0]['extends']);
+    }
 }

@@ -244,12 +244,26 @@
     </type>
 
     <!-- Discount extension. The checkout bundle's variants, which the session response accepts. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\ExtensionDeclarationInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\ExtensionDeclaration" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsRequest" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsResponse" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AppliedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AppliedDiscount" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
 
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToCapabilities">
+        <arguments>
+            <argument name="extensions" xsi:type="array">
+                <item name="discount" xsi:type="array">
+                    <item name="extends" xsi:type="array">
+                        <item name="response" xsi:type="string">$.CheckoutSession.discounts</item>
+                        <item name="request" xsi:type="string">$.CheckoutSessionCreateRequest.discounts</item>
+                    </item>
+                    <item name="schema" xsi:type="string">https://agentic-commerce-protocol.com/schemas/discount.json</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Magebit\AgenticCommerce\Model\Convert\CartToTotals">
         <arguments>
             <argument name="typeMapping" xsi:type="array">

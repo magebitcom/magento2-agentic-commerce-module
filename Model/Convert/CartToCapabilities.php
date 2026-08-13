@@ -17,6 +17,8 @@ use Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\ExtensionDeclarationInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\ExtensionDeclarationInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterfaceFactory;
 use Magebit\AgenticCommerce\Controller\Schema\Index as SchemaIndex;
 use Magento\Framework\UrlInterface;
@@ -39,12 +41,16 @@ class CartToCapabilities
      * @param PaymentInterfaceFactory $paymentFactory
      * @param PaymentHandlerInterfaceFactory $paymentHandlerFactory
      * @param UrlInterface $urlBuilder
+     * @param ExtensionDeclarationInterfaceFactory $extensionFactory
+     * @param array<string, array{extends?: array<int, string>, schema?: string, spec?: string}> $extensions
      */
     public function __construct(
         protected readonly CapabilitiesInterfaceFactory $capabilitiesFactory,
         protected readonly PaymentInterfaceFactory $paymentFactory,
         protected readonly PaymentHandlerInterfaceFactory $paymentHandlerFactory,
         protected readonly UrlInterface $urlBuilder,
+        protected readonly ExtensionDeclarationInterfaceFactory $extensionFactory,
+        protected readonly array $extensions = [],
     ) {
     }
 
@@ -62,7 +68,46 @@ class CartToCapabilities
         $capabilities = $this->capabilitiesFactory->create();
         $capabilities->setPayment($payment);
 
+        $extensions = $this->extensionDeclarations();
+
+        if ($extensions !== []) {
+            $capabilities->setExtensions($extensions);
+        }
+
         return $capabilities;
+    }
+
+    /**
+     * The extensions this session actually serves, so an agent learns which extra fields to expect
+     * rather than discovering them by inspecting the payload.
+     *
+     * @return ExtensionDeclarationInterface[]
+     */
+    private function extensionDeclarations(): array
+    {
+        $declarations = [];
+
+        foreach ($this->extensions as $name => $config) {
+            /** @var ExtensionDeclarationInterface $declaration */
+            $declaration = $this->extensionFactory->create();
+            $declaration->setName($name);
+
+            if (isset($config['extends'])) {
+                $declaration->setExtends(array_values($config['extends']));
+            }
+
+            if (isset($config['schema'])) {
+                $declaration->setSchema($config['schema']);
+            }
+
+            if (isset($config['spec'])) {
+                $declaration->setSpec($config['spec']);
+            }
+
+            $declarations[] = $declaration;
+        }
+
+        return $declarations;
     }
 
     /**

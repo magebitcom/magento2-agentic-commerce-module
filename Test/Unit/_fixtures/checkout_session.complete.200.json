@@ -2,7 +2,7 @@
     "id": "checkout_session_placeholder_0001",
     "line_items": [
         {
-            "id": "id-05ada863",
+            "id": "id-79d6eaa2",
             "item": {
                 "id": "24-MB04",
                 "name": "Strive Shoulder Pack"
@@ -121,7 +121,17 @@
                     "config": {}
                 }
             ]
-        }
+        },
+        "extensions": [
+            {
+                "name": "discount",
+                "extends": [
+                    "$.CheckoutSession.discounts",
+                    "$.CheckoutSessionCreateRequest.discounts"
+                ],
+                "schema": "https://merchant.example/schemas/discount.json"
+            }
+        ]
     },
     "currency": "USD",
     "buyer": {
@@ -135,7 +145,7 @@
         {
             "type": "info",
             "content_type": "plain",
-            "content": "Order placed successfully: 000000140"
+            "content": "Order placed successfully: 000000141"
         }
     ],
     "status": "completed",
@@ -144,15 +154,15 @@
             "type": "shipping",
             "option_id": "flatrate_flatrate",
             "item_ids": [
-                "id-05ada863"
+                "id-79d6eaa2"
             ]
         }
     ],
     "order": {
         "type": "order",
-        "id": "id-b9f105b9",
+        "id": "id-cd857ab0",
         "checkout_session_id": "checkout_session_placeholder_0001",
-        "order_number": "000000140",
+        "order_number": "000000141",
         "permalink_url": "https://merchant.example/agentic_commerce/checkout/order/order_id/checkout_session_placeholder_0001/",
         "status": "confirmed"
     }
