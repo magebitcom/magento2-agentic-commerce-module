@@ -16,7 +16,8 @@
     },
     "sales_order": {
         "column": {
-            "ac_order_id": true
+            "ac_order_id": true,
+            "agentic_marketing_consent": true
         },
         "index": {
             "SALES_ORDER_AC_ORDER_ID": true

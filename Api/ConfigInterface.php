@@ -29,6 +29,7 @@ interface ConfigInterface
     public const CONFIG_SELLER_NAME_SOURCE = 'agentic_commerce/product_feed/seller_name_source';
     public const CONFIG_SELLER_NAME = 'agentic_commerce/product_feed/seller_name';
     public const CONFIG_SELLER_PRIVACY_POLICY_URL = 'agentic_commerce/product_feed/seller_privacy_policy_url';
+    public const CONFIG_MARKETING_CONSENT_SUBSCRIBES = 'agentic_commerce/general_settings/marketing_consent_subscribes';
     public const CONFIG_SELLER_TOS_URL = 'agentic_commerce/product_feed/seller_tos_url';
     public const CONFIG_RETURN_POLICY_URL = 'agentic_commerce/product_feed/return_policy_url';
     public const CONFIG_RETURN_WINDOW = 'agentic_commerce/product_feed/return_window';
@@ -138,4 +139,13 @@ interface ConfigInterface
      * @return array<array{magento_order_status: string, ac_status: string}>
      */
     public function getOrderStatusMap(?int $storeId = null): array;
+
+    /**
+     * Whether a reported opt-in should create a newsletter subscriber. The decision is recorded on the
+     * order regardless.
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function marketingConsentSubscribes(?int $storeId = null): bool;
 }

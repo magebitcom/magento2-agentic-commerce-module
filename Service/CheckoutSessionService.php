@@ -60,6 +60,8 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
+use Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions;
+use Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool as MarketingConsentPool;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
@@ -102,6 +104,8 @@ class CheckoutSessionService
      * @param OrderLinkRepositoryInterface $orderLinkRepository
      * @param OrderToAcpOrder $orderToAcpOrder
      * @param CartToDiscounts $cartToDiscounts
+     * @param CartToMarketingConsentOptions $cartToMarketingConsentOptions
+     * @param MarketingConsentPool $marketingConsentPool
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -133,6 +137,8 @@ class CheckoutSessionService
         protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
         protected readonly OrderToAcpOrder $orderToAcpOrder,
         protected readonly CartToDiscounts $cartToDiscounts,
+        protected readonly CartToMarketingConsentOptions $cartToMarketingConsentOptions,
+        protected readonly MarketingConsentPool $marketingConsentPool,
     ) {
     }
 
@@ -257,6 +263,10 @@ class CheckoutSessionService
         // Required on completion: the spec returns CheckoutSessionWithOrder here, and without it an
         // agent gets no machine-readable reference to the order it just created.
         $response->setOrder($this->orderToAcpOrder->convert($order, $sessionId));
+
+        // After the order exists, so a handler has something to record against, and after the response is
+        // built, so a failing signup cannot change what the agent is told about the order.
+        $this->marketingConsentPool->apply($checkoutSessionsRequest->getMarketingConsents(), $order);
         $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);
@@ -425,6 +435,12 @@ class CheckoutSessionService
 
         if ($discounts !== null) {
             $response->setDiscounts($discounts);
+        }
+
+        $consentOptions = $this->cartToMarketingConsentOptions->execute($cart);
+
+        if ($consentOptions !== []) {
+            $response->setMarketingConsentOptions($consentOptions);
         }
 
         // Being very optimistic here

@@ -10,6 +10,8 @@
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface;
+
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
@@ -25,4 +27,11 @@ interface CompleteCheckoutSessionRequestInterface extends ValidatableDataInterfa
      * @return \Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface
      */
     public function getPaymentData(): PaymentDataInterface;
+
+    /**
+     * The buyer's marketing consent decisions, one per channel.
+     *
+     * @return MarketingConsentInterface[]
+     */
+    public function getMarketingConsents(): array;
 }

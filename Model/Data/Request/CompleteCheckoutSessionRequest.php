@@ -12,6 +12,8 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
@@ -26,11 +28,13 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
     /**
      * @param PaymentDataBuilder $paymentDataBuilder
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
+     * @param MarketingConsentInterfaceFactory $marketingConsentFactory
      * @param array<mixed> $data
      */
     public function __construct(
         private readonly PaymentDataBuilder $paymentDataBuilder,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
+        private readonly MarketingConsentInterfaceFactory $marketingConsentFactory,
         array $data = []
     ) {
         parent::__construct($data);
@@ -42,6 +46,37 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
     public function getBuyer(): ?BuyerInterface
     {
         return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
+    }
+
+    /**
+     * A list rather than a single composite, so each entry is hydrated here: the spec runtime only
+     * builds the top level of a field.
+     *
+     * @inheritDoc
+     */
+    public function getMarketingConsents(): array
+    {
+        $raw = $this->getData('marketing_consents');
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $consents = [];
+
+        foreach ($raw as $entry) {
+            if ($entry instanceof MarketingConsentInterface) {
+                $consents[] = $entry;
+
+                continue;
+            }
+
+            if (is_array($entry)) {
+                $consents[] = $this->marketingConsentFactory->create(['data' => $entry]);
+            }
+        }
+
+        return $consents;
     }
 
     /**

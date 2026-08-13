@@ -340,4 +340,17 @@ class Config implements ConfigInterface
 
         return $url;
     }
+
+    /**
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function marketingConsentSubscribes(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            ConfigInterface::CONFIG_MARKETING_CONSENT_SUBSCRIBES,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
 }

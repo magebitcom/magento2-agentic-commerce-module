@@ -185,4 +185,26 @@ class CheckoutSessionFixtureTest extends TestCase
         $this->assertSame(['discount'], array_column($extensions, 'name'));
         $this->assertContains('$.CheckoutSession.discounts', $extensions[0]['extends']);
     }
+
+    /**
+     * The seller declares a consent option only for a channel it has a handler for and a privacy policy
+     * behind, so it never asks for consent it cannot honour or explain.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testMarketingConsentOptionsAreFullyDeclared(string $fixture): void
+    {
+        $options = self::loadFixture($fixture)['marketing_consent_options'] ?? [];
+
+        $this->assertNotEmpty($options);
+
+        foreach ($options as $option) {
+            $this->assertNotEmpty($option['channel']);
+            $this->assertNotEmpty($option['display_text']);
+            $this->assertNotEmpty($option['privacy_policy_url']);
+        }
+    }
 }

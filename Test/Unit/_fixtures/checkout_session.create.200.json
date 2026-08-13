@@ -1,8 +1,15 @@
 {
     "id": "checkout_session_placeholder_0001",
+    "marketing_consent_options": [
+        {
+            "channel": "email",
+            "display_text": "promotional emails, product launches, and exclusive offers",
+            "privacy_policy_url": "https://merchant.example/privacy-policy-cookie-restriction-mode"
+        }
+    ],
     "line_items": [
         {
-            "id": "id-bb668ca9",
+            "id": "id-8cd25102",
             "item": {
                 "id": "24-MB04",
                 "name": "Strive Shoulder Pack"

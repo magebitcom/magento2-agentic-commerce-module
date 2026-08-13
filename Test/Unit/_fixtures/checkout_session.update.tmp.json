@@ -1,0 +1,38 @@
+{
+    "currency": "USD",
+    "capabilities": {},
+    "line_items": [
+        {
+            "id": "24-MB04",
+            "quantity": 2
+        }
+    ],
+    "buyer": {
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "email": "ada@example.com",
+        "phone_number": "+15555550123"
+    },
+    "fulfillment_details": {
+        "name": "Ada Lovelace",
+        "phone_number": "+15555550123",
+        "email": "ada@example.com",
+        "address": {
+            "name": "Ada Lovelace",
+            "line_one": "1 Infinite Loop",
+            "city": "Cupertino",
+            "state": "California",
+            "country": "US",
+            "postal_code": "95014"
+        }
+    },
+    "selected_fulfillment_options": [
+        {
+            "type": "shipping",
+            "option_id": "flatrate_flatrate",
+            "item_ids": [
+                "id-dac53c17"
+            ]
+        }
+    ]
+}

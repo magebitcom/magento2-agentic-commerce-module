@@ -251,6 +251,39 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
 
+    <!-- Marketing consent. Every channel here is declared to the agent and receives the buyer's
+         decision; a merchant adds a channel by binding a handler, and replaces the behaviour by
+         binding their own. -->
+    <type name="Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="email" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\EmailConsent</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- The default email behaviour: record the decision on the order, and optionally subscribe. The
+         composite is what a merchant replaces or extends. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\MarketingConsent\EmailConsent" type="Magebit\AgenticCommerce\Model\MarketingConsent\Composite">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="record" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\RecordOnOrder</item>
+                <item name="newsletter" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\NewsletterSubscription</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions">
+        <arguments>
+            <argument name="displayText" xsi:type="array">
+                <item name="email" xsi:type="string">promotional emails, product launches, and exclusive offers</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MarketingConsent" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentOptionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MarketingConsentOption" />
+
     <type name="Magebit\AgenticCommerce\Model\Convert\CartToCapabilities">
         <arguments>
             <argument name="extensions" xsi:type="array">
