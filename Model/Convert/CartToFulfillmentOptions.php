@@ -16,6 +16,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magebit\AgenticCore\Model\Fulfillment\ShippingOption;
 use Magebit\AgenticCore\Model\Fulfillment\ShippingOptionResolver;
+use Magebit\AgenticCore\Model\Total\TypeLabel;
 use Magento\Quote\Model\Quote;
 
 class CartToFulfillmentOptions
@@ -24,11 +25,13 @@ class CartToFulfillmentOptions
      * @param FulfillmentOptionShippingInterfaceFactory $fulfillmentOptionFactory
      * @param TotalInterfaceFactory $totalFactory
      * @param ShippingOptionResolver $shippingOptionResolver
+     * @param TypeLabel $typeLabel
      */
     public function __construct(
         protected readonly FulfillmentOptionShippingInterfaceFactory $fulfillmentOptionFactory,
         protected readonly TotalInterfaceFactory $totalFactory,
-        protected readonly ShippingOptionResolver $shippingOptionResolver
+        protected readonly ShippingOptionResolver $shippingOptionResolver,
+        protected readonly TypeLabel $typeLabel,
     ) {
     }
 
@@ -86,6 +89,8 @@ class CartToFulfillmentOptions
             /** @var TotalInterface $total */
             $total = $this->totalFactory->create();
             $total->setType($type);
+            // Required by the schema, and these totals are derived rather than titled by Magento.
+            $total->setDisplayText($this->typeLabel->for($type));
             $total->setAmount($amount);
 
             $totals[] = $total;

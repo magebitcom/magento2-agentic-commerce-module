@@ -2,26 +2,43 @@
     "id": "checkout_session_placeholder_0001",
     "line_items": [
         {
-            "id": "1001",
-            "base_amount": 6400,
-            "subtotal": 6400,
-            "discount": 0,
-            "total": 6400,
-            "tax": 0,
+            "id": "id-ec2e990b",
             "item": {
                 "id": "24-MB04",
-                "quantity": 2
-            }
+                "name": "Strive Shoulder Pack"
+            },
+            "quantity": 2,
+            "totals": [
+                {
+                    "type": "items_base_amount",
+                    "display_text": "Items base amount",
+                    "amount": 6400
+                },
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 6400
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 6400
+                }
+            ]
         }
     ],
-    "fulfillment_address": {
+    "fulfillment_details": {
+        "address": {
+            "name": "Ada Lovelace",
+            "line_one": "1 Infinite Loop",
+            "city": "Cupertino",
+            "state": "California",
+            "country": "US",
+            "postal_code": "95014"
+        },
         "name": "Ada Lovelace",
-        "line_one": "123 Main St",
-        "line_two": null,
-        "city": "Austin",
-        "state": "Texas",
-        "country": "US",
-        "postal_code": "78701"
+        "email": "ada@example.com",
+        "phone_number": "+15555550123"
     },
     "totals": [
         {
@@ -30,7 +47,7 @@
             "amount": 6400
         },
         {
-            "type": "shipping",
+            "type": "fulfillment",
             "display_text": "Shipping & Handling",
             "amount": 0
         },
@@ -40,7 +57,7 @@
             "amount": 0
         },
         {
-            "type": "grand_total",
+            "type": "total",
             "display_text": "Grand Total",
             "amount": 6400
         }
@@ -50,30 +67,67 @@
             "type": "shipping",
             "id": "flatrate_flatrate",
             "title": "Flat Rate",
-            "subtotal": 1000,
-            "tax": 0,
-            "total": 1000
+            "description": "Flat Rate",
+            "carrier": "Flat Rate",
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 1000
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 1000
+                }
+            ]
         },
         {
             "type": "shipping",
             "id": "tablerate_bestway",
             "title": "Best Way",
-            "subtotal": 1500,
-            "tax": 0,
-            "total": 1500
+            "description": "Best Way",
+            "carrier": "Best Way",
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 1500
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 1500
+                }
+            ]
         }
     ],
-    "payment_provider": {
-        "provider": "stripe",
-        "supported_payment_methods": [
-            "card"
-        ]
+    "capabilities": {
+        "payment": {
+            "handlers": [
+                {
+                    "id": "stripe",
+                    "name": "stripe",
+                    "display_name": "Stripe",
+                    "version": "2026-04-17",
+                    "spec": "https://agenticcommerce.dev/specs/delegate_payment",
+                    "requires_delegate_payment": true,
+                    "requires_pci_compliance": false,
+                    "psp": "stripe",
+                    "config_schema": "https://merchant.example/agentic_commerce/schema/config",
+                    "instrument_schemas": [
+                        "https://merchant.example/agentic_commerce/schema/instrument_card"
+                    ],
+                    "config": {}
+                }
+            ]
+        }
     },
     "currency": "USD",
     "buyer": {
+        "email": "ada@example.com",
         "first_name": "Ada",
         "last_name": "Lovelace",
-        "email": "ada@example.com",
         "phone_number": "+15555550123"
     },
     "links": [],
@@ -85,5 +139,6 @@
             "content": "Shipping method is required"
         }
     ],
-    "status": "not_ready_for_payment"
+    "status": "not_ready_for_payment",
+    "selected_fulfillment_options": []
 }

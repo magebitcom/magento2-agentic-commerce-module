@@ -18,6 +18,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionShipping;
 use Magebit\AcpSpec\Data\AgenticCheckout\Total;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
+use Magebit\AgenticCore\Model\Total\TypeLabel;
 use Magebit\AgenticCore\Model\Fulfillment\ShippingOption;
 use Magebit\AgenticCore\Model\Fulfillment\ShippingOptionResolver;
 use Magento\Quote\Model\Quote;
@@ -87,7 +88,7 @@ class CartToFulfillmentOptionsTest extends TestCase
         $totalFactory = $this->createMock(TotalInterfaceFactory::class);
         $totalFactory->method('create')->willReturnCallback(static fn (): Total => new Total());
 
-        $converter = new CartToFulfillmentOptions($optionFactory, $totalFactory, $resolver);
+        $converter = new CartToFulfillmentOptions($optionFactory, $totalFactory, $resolver, new TypeLabel());
 
         $cart = $this->getMockBuilder(Quote::class)->disableOriginalConstructor()->onlyMethods([])->getMock();
 

@@ -242,4 +242,17 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToTotals">
+        <arguments>
+            <argument name="typeMapping" xsi:type="array">
+                <item name="subtotal" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_SUBTOTAL</item>
+                <item name="shipping" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_FULFILLMENT</item>
+                <item name="tax" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_TAX</item>
+                <item name="discount" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_DISCOUNT</item>
+                <item name="giftwrapping" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_GIFT_WRAP</item>
+                <item name="customerbalance" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_STORE_CREDIT</item>
+                <item name="grand_total" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_TOTAL</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

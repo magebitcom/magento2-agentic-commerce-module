@@ -16,8 +16,7 @@ use JsonException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Guards the golden ACP fixtures. Schema validation is wired up but the session fixtures predate the
- * response migration, so they are pinned structurally until they can be re-captured.
+ * Validates the golden ACP fixtures against the vendored schema bundle.
  */
 class CheckoutSessionFixtureTest extends TestCase
 {
@@ -66,13 +65,49 @@ class CheckoutSessionFixtureTest extends TestCase
      */
     public function testSessionFixtureMatchesSpec(string $fixture): void
     {
-        $this->assertNotEmpty(self::loadFixture($fixture));
-        $this->markTestSkipped(
-            'These fixtures predate the response migration — captured with quantity inside `item` and '
-            . 'flat per-item money, where the live response now sends quantity beside `item` with a '
-            . '`totals` array. Validating them would assert the old shape. Re-capture needs an ACP '
-            . 'FixtureScrubber, which does not exist yet.'
+        $this->assertMatchesSchema(self::loadFixtureObject($fixture), self::SESSION_SCHEMA);
+    }
+
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testCompletedSessionMatchesSpec(): void
+    {
+        $this->assertMatchesSchema(
+            self::loadFixtureObject(self::COMPLETE_FIXTURE),
+            'schema.agentic_checkout.json#/$defs/CheckoutSessionWithOrder'
         );
+    }
+
+    /**
+     * Every total needs a type from the spec's enum and a label, at cart level and inside each line item
+     * and fulfillment option. Magento's own codes are not that vocabulary.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testEveryTotalIsLabelledAndTyped(string $fixture): void
+    {
+        $payload = self::loadFixture($fixture);
+        $groups = [$payload['totals']];
+
+        foreach ($payload['line_items'] as $lineItem) {
+            $groups[] = $lineItem['totals'];
+        }
+
+        foreach ($payload['fulfillment_options'] ?? [] as $option) {
+            $groups[] = $option['totals'];
+        }
+
+        foreach ($groups as $totals) {
+            foreach ($totals as $total) {
+                $this->assertNotEmpty($total['display_text'], 'every total carries a label');
+                $this->assertNotContains($total['type'], ['shipping', 'grand_total'], 'Magento codes are mapped');
+            }
+        }
     }
 
     /**
@@ -84,14 +119,6 @@ class CheckoutSessionFixtureTest extends TestCase
      */
     public function testCompletedSessionCarriesAConformantOrder(): void
     {
-        if (!is_file(__DIR__ . '/_fixtures/' . self::COMPLETE_FIXTURE)) {
-            self::markTestSkipped(
-                'No completed-session capture yet: completion reaches Stripe and Stripe rejects the '
-                . 'payment intent because the account has no payment methods activated for USD. The '
-                . 'order object itself is covered by OrderToAcpOrderTest.'
-            );
-        }
-
         $payload = self::loadFixture(self::COMPLETE_FIXTURE);
 
         $this->assertMatchesSchema(self::loadFixtureObject(self::COMPLETE_FIXTURE)->order, self::ORDER_SCHEMA);

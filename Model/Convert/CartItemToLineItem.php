@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Convert;
 
 use Magebit\AgenticCore\Model\Money\MinorUnits;
+use Magebit\AgenticCore\Model\Total\TypeLabel;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
@@ -28,12 +29,14 @@ class CartItemToLineItem
      * @param ItemInterfaceFactory $itemFactory
      * @param TotalInterfaceFactory $totalFactory
      * @param MinorUnits $minorUnits
+     * @param TypeLabel $typeLabel
      */
     public function __construct(
         protected readonly LineItemInterfaceFactory $lineItemFactory,
         protected readonly ItemInterfaceFactory $itemFactory,
         protected readonly TotalInterfaceFactory $totalFactory,
         protected readonly MinorUnits $minorUnits,
+        protected readonly TypeLabel $typeLabel,
     ) {
     }
 
@@ -99,6 +102,8 @@ class CartItemToLineItem
             /** @var TotalInterface $total */
             $total = $this->totalFactory->create();
             $total->setType($type);
+            // Required by the schema, and these totals are derived rather than titled by Magento.
+            $total->setDisplayText($this->typeLabel->for($type));
             $total->setAmount($this->minorUnits->convert($amount, $currencyCode));
 
             $totals[] = $total;

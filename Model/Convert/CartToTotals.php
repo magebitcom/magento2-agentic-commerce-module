@@ -20,10 +20,12 @@ class CartToTotals
     /**
      * @param TotalInterfaceFactory $totalInterfaceFactory
      * @param MinorUnits $minorUnits
+     * @param array<string, string> $typeMapping Magento total code to spec total type
      */
     public function __construct(
         protected readonly TotalInterfaceFactory $totalInterfaceFactory,
         protected readonly MinorUnits $minorUnits,
+        protected readonly array $typeMapping = [],
     ) {
     }
 
@@ -37,15 +39,47 @@ class CartToTotals
         $currencyCode = $cart->getCurrency()?->getStoreCurrencyCode() ?? 'USD';
 
         foreach ($cart->getTotals() as $cartTotal) {
+            $type = $this->mapType((string) $cartTotal->getCode());
+
+            // A code the spec has no member for is dropped rather than sent as an invalid type. Its
+            // money is still inside the grand total.
+            if ($type === null) {
+                continue;
+            }
+
             /** @var TotalInterface $total */
             $total = $this->totalInterfaceFactory->create();
 
-            $total->setType($cartTotal->getCode());
-            $total->setDisplayText((string) $cartTotal->getTitle());
+            $total->setType($type);
+            $total->setDisplayText($this->labelFor((string) $cartTotal->getTitle(), $type));
             $total->setAmount($this->minorUnits->convert($cartTotal->getValue(), $currencyCode));
             $totals[] = $total;
         }
 
         return $totals;
+    }
+
+    /**
+     * Magento's own codes are not the spec's vocabulary: `shipping` is `fulfillment` and `grand_total`
+     * is `total`.
+     *
+     * @param string $magentoCode
+     * @return string|null
+     */
+    private function mapType(string $magentoCode): ?string
+    {
+        return $this->typeMapping[$magentoCode] ?? null;
+    }
+
+    /**
+     * `display_text` is required, so an untitled total gets a label derived from its type.
+     *
+     * @param string $title
+     * @param string $type
+     * @return string
+     */
+    private function labelFor(string $title, string $type): string
+    {
+        return $title !== '' ? $title : ucfirst(str_replace('_', ' ', $type));
     }
 }
