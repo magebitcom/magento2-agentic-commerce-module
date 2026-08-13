@@ -25,6 +25,8 @@ class CheckoutSessionFixtureTest extends TestCase
     private const SESSION_SCHEMA = 'schema.agentic_checkout.json#/$defs/CheckoutSession';
     private const ORDER_SCHEMA = 'schema.agentic_checkout.json#/$defs/Order';
     private const COMPLETE_FIXTURE = 'checkout_session.complete.200.json';
+    private const DISCOUNTED_FIXTURE = 'checkout_session.create.discounted.200.json';
+    private const DISCOUNT_SCHEMA = 'schema.discount.json#/$defs/checkout_with_discount';
 
     /**
      * @return array<string, array{0: string}>
@@ -125,5 +127,45 @@ class CheckoutSessionFixtureTest extends TestCase
         $this->assertSame('completed', $payload['status']);
         $this->assertSame($payload['id'], $payload['order']['checkout_session_id']);
         $this->assertStringContainsString($payload['id'], $payload['order']['permalink_url']);
+    }
+
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testADiscountedSessionMatchesTheDiscountExtension(): void
+    {
+        $this->assertMatchesSchema(self::loadFixtureObject(self::DISCOUNTED_FIXTURE), self::DISCOUNT_SCHEMA);
+    }
+
+    /**
+     * Magento holds one coupon per quote, so a second code is reported rejected rather than dropped
+     * without explanation.
+     *
+     * @return void
+     * @throws JsonException
+     */
+    public function testASecondDiscountCodeIsRejectedWithAReason(): void
+    {
+        $discounts = self::loadFixture(self::DISCOUNTED_FIXTURE)['discounts'];
+
+        $this->assertCount(2, $discounts['codes']);
+        $this->assertCount(1, $discounts['applied']);
+        $this->assertCount(1, $discounts['rejected']);
+        $this->assertSame('discount_code_combination_disallowed', $discounts['rejected'][0]['reason']);
+    }
+
+    /**
+     * The spec wants a positive amount on an applied discount; Magento carries it as a reduction.
+     *
+     * @return void
+     * @throws JsonException
+     */
+    public function testTheAppliedDiscountAmountIsPositive(): void
+    {
+        $applied = self::loadFixture(self::DISCOUNTED_FIXTURE)['discounts']['applied'][0];
+
+        $this->assertGreaterThan(0, $applied['amount']);
+        $this->assertSame($applied['code'], $applied['coupon']['id']);
     }
 }

@@ -59,6 +59,7 @@ use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
@@ -100,6 +101,7 @@ class CheckoutSessionService
      * @param StateResolver $stateResolver
      * @param OrderLinkRepositoryInterface $orderLinkRepository
      * @param OrderToAcpOrder $orderToAcpOrder
+     * @param CartToDiscounts $cartToDiscounts
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -130,6 +132,7 @@ class CheckoutSessionService
         protected readonly StateResolver $stateResolver,
         protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
         protected readonly OrderToAcpOrder $orderToAcpOrder,
+        protected readonly CartToDiscounts $cartToDiscounts,
     ) {
     }
 
@@ -148,7 +151,12 @@ class CheckoutSessionService
 
         $lineItemResults = $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
-        $this->assignCartDataToResponse($cart, $response, $lineItemResults);
+        $this->assignCartDataToResponse(
+            $cart,
+            $response,
+            $lineItemResults,
+            $this->submittedCodes($checkoutSessionsRequest)
+        );
 
         $this->logger->info('Checkout session created', ['cart_id' => $maskedCartId]);
 
@@ -171,7 +179,12 @@ class CheckoutSessionService
 
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
-        $this->assignCartDataToResponse($cart, $response, $lineItemResults);
+        $this->assignCartDataToResponse(
+            $cart,
+            $response,
+            $lineItemResults,
+            $this->submittedCodes($checkoutSessionsRequest)
+        );
 
         $this->logger->info('Checkout session updated', ['cart_id' => $sessionId]);
 
@@ -314,6 +327,9 @@ class CheckoutSessionService
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
+        /** @var Quote $cart */
+        $this->applyDiscountCodes($cart, $this->submittedCodes($checkoutSessionsRequest));
+
         $fulfillmentDetails = $checkoutSessionsRequest->getFulfillmentDetails();
 
         if ($fulfillmentDetails?->getAddress() !== null) {
@@ -333,15 +349,62 @@ class CheckoutSessionService
     }
 
     /**
+     * The codes the agent sent on this request. A submitted empty array clears what was there, which the
+     * spec asks for explicitly.
+     *
+     * @param CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $request
+     * @return array<int, string>
+     */
+    public function submittedCodes(
+        CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $request
+    ): array {
+        $discounts = $request->getDiscounts();
+
+        if ($discounts === null) {
+            return [];
+        }
+
+        return array_values(array_map('strval', $discounts->getCodes() ?? []));
+    }
+
+    /**
+     * Magento holds a single coupon per quote, so the first code that applies wins and the rest are
+     * reported as rejected rather than retried.
+     *
+     * @param Quote $cart
+     * @param array<int, string> $codes
+     * @return void
+     */
+    private function applyDiscountCodes(Quote $cart, array $codes): void
+    {
+        if ($codes === []) {
+            $cart->setCouponCode('');
+
+            return;
+        }
+
+        foreach ($codes as $code) {
+            $cart->setCouponCode($code);
+            $cart->collectTotals();
+
+            if ((string) $cart->getCouponCode() !== '') {
+                return;
+            }
+        }
+    }
+
+    /**
      * @param CartInterface $cart
      * @param CheckoutSessionInterface $response
      * @param LineItemResult[] $lineItemResults Outcomes for items submitted on this request, if any
+     * @param array<int, string> $submittedCodes Discount codes the agent sent on this request
      * @return void
      */
     public function assignCartDataToResponse(
         CartInterface $cart,
         CheckoutSessionInterface $response,
-        array $lineItemResults = []
+        array $lineItemResults = [],
+        array $submittedCodes = []
     ): void {
         /** @var Quote $cart */
         $lineItems = [];
@@ -358,6 +421,11 @@ class CheckoutSessionService
         $buyer = $this->cartToBuyer->execute($cart);
         $links = $this->getLinks();
         $validationErrors = $this->cartValidator->validate($cart);
+        $discounts = $this->cartToDiscounts->execute($cart, $submittedCodes);
+
+        if ($discounts !== null) {
+            $response->setDiscounts($discounts);
+        }
 
         // Being very optimistic here
         /** @var string $currency */

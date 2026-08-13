@@ -35,6 +35,7 @@ use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
+use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Magebit\AgenticCommerce\Service\WebhookService;
@@ -119,7 +120,8 @@ class CheckoutSessionWritesTest extends TestCase
             $this->createMock(LoggerInterface::class),
             $stateResolver,
             $this->orderLinkRepository,
-            $this->createMock(OrderToAcpOrder::class)
+            $this->createMock(OrderToAcpOrder::class),
+            $this->createMock(CartToDiscounts::class)
         );
     }
 

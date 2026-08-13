@@ -16,6 +16,8 @@ use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
@@ -32,6 +34,7 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
      * @param FulfillmentDetailsBuilder $fulfillmentDetailsBuilder
      * @param CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
+     * @param DiscountsRequestInterfaceFactory $discountsRequestFactory
      * @param array<mixed> $data
      */
     public function __construct(
@@ -39,6 +42,7 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
         private readonly FulfillmentDetailsBuilder $fulfillmentDetailsBuilder,
         private readonly CapabilitiesInterfaceFactory $capabilitiesInterfaceFactory,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
+        private readonly DiscountsRequestInterfaceFactory $discountsRequestFactory,
         array $data = []
     ) {
         parent::__construct($data);
@@ -94,6 +98,20 @@ class CreateCheckoutSessionRequest extends DataTransferObject implements
     public function getBuyer(): ?BuyerInterface
     {
         return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
+    }
+
+    /**
+     * @return DiscountsRequestInterface|null
+     */
+    public function getDiscounts(): ?DiscountsRequestInterface
+    {
+        $discounts = $this->getDataInstance(
+            'discounts',
+            DiscountsRequestInterface::class,
+            $this->discountsRequestFactory->create(...)
+        );
+
+        return $discounts instanceof DiscountsRequestInterface ? $discounts : null;
     }
 
     /**

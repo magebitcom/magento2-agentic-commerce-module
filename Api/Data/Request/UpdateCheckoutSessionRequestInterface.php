@@ -12,6 +12,7 @@ namespace Magebit\AgenticCommerce\Api\Data\Request;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
 
 interface UpdateCheckoutSessionRequestInterface extends RequestInterface, ValidatableDataInterface
@@ -30,6 +31,13 @@ interface UpdateCheckoutSessionRequestInterface extends RequestInterface, Valida
      * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
      */
     public function getBuyer(): ?BuyerInterface;
+
+    /**
+     * Discount codes the agent submitted. An empty array clears what was applied.
+     *
+     * @return DiscountsRequestInterface|null
+     */
+    public function getDiscounts(): ?DiscountsRequestInterface;
 
     /**
      * A selection per fulfillment group, replacing the single option id earlier revisions carried.

@@ -242,6 +242,14 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- Discount extension. The checkout bundle's variants, which the session response accepts. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsRequest" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AppliedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AppliedDiscount" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
+
     <type name="Magebit\AgenticCommerce\Model\Convert\CartToTotals">
         <arguments>
             <argument name="typeMapping" xsi:type="array">

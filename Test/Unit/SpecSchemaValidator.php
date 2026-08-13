@@ -34,6 +34,11 @@ class SpecSchemaValidator
     public const MAX_ERRORS = 50;
 
     /**
+     * The base the extension bundles resolve their sibling references against.
+     */
+    private const SIBLING_BASE = 'https://agentic-commerce-protocol.com/schemas/';
+
+    /**
      * @return string|null
      */
     public static function locateSchemaDir(): ?string
@@ -89,11 +94,7 @@ class SpecSchemaValidator
         );
 
         $validator = new Validator(null, self::MAX_ERRORS, false);
-
-        // The bundle is registered under its own $id so a pointer into its $defs resolves, and every
-        // internal $ref keeps working from there.
-        $id = is_object($bundle) && isset($bundle->{'$id'}) ? (string) $bundle->{'$id'} : 'urn:acp:' . $relativeFile;
-        $validator->resolver()?->registerRaw($bundle, $id);
+        $id = self::registerBundles($validator, $schemaDir, (string) $relativeFile);
 
         $schema = $fragment === null ? $bundle : (object) ['$ref' => $id . '#' . $fragment];
         $result = $validator->validate(self::toJsonData($payload), $schema);
@@ -103,6 +104,45 @@ class SpecSchemaValidator
         }
 
         return self::describeError($schemaPath, $result->error());
+    }
+
+    /**
+     * @param Validator $validator
+     * @param string $schemaDir
+     * @param string $target The bundle being validated against
+     * @return string The target bundle's registered id
+     * @throws JsonException
+     */
+    private static function registerBundles(Validator $validator, string $schemaDir, string $target): string
+    {
+        $targetId = 'urn:acp:' . $target;
+
+        foreach ((array) glob($schemaDir . '/*.json') as $path) {
+            $file = basename((string) $path);
+            $decoded = json_decode((string) file_get_contents((string) $path), false, 512, JSON_THROW_ON_ERROR);
+            $id = is_object($decoded) && isset($decoded->{'$id'})
+                ? (string) $decoded->{'$id'}
+                : 'urn:acp:' . $file;
+
+            $validator->resolver()?->registerRaw($decoded, $id);
+
+            // A second copy with its $id rewritten to the sibling URI. The checkout bundle's own $id is
+            // a leftover example.com placeholder while its siblings reference it as a relative filename,
+            // and Opis honours the document's internal $id, so registering the same object twice does
+            // nothing — the copy is what makes cross-bundle references resolve.
+            $sibling = json_decode((string) json_encode($decoded), false, 512, JSON_THROW_ON_ERROR);
+
+            if (is_object($sibling)) {
+                $sibling->{'$id'} = self::SIBLING_BASE . $file;
+                $validator->resolver()?->registerRaw($sibling, self::SIBLING_BASE . $file);
+            }
+
+            if ($file === $target) {
+                $targetId = $id;
+            }
+        }
+
+        return $targetId;
     }
 
     /**

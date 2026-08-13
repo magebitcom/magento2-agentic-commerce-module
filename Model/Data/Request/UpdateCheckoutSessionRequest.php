@@ -16,6 +16,8 @@ use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactor
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
@@ -32,6 +34,7 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
      * @param FulfillmentDetailsBuilder $fulfillmentDetailsBuilder
      * @param SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionInterfaceFactory
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
+     * @param DiscountsRequestInterfaceFactory $discountsRequestFactory
      * @param array<mixed> $data
      */
     public function __construct(
@@ -39,6 +42,7 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
         private readonly FulfillmentDetailsBuilder $fulfillmentDetailsBuilder,
         private readonly SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionInterfaceFactory,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
+        private readonly DiscountsRequestInterfaceFactory $discountsRequestFactory,
         array $data = []
     ) {
         parent::__construct($data);
@@ -74,6 +78,20 @@ class UpdateCheckoutSessionRequest extends DataTransferObject implements
     public function getBuyer(): ?BuyerInterface
     {
         return $this->getDataInstance('buyer', BuyerInterface::class, $this->buyerInterfaceFactory->create(...));
+    }
+
+    /**
+     * @return DiscountsRequestInterface|null
+     */
+    public function getDiscounts(): ?DiscountsRequestInterface
+    {
+        $discounts = $this->getDataInstance(
+            'discounts',
+            DiscountsRequestInterface::class,
+            $this->discountsRequestFactory->create(...)
+        );
+
+        return $discounts instanceof DiscountsRequestInterface ? $discounts : null;
     }
 
     /**
