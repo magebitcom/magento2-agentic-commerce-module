@@ -251,6 +251,21 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
 
+    <!-- Delegated 3DS authentication, merchant side. The agent runs the authentication with its own
+         provider; this decides which outcomes may become an order, which is a liability call. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AuthenticationResult" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultOutcomeDetailsInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AuthenticationResultOutcomeDetails" />
+    <type name="Magebit\AgenticCommerce\Model\Authentication\OutcomePolicy">
+        <arguments>
+            <argument name="allowedOutcomes" xsi:type="array">
+                <item name="authenticated" xsi:type="string">authenticated</item>
+                <!-- The issuer acknowledged the attempt without authenticating. Most schemes still
+                     shift liability, so it is allowed; remove it to require a full challenge. -->
+                <item name="attempt_acknowledged" xsi:type="string">attempt_acknowledged</item>
+            </argument>
+        </arguments>
+    </type>
+
     <!-- Cart capability -->
     <preference for="Magebit\AgenticCommerce\Api\CartServiceInterface" type="Magebit\AgenticCommerce\Service\CartService" />
     <preference for="Magebit\AcpSpec\Api\Cart\CartInterface" type="Magebit\AcpSpec\Data\Cart\Cart" />

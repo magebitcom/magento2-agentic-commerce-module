@@ -12,6 +12,7 @@ namespace Magebit\AgenticCommerce\Model\Data\Request;
 
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
@@ -29,12 +30,14 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
      * @param PaymentDataBuilder $paymentDataBuilder
      * @param BuyerInterfaceFactory $buyerInterfaceFactory
      * @param MarketingConsentInterfaceFactory $marketingConsentFactory
+     * @param AuthenticationResultBuilder $authenticationResultBuilder
      * @param array<mixed> $data
      */
     public function __construct(
         private readonly PaymentDataBuilder $paymentDataBuilder,
         private readonly BuyerInterfaceFactory $buyerInterfaceFactory,
         private readonly MarketingConsentInterfaceFactory $marketingConsentFactory,
+        private readonly AuthenticationResultBuilder $authenticationResultBuilder,
         array $data = []
     ) {
         parent::__construct($data);
@@ -77,6 +80,20 @@ class CompleteCheckoutSessionRequest extends DataTransferObject implements
         }
 
         return $consents;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAuthenticationResult(): ?AuthenticationResultInterface
+    {
+        $result = $this->getDataInstance(
+            'authentication_result',
+            AuthenticationResultInterface::class,
+            $this->authenticationResultBuilder->create(...)
+        );
+
+        return $result instanceof AuthenticationResultInterface ? $result : null;
     }
 
     /**

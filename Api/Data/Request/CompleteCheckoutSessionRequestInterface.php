@@ -10,6 +10,7 @@
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
+use Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
@@ -34,4 +35,11 @@ interface CompleteCheckoutSessionRequestInterface extends ValidatableDataInterfa
      * @return MarketingConsentInterface[]
      */
     public function getMarketingConsents(): array;
+
+    /**
+     * The 3DS outcome the agent obtained from its authentication provider, when it ran one.
+     *
+     * @return AuthenticationResultInterface|null
+     */
+    public function getAuthenticationResult(): ?AuthenticationResultInterface;
 }

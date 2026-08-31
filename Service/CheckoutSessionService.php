@@ -59,6 +59,7 @@ use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Authentication\OutcomePolicy;
 use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
 use Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions;
 use Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool as MarketingConsentPool;
@@ -108,6 +109,7 @@ class CheckoutSessionService
      * @param CartToMarketingConsentOptions $cartToMarketingConsentOptions
      * @param MarketingConsentPool $marketingConsentPool
      * @param BuyerWriter $buyerWriter
+     * @param OutcomePolicy $authenticationOutcomePolicy
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -142,6 +144,7 @@ class CheckoutSessionService
         protected readonly CartToMarketingConsentOptions $cartToMarketingConsentOptions,
         protected readonly MarketingConsentPool $marketingConsentPool,
         protected readonly BuyerWriter $buyerWriter,
+        protected readonly OutcomePolicy $authenticationOutcomePolicy,
     ) {
     }
 
@@ -224,6 +227,14 @@ class CheckoutSessionService
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
+        // Checked before payment is touched: a refused or unfinished 3DS authentication must not become
+        // an order, and the merchant decides which outcomes count.
+        if (!$this->authenticationOutcomePolicy->permits($checkoutSessionsRequest->getAuthenticationResult())) {
+            throw new LocalizedException(
+                __('The payment could not be authenticated. Please try a different payment method.')
+            );
+        }
+
         $this->setCartEmailAddress($cart);
 
         $billingAddress = $paymentData->getBillingAddress();
@@ -234,7 +245,11 @@ class CheckoutSessionService
             $this->copyShippingAddressToBillingAddress($cart);
         }
 
-        $cartPayment = $this->paymentHandlerPool->get($cart, $paymentData);
+        $cartPayment = $this->paymentHandlerPool->get(
+            $cart,
+            $paymentData,
+            $checkoutSessionsRequest->getAuthenticationResult()
+        );
         $this->cartRepository->save($cart);
 
         $orderId = $this->guestCartManagement->placeOrder($sessionId, $cartPayment);
