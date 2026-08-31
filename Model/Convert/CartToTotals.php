@@ -52,7 +52,7 @@ class CartToTotals
 
             $total->setType($type);
             $total->setDisplayText($this->labelFor((string) $cartTotal->getTitle(), $type));
-            $total->setAmount($this->minorUnits->convert($cartTotal->getValue(), $currencyCode));
+            $total->setAmount($this->minorUnits->convert((float) $cartTotal->getValue(), $currencyCode));
             $totals[] = $total;
         }
 

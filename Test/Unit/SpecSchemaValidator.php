@@ -115,6 +115,8 @@ class SpecSchemaValidator
      */
     private static function registerBundles(Validator $validator, string $schemaDir, string $target): string
     {
+        $bundles = [];
+        $bases = [self::SIBLING_BASE];
         $targetId = 'urn:acp:' . $target;
 
         foreach ((array) glob($schemaDir . '/*.json') as $path) {
@@ -124,21 +126,32 @@ class SpecSchemaValidator
                 ? (string) $decoded->{'$id'}
                 : 'urn:acp:' . $file;
 
-            $validator->resolver()?->registerRaw($decoded, $id);
-
-            // A second copy with its $id rewritten to the sibling URI. The checkout bundle's own $id is
-            // a leftover example.com placeholder while its siblings reference it as a relative filename,
-            // and Opis honours the document's internal $id, so registering the same object twice does
-            // nothing — the copy is what makes cross-bundle references resolve.
-            $sibling = json_decode((string) json_encode($decoded), false, 512, JSON_THROW_ON_ERROR);
-
-            if (is_object($sibling)) {
-                $sibling->{'$id'} = self::SIBLING_BASE . $file;
-                $validator->resolver()?->registerRaw($sibling, self::SIBLING_BASE . $file);
-            }
+            $bundles[$file] = [$decoded, $id];
+            $bases[] = substr($id, 0, (int) strrpos($id, '/') + 1);
 
             if ($file === $target) {
                 $targetId = $id;
+            }
+        }
+
+        // Registered under its own id and under every base any bundle's $id implies. The bundles
+        // reference each other by relative filename while their own $ids are inconsistent
+        // example.com placeholders, so one base is not enough; Opis honours a document's internal
+        // $id, which is why each alias is a copy with the id rewritten.
+        foreach ($bundles as $file => [$decoded, $id]) {
+            $validator->resolver()?->registerRaw($decoded, $id);
+
+            foreach (array_unique($bases) as $base) {
+                if ($base . $file === $id) {
+                    continue;
+                }
+
+                $alias = json_decode((string) json_encode($decoded), false, 512, JSON_THROW_ON_ERROR);
+
+                if (is_object($alias)) {
+                    $alias->{'$id'} = $base . $file;
+                    $validator->resolver()?->registerRaw($alias, $base . $file);
+                }
             }
         }
 

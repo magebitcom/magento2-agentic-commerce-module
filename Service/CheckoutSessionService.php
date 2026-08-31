@@ -62,6 +62,7 @@ use Magebit\AgenticCommerce\Service\WebhookService;
 use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
 use Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions;
 use Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool as MarketingConsentPool;
+use Magebit\AgenticCommerce\Model\Quote\BuyerWriter;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
@@ -106,6 +107,7 @@ class CheckoutSessionService
      * @param CartToDiscounts $cartToDiscounts
      * @param CartToMarketingConsentOptions $cartToMarketingConsentOptions
      * @param MarketingConsentPool $marketingConsentPool
+     * @param BuyerWriter $buyerWriter
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -139,6 +141,7 @@ class CheckoutSessionService
         protected readonly CartToDiscounts $cartToDiscounts,
         protected readonly CartToMarketingConsentOptions $cartToMarketingConsentOptions,
         protected readonly MarketingConsentPool $marketingConsentPool,
+        protected readonly BuyerWriter $buyerWriter,
     ) {
     }
 
@@ -665,25 +668,7 @@ class CheckoutSessionService
     public function addBuyerToCart(CartInterface $cart, BuyerInterface $buyer): void
     {
         /** @var Quote $cart */
-        if ($firstName = $buyer->getFirstName()) {
-            $cart->setCustomerFirstname($firstName);
-        }
-
-        if ($lastName = $buyer->getLastName()) {
-            $cart->setCustomerLastname($lastName);
-        }
-
-        if ($email = $buyer->getEmail()) {
-            $cart->setCustomerEmail($email);
-        }
-
-        if ($email = $buyer->getEmail()) {
-            $cart->getShippingAddress()->setEmail($email);
-        }
-
-        if ($phoneNumber = $buyer->getPhoneNumber()) {
-            $cart->getShippingAddress()->setTelephone($phoneNumber);
-        }
+        $this->buyerWriter->write($cart, $buyer);
     }
 
     /**

@@ -30,6 +30,12 @@ class ConfiguredRouteProvider implements RouteProviderInterface
     private const SESSIONS_CONTROLLER = 'checkout_sessions';
 
     /**
+     * Carts sit beside the sessions under the same configured base path.
+     */
+    private const CARTS_SEGMENT = 'carts';
+    private const CARTS_CONTROLLER = 'cart';
+
+    /**
      * @param ConfigInterface $config
      */
     public function __construct(
@@ -44,6 +50,8 @@ class ConfiguredRouteProvider implements RouteProviderInterface
     {
         $base = trim($this->config->getCheckoutRouterBasePath(), '/');
         $session = $base . '/{session_id}';
+        $cartBase = dirname($base) === '.' ? self::CARTS_SEGMENT : dirname($base) . '/' . self::CARTS_SEGMENT;
+        $cart = $cartBase . '/{cart_id}';
 
         return [
             new Route(self::DISCOVERY_PATH, 'GET', 'discovery', 'index'),
@@ -54,6 +62,10 @@ class ConfiguredRouteProvider implements RouteProviderInterface
             new Route($session, 'POST', self::SESSIONS_CONTROLLER, 'update'),
             new Route($session . '/complete', 'POST', self::SESSIONS_CONTROLLER, 'complete'),
             new Route($session . '/cancel', 'POST', self::SESSIONS_CONTROLLER, 'cancel'),
+            new Route($cartBase, 'POST', self::CARTS_CONTROLLER, 'index'),
+            new Route($cart, 'GET', self::CARTS_CONTROLLER, 'retrieve'),
+            new Route($cart, 'PUT', self::CARTS_CONTROLLER, 'update'),
+            new Route($cart . '/cancel', 'POST', self::CARTS_CONTROLLER, 'cancel'),
         ];
     }
 }

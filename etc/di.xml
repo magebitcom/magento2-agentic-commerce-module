@@ -251,6 +251,12 @@
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
 
+    <!-- Cart capability -->
+    <preference for="Magebit\AgenticCommerce\Api\CartServiceInterface" type="Magebit\AgenticCommerce\Service\CartService" />
+    <preference for="Magebit\AcpSpec\Api\Cart\CartInterface" type="Magebit\AcpSpec\Data\Cart\Cart" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CartCreateRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CartCreateRequest" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CartUpdateRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CartUpdateRequest" />
+
     <!-- Marketing consent. Every channel here is declared to the agent and receives the buyer's
          decision; a merchant adds a channel by binding a handler, and replaces the behaviour by
          binding their own. -->
