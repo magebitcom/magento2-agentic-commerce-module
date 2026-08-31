@@ -67,7 +67,7 @@ use Magebit\AgenticCommerce\Model\Quote\BuyerWriter;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
 use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
-use Magebit\AgenticCore\Model\Order\PlacementNote;
+use Magebit\AgenticCore\Model\Order\Note;
 use Magebit\AgenticCore\Model\Checkout\CheckoutState;
 use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Psr\Log\LoggerInterface;
@@ -111,7 +111,7 @@ class CheckoutSessionService
      * @param MarketingConsentPool $marketingConsentPool
      * @param BuyerWriter $buyerWriter
      * @param OutcomePolicy $authenticationOutcomePolicy
-     * @param PlacementNote $placementNote
+     * @param Note $orderNote
      */
     public function __construct(
         protected readonly ConfigInterface $config,
@@ -147,7 +147,7 @@ class CheckoutSessionService
         protected readonly MarketingConsentPool $marketingConsentPool,
         protected readonly BuyerWriter $buyerWriter,
         protected readonly OutcomePolicy $authenticationOutcomePolicy,
-        protected readonly PlacementNote $placementNote,
+        protected readonly Note $orderNote,
     ) {
     }
 
@@ -267,7 +267,7 @@ class CheckoutSessionService
             (int) $orderId
         );
 
-        $this->placementNote->add($order, (string) __('Placed by an agent over ACP.'));
+        $this->orderNote->add($order, (string) __('Placed by an agent over ACP.'));
 
         $this->webhookService->dispatch(
             $this->orderToOrderCreatedUpdatedWebhook->execute(

@@ -38,7 +38,7 @@ use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
 use Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions;
 use Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool as MarketingConsentPool;
-use Magebit\AgenticCore\Model\Order\PlacementNote;
+use Magebit\AgenticCore\Model\Order\Note;
 use Magebit\AgenticCommerce\Model\Authentication\OutcomePolicy;
 use Magebit\AgenticCommerce\Model\Quote\BuyerWriter;
 use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
@@ -131,7 +131,7 @@ class CheckoutSessionWritesTest extends TestCase
             $this->createMock(MarketingConsentPool::class),
             new BuyerWriter(),
             new OutcomePolicy(['authenticated', 'attempt_acknowledged']),
-            $this->createMock(PlacementNote::class)
+            $this->createMock(Note::class)
         );
     }
 
