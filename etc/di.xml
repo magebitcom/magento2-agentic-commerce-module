@@ -266,6 +266,15 @@
         </arguments>
     </type>
 
+    <!-- How an order placed through this protocol reads in admin. -->
+    <type name="Magebit\AgenticCore\Block\Adminhtml\Order\View\PlacedBy">
+        <arguments>
+            <argument name="labels" xsi:type="array">
+                <item name="acp" xsi:type="string">Placed by an agent over ACP</item>
+            </argument>
+        </arguments>
+    </type>
+
     <!-- Cart capability -->
     <preference for="Magebit\AgenticCommerce\Api\CartServiceInterface" type="Magebit\AgenticCommerce\Service\CartService" />
     <preference for="Magebit\AcpSpec\Api\Cart\CartInterface" type="Magebit\AcpSpec\Data\Cart\Cart" />
