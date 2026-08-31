@@ -1,0 +1,118 @@
+{
+    "products": [
+        {
+            "id": "24-MB04",
+            "title": "Strive Shoulder Pack",
+            "description": {
+                "plain": "Convenience is next to nothing when your day is crammed with action. So whether you're heading to class, gym, or the unbeaten path, make sure you've got your Strive Shoulder Pack stuffed with all your essentials, and extras as well.\r\n\r\nZippered main compartment.\r\nFront zippered pocket.\r\nSide mesh pocket.\r\nCell phone pocket on strap.\r\nAdjustable shoulder strap and top carry handle."
+            },
+            "variants": [
+                {
+                    "id": "24-MB04",
+                    "title": "Strive Shoulder Pack",
+                    "description": {
+                        "plain": "Convenience is next to nothing when your day is crammed with action. So whether you're heading to class, gym, or the unbeaten path, make sure you've got your Strive Shoulder Pack stuffed with all your essentials, and extras as well.\r\n\r\nZippered main compartment.\r\nFront zippered pocket.\r\nSide mesh pocket.\r\nCell phone pocket on strap.\r\nAdjustable shoulder strap and top carry handle."
+                    },
+                    "price": {
+                        "amount": 3200,
+                        "currency": "USD"
+                    },
+                    "availability": {
+                        "available": true,
+                        "status": "in_stock"
+                    },
+                    "url": "https://merchant.example/strive-shoulder-pack.html",
+                    "media": [
+                        {
+                            "type": "image",
+                            "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb04-black-0.jpg"
+                        }
+                    ]
+                }
+            ],
+            "url": "https://merchant.example/strive-shoulder-pack.html",
+            "media": [
+                {
+                    "type": "image",
+                    "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb04-black-0.jpg"
+                }
+            ]
+        },
+        {
+            "id": "24-MB03",
+            "title": "Crown Summit Backpack",
+            "description": {
+                "plain": "The Crown Summit Backpack is equally at home in a gym locker, study cube or a pup tent, so be sure yours is packed with books, a bag lunch, water bottles, yoga block, laptop, or whatever else you want in hand. Rugged enough for day hikes and camping trips, it has two large zippered compartments and padded, adjustable shoulder straps.\n\nTop handle.\nGrommet holes.\nTwo-way zippers.\nH 20\" x W 14\" x D 12\".\nWeight: 2 lbs, 8 oz. Volume: 29 L."
+            },
+            "variants": [
+                {
+                    "id": "24-MB03",
+                    "title": "Crown Summit Backpack",
+                    "description": {
+                        "plain": "The Crown Summit Backpack is equally at home in a gym locker, study cube or a pup tent, so be sure yours is packed with books, a bag lunch, water bottles, yoga block, laptop, or whatever else you want in hand. Rugged enough for day hikes and camping trips, it has two large zippered compartments and padded, adjustable shoulder straps.\n\nTop handle.\nGrommet holes.\nTwo-way zippers.\nH 20\" x W 14\" x D 12\".\nWeight: 2 lbs, 8 oz. Volume: 29 L."
+                    },
+                    "price": {
+                        "amount": 3800,
+                        "currency": "USD"
+                    },
+                    "availability": {
+                        "available": true,
+                        "status": "in_stock"
+                    },
+                    "url": "https://merchant.example/crown-summit-backpack.html",
+                    "media": [
+                        {
+                            "type": "image",
+                            "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb03-black-0.jpg"
+                        }
+                    ]
+                }
+            ],
+            "url": "https://merchant.example/crown-summit-backpack.html",
+            "media": [
+                {
+                    "type": "image",
+                    "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb03-black-0.jpg"
+                }
+            ]
+        },
+        {
+            "id": "24-MB05",
+            "title": "Wayfarer Messenger Bag",
+            "description": {
+                "plain": "Perfect for class, work or the gym, the Wayfarer Messenger Bag is packed with pockets. The dual-buckle flap closure reveals an organizational panel, and the roomy main compartment has spaces for your laptop and a change of clothes. An adjustable shoulder strap and easy-grip handle promise easy carrying.\n\nMultiple internal zip pockets.\nMade of durable nylon."
+            },
+            "variants": [
+                {
+                    "id": "24-MB05",
+                    "title": "Wayfarer Messenger Bag",
+                    "description": {
+                        "plain": "Perfect for class, work or the gym, the Wayfarer Messenger Bag is packed with pockets. The dual-buckle flap closure reveals an organizational panel, and the roomy main compartment has spaces for your laptop and a change of clothes. An adjustable shoulder strap and easy-grip handle promise easy carrying.\n\nMultiple internal zip pockets.\nMade of durable nylon."
+                    },
+                    "price": {
+                        "amount": 4500,
+                        "currency": "USD"
+                    },
+                    "availability": {
+                        "available": true,
+                        "status": "in_stock"
+                    },
+                    "url": "https://merchant.example/wayfarer-messenger-bag.html",
+                    "media": [
+                        {
+                            "type": "image",
+                            "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb05-black-0.jpg"
+                        }
+                    ]
+                }
+            ],
+            "url": "https://merchant.example/wayfarer-messenger-bag.html",
+            "media": [
+                {
+                    "type": "image",
+                    "url": "https://merchant.example/media/catalog/product/cache/IMAGECACHEHASH/m/b/mb05-black-0.jpg"
+                }
+            ]
+        }
+    ]
+}

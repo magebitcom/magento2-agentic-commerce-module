@@ -275,6 +275,18 @@
         </arguments>
     </type>
 
+    <!-- ACP feed, read side. The nested product shape is a second serialiser: the flat OpenAI feed
+         vocabulary stays as it is, because agents consume both. -->
+    <preference for="Magebit\AgenticCommerce\Api\FeedServiceInterface" type="Magebit\AgenticCommerce\Service\FeedService" />
+    <preference for="Magebit\AcpSpec\Api\Feed\FeedMetadataInterface" type="Magebit\AcpSpec\Data\Feed\FeedMetadata" />
+    <preference for="Magebit\AcpSpec\Api\Feed\ProductsResponseInterface" type="Magebit\AcpSpec\Data\Feed\ProductsResponse" />
+    <preference for="Magebit\AcpSpec\Api\Feed\ProductInterface" type="Magebit\AcpSpec\Data\Feed\Product" />
+    <preference for="Magebit\AcpSpec\Api\Feed\VariantInterface" type="Magebit\AcpSpec\Data\Feed\Variant" />
+    <preference for="Magebit\AcpSpec\Api\Feed\DescriptionInterface" type="Magebit\AcpSpec\Data\Feed\Description" />
+    <preference for="Magebit\AcpSpec\Api\Feed\PriceInterface" type="Magebit\AcpSpec\Data\Feed\Price" />
+    <preference for="Magebit\AcpSpec\Api\Feed\AvailabilityInterface" type="Magebit\AcpSpec\Data\Feed\Availability" />
+    <preference for="Magebit\AcpSpec\Api\Feed\MediaInterface" type="Magebit\AcpSpec\Data\Feed\Media" />
+
     <!-- Cart capability -->
     <preference for="Magebit\AgenticCommerce\Api\CartServiceInterface" type="Magebit\AgenticCommerce\Service\CartService" />
     <preference for="Magebit\AcpSpec\Api\Cart\CartInterface" type="Magebit\AcpSpec\Data\Cart\Cart" />

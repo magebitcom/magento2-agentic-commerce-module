@@ -36,6 +36,13 @@ class ConfiguredRouteProvider implements RouteProviderInterface
     private const CARTS_CONTROLLER = 'cart';
 
     /**
+     * The feed sits beside the sessions and carts. Only the read side is served — see the plan for why
+     * the product upsert is deliberately absent.
+     */
+    private const FEEDS_SEGMENT = 'feeds';
+    private const FEEDS_CONTROLLER = 'feed';
+
+    /**
      * @param ConfigInterface $config
      */
     public function __construct(
@@ -52,6 +59,8 @@ class ConfiguredRouteProvider implements RouteProviderInterface
         $session = $base . '/{session_id}';
         $cartBase = dirname($base) === '.' ? self::CARTS_SEGMENT : dirname($base) . '/' . self::CARTS_SEGMENT;
         $cart = $cartBase . '/{cart_id}';
+        $feedBase = dirname($base) === '.' ? self::FEEDS_SEGMENT : dirname($base) . '/' . self::FEEDS_SEGMENT;
+        $feed = $feedBase . '/{feed_id}';
 
         return [
             new Route(self::DISCOVERY_PATH, 'GET', 'discovery', 'index'),
@@ -66,6 +75,9 @@ class ConfiguredRouteProvider implements RouteProviderInterface
             new Route($cart, 'GET', self::CARTS_CONTROLLER, 'retrieve'),
             new Route($cart, 'PUT', self::CARTS_CONTROLLER, 'update'),
             new Route($cart . '/cancel', 'POST', self::CARTS_CONTROLLER, 'cancel'),
+            new Route($feedBase, 'POST', self::FEEDS_CONTROLLER, 'index'),
+            new Route($feed, 'GET', self::FEEDS_CONTROLLER, 'metadata'),
+            new Route($feed . '/products', 'GET', self::FEEDS_CONTROLLER, 'products'),
         ];
     }
 }
