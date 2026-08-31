@@ -531,6 +531,10 @@ class CheckoutSessionService
                     'Product "%s" is not available for purchase.',
                     $result->sku
                 ),
+                LineItemOutcome::InsufficientStock => $result->reason
+                    ?? sprintf('Product "%s" is not available in that quantity.', $result->sku),
+                LineItemOutcome::InvalidQuantity => $result->reason
+                    ?? sprintf('Product "%s" cannot be bought in that quantity.', $result->sku),
                 LineItemOutcome::Rejected => $result->reason
                     ?? sprintf('Product "%s" could not be added.', $result->sku),
             };
@@ -557,7 +561,8 @@ class CheckoutSessionService
             CheckoutState::Completed => CheckoutSessionInterface::STATUS_COMPLETED,
             CheckoutState::Canceled => CheckoutSessionInterface::STATUS_CANCELED,
             CheckoutState::Ready => CheckoutSessionInterface::STATUS_READY_FOR_PAYMENT,
-            CheckoutState::Incomplete => CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT,
+            CheckoutState::Incomplete,
+            CheckoutState::RequiresEscalation => CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT,
         };
     }
 
