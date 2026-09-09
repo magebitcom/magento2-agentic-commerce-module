@@ -50,7 +50,7 @@ class Index extends ApiController implements HttpPostActionInterface
         RequestValidator $requestValidator,
         Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly FeedServiceInterface $feedService,
         protected readonly ConfigInterface $config
@@ -60,7 +60,8 @@ class Index extends ApiController implements HttpPostActionInterface
             $request,
             $requestValidator,
             $hydrator,
-            $errorResponseFactory
+            $errorResponseFactory,
+            $complianceService
         );
     }
 
@@ -94,8 +95,8 @@ class Index extends ApiController implements HttpPostActionInterface
         /** @var Http $request */
         $request = $this->getRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
+        if ($response = $this->guard($request)) {
+            return $response;
         }
 
         try {
@@ -105,11 +106,7 @@ class Index extends ApiController implements HttpPostActionInterface
                 throw new LocalizedException(__('The feed could not be serialised.'));
             }
 
-            $response = $this->makeJsonResponse($payload, 201);
-
-            $this->addHeaders($response, $request);
-
-            return $response;
+            return $this->respond($request, $payload, 201);
         } catch (NoSuchEntityException $e) {
             return $this->makeErrorResponse($this->errorResponseFactory->create(['data' => [
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,

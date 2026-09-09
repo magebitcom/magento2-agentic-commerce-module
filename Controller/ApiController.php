@@ -38,14 +38,58 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
      * @param RequestValidator $requestValidator
      * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param ComplianceService $complianceService
      */
     public function __construct(
         protected readonly JsonFactory $resultJsonFactory,
         protected readonly RequestInterface $request,
         protected readonly RequestValidator $requestValidator,
         protected readonly Hydrator $hydrator,
-        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory
+        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
+        protected readonly ComplianceService $complianceService
     ) {
+    }
+
+    /**
+     * Everything that has to hold before an operation runs: the version, the token and the
+     * idempotency key. Returns the response to send instead of running it, or null to go ahead.
+     *
+     * @param Http $request
+     * @return ResultJson|null
+     */
+    protected function guard(Http $request): ?ResultJson
+    {
+        $outcome = $this->complianceService->guard($request);
+
+        if ($outcome instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($outcome);
+        }
+
+        if ($outcome !== null) {
+            $this->addHeaders($outcome, $request);
+        }
+
+        return $outcome;
+    }
+
+    /**
+     * The success path of a write. The response is stored under the request's idempotency key before
+     * it is sent, so a repeat of the same request is answered with this same body rather than doing
+     * the work twice. Going through here is what keeps that from being forgotten.
+     *
+     * @param Http $request
+     * @param array<mixed>|JsonSerializable $payload
+     * @param int $status
+     * @return ResultJson
+     */
+    protected function respond(Http $request, array|JsonSerializable $payload, int $status = 200): ResultJson
+    {
+        $this->complianceService->storeResponse($request, (string) json_encode($payload), $status);
+
+        $response = $this->makeJsonResponse($payload, $status);
+        $this->addHeaders($response, $request);
+
+        return $response;
     }
 
     /**

@@ -48,7 +48,7 @@ class Retrieve extends ApiController implements HttpGetActionInterface
         RequestValidator $requestValidator,
         Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly ConfigInterface $config
@@ -58,7 +58,8 @@ class Retrieve extends ApiController implements HttpGetActionInterface
             $request,
             $requestValidator,
             $hydrator,
-            $errorResponseFactory
+            $errorResponseFactory,
+            $complianceService
         );
     }
 
@@ -80,8 +81,8 @@ class Retrieve extends ApiController implements HttpGetActionInterface
         /** @var Http $request */
         $request = $this->getRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
+        if ($response = $this->guard($request)) {
+            return $response;
         }
 
         $sessionId = $request->getParam('session_id');

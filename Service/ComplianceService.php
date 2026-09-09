@@ -10,15 +10,13 @@
 
 namespace Magebit\AgenticCommerce\Service;
 
-use Magebit\AgenticCore\Model\Idempotency\ClaimOutcome;
-use Magebit\AgenticCore\Model\Idempotency\Coordinator;
-use Magebit\AgenticCore\Model\Idempotency\RequestHasher;
+use Magebit\AgenticCore\Model\Idempotency\DecisionOutcome;
+use Magebit\AgenticCore\Model\Idempotency\Gate;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 
 class ComplianceService
@@ -43,27 +41,59 @@ class ComplianceService
     public const IDEMPOTENCY_SCOPE = 'acp';
 
     /**
-     * This protocol requires a key on writes, so the list is an allow-list of methods it applies to
-     * rather than a deny-list of safe ones.
-     */
-    private const ALLOWED_METHODS = ['POST', 'PUT', 'PATCH'];
-
-    /**
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
-     * @param Coordinator $coordinator
-     * @param RequestHasher $hasher
+     * @param Gate $gate
      * @param JsonFactory $resultJsonFactory
-     * @param EncryptorInterface $encryptor
      * @param ConfigInterface $config
      */
     public function __construct(
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly Coordinator $coordinator,
-        protected readonly RequestHasher $hasher,
+        protected readonly Gate $gate,
         protected readonly JsonFactory $resultJsonFactory,
-        protected readonly EncryptorInterface $encryptor,
         protected readonly ConfigInterface $config
     ) {
+    }
+
+    /**
+     * Everything that has to hold before the operation runs. Returns what to send instead of
+     * running it — a refusal, or the response a previous identical request already got — or null to
+     * go ahead. Asked once per request, because claiming the key twice reads as a collision with
+     * this same request.
+     *
+     * @param Http $request
+     * @return ErrorResponseInterface|ResultJson|null
+     */
+    public function guard(Http $request): ErrorResponseInterface|ResultJson|null
+    {
+        if ($error = $this->validateRequest($request)) {
+            return $error;
+        }
+
+        $decision = $this->gate->decide(self::IDEMPOTENCY_SCOPE, $request);
+
+        return match ($decision->outcome) {
+            DecisionOutcome::Proceed => null,
+            DecisionOutcome::Replay => $this->resultJsonFactory
+                ->create()
+                ->setJsonData((string) $decision->body)
+                ->setHttpResponseCode((int) $decision->status),
+            DecisionOutcome::KeyMissing => $this->idempotencyError(
+                ErrorResponseInterface::CODE_IDEMPOTENCY_KEY_REQUIRED,
+                'Idempotency-Key header is required',
+                400
+            ),
+            DecisionOutcome::InFlight => $this->idempotencyError(
+                ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT,
+                'A request with this Idempotency-Key is currently being processed',
+                409,
+                self::IN_FLIGHT_RETRY_AFTER_SECONDS
+            ),
+            DecisionOutcome::Conflict => $this->idempotencyError(
+                ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT,
+                'Idempotency-Key has already been used with a different request body',
+                422
+            ),
+        };
     }
 
     /**
@@ -129,67 +159,7 @@ class ComplianceService
             ]]);
         }
 
-        if ($idempotencyError = $this->validateIdempotency($request)) {
-            return $idempotencyError;
-        }
-
         return null;
-    }
-
-    /**
-     * @param Http $request
-     * @return null|ErrorResponseInterface
-     */
-    public function validateIdempotency(Http $request): ?ErrorResponseInterface
-    {
-        if (!$this->appliesTo($request)) {
-            return null;
-        }
-
-        $key = trim((string) $request->getHeader('Idempotency-Key'));
-
-        if ($key === '') {
-            return $this->idempotencyError(
-                ErrorResponseInterface::CODE_IDEMPOTENCY_KEY_REQUIRED,
-                'Idempotency-Key header is required',
-                400
-            );
-        }
-
-        $result = $this->coordinator->claim(self::IDEMPOTENCY_SCOPE, $key, $this->hasher->hash($request));
-
-        return match ($result->outcome) {
-            // A stored response is replayed by handleIdempotency(), not rejected here.
-            ClaimOutcome::Claimed, ClaimOutcome::Replay => null,
-            ClaimOutcome::InFlight => $this->inFlightError(),
-            ClaimOutcome::Conflict => $this->idempotencyError(
-                ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT,
-                'Idempotency-Key has already been used with a different request body',
-                422
-            ),
-        };
-    }
-
-    /**
-     * @param Http $request
-     * @return bool
-     */
-    private function appliesTo(Http $request): bool
-    {
-        return in_array(strtoupper($request->getMethod()), self::ALLOWED_METHODS, true);
-    }
-
-    /**
-     * @return ErrorResponseInterface
-     */
-    private function inFlightError(): ErrorResponseInterface
-    {
-        return $this->idempotencyError(
-            ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT,
-            'A request with this Idempotency-Key is currently being processed',
-            409,
-            self::IN_FLIGHT_RETRY_AFTER_SECONDS
-        );
     }
 
     /**
@@ -225,33 +195,6 @@ class ComplianceService
     }
 
     /**
-     * Expiry is now `created_at` plus the TTL read at purge time, so a TTL change also applies to
-     * rows already written.
-     *
-     * @param Http $request
-     * @return null|ResultJson
-     */
-    public function handleIdempotency(Http $request): ?ResultJson
-    {
-        $key = trim((string) $request->getHeader('Idempotency-Key'));
-
-        if ($key === '' || !$this->appliesTo($request)) {
-            return null;
-        }
-
-        $result = $this->coordinator->claim(self::IDEMPOTENCY_SCOPE, $key, $this->hasher->hash($request));
-
-        if ($result->outcome !== ClaimOutcome::Replay || $result->record === null) {
-            return null;
-        }
-
-        return $this->resultJsonFactory
-            ->create()
-            ->setJsonData((string) $this->encryptor->decrypt((string) $result->record->getResponseBody()))
-            ->setHttpResponseCode((int) $result->record->getResponseStatus());
-    }
-
-    /**
      * @param Http $request
      * @param string $response
      * @param int $status
@@ -259,21 +202,6 @@ class ComplianceService
      */
     public function storeResponse(Http $request, string $response, int $status): void
     {
-        $key = trim((string) $request->getHeader('Idempotency-Key'));
-
-        if ($key === '' || !$this->appliesTo($request)) {
-            return;
-        }
-
-        $this->coordinator->storeResponse(
-            self::IDEMPOTENCY_SCOPE,
-            $key,
-            $this->hasher->hash($request),
-            $status,
-            // Encryption stays here rather than moving into the shared base: the other consumer
-            // stores plaintext, and unifying that inside an extraction would change one module's
-            // storage while attributing any regression to the other's refactor.
-            $this->encryptor->encrypt($response)
-        );
+        $this->gate->remember(self::IDEMPOTENCY_SCOPE, $request, $response, $status);
     }
 }

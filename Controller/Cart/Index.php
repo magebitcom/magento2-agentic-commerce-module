@@ -53,7 +53,7 @@ class Index extends ApiController implements HttpPostActionInterface
         RequestValidator $requestValidator,
         Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly CartServiceInterface $cartService,
         protected readonly ConfigInterface $config,
@@ -64,7 +64,8 @@ class Index extends ApiController implements HttpPostActionInterface
             $request,
             $requestValidator,
             $hydrator,
-            $errorResponseFactory
+            $errorResponseFactory,
+            $complianceService
         );
     }
 
@@ -84,13 +85,7 @@ class Index extends ApiController implements HttpPostActionInterface
         /** @var Http $request */
         $request = $this->getRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
-        }
-
-        if ($response = $this->complianceService->handleIdempotency($request)) {
-            $this->addHeaders($response, $request);
-
+        if ($response = $this->guard($request)) {
             return $response;
         }
 
@@ -111,11 +106,7 @@ class Index extends ApiController implements HttpPostActionInterface
                 throw new LocalizedException(__('The cart could not be serialised.'));
             }
 
-            $response = $this->makeJsonResponse($cart, 200);
-
-            $this->addHeaders($response, $request);
-
-            return $response;
+            return $this->respond($request, $cart, 200);
         } catch (NoSuchEntityException $e) {
             return $this->makeErrorResponse($this->errorResponseFactory->create(['data' => [
                 'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,

@@ -49,7 +49,7 @@ class Index extends ApiController implements HttpPostActionInterface
         RequestValidator $requestValidator,
         Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly CreateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly LoggerInterface $logger,
@@ -60,7 +60,8 @@ class Index extends ApiController implements HttpPostActionInterface
             $request,
             $requestValidator,
             $hydrator,
-            $errorResponseFactory
+            $errorResponseFactory,
+            $complianceService
         );
     }
 
@@ -82,12 +83,7 @@ class Index extends ApiController implements HttpPostActionInterface
         /** @var Http $request */
         $request = $this->getRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
-        }
-
-        if ($response = $this->complianceService->handleIdempotency($request)) {
-            $this->addHeaders($response, $request);
+        if ($response = $this->guard($request)) {
             return $response;
         }
 
@@ -106,11 +102,7 @@ class Index extends ApiController implements HttpPostActionInterface
 
             /** @var CheckoutSession $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
-            $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
-
-            $response = $this->makeJsonResponse($responseData);
-            $this->addHeaders($response, $request);
-            return $response;
+            return $this->respond($request, $responseData);
         } catch (LocalizedException $e) {
             $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
 

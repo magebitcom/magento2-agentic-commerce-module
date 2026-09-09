@@ -15,6 +15,7 @@ namespace Magebit\AgenticCommerce\Test\Unit\Service;
 use Magebit\AgenticCore\Model\Idempotency\ClaimOutcome;
 use Magebit\AgenticCore\Model\Idempotency\ClaimResult;
 use Magebit\AgenticCore\Model\Idempotency\Coordinator;
+use Magebit\AgenticCore\Model\Idempotency\Gate;
 use Magebit\AgenticCore\Model\Idempotency\RequestHasher;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
@@ -22,6 +23,7 @@ use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\App\Request\Http;
+use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Encryption\EncryptorInterface;
 use PHPUnit\Framework\TestCase;
@@ -39,7 +41,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testMissingKeyIsRejectedWithFourHundred(): void
     {
-        $error = $this->service()->validateIdempotency($this->request(null));
+        $error = $this->errorFrom($this->service()->guard($this->request(null)));
 
         $this->assertNotNull($error);
         $this->assertSame(ErrorResponseInterface::TYPE_INVALID_REQUEST, $error->getType());
@@ -54,7 +56,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testReadRequestsAreNotRequiredToCarryAKey(): void
     {
-        $this->assertNull($this->service()->validateIdempotency($this->request(null, method: 'GET')));
+        $this->assertNull($this->service()->guard($this->request(null, method: 'GET')));
     }
 
     /**
@@ -62,7 +64,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testKeyReusedWithADifferentBodyIsRejectedWithFourTwentyTwo(): void
     {
-        $error = $this->service(ClaimOutcome::Conflict)->validateIdempotency($this->request(self::KEY));
+        $error = $this->errorFrom($this->service(ClaimOutcome::Conflict)->guard($this->request(self::KEY)));
 
         $this->assertNotNull($error);
         $this->assertSame(ErrorResponseInterface::CODE_IDEMPOTENCY_CONFLICT, $error->getCode());
@@ -76,7 +78,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testInFlightCollisionIsRejectedWithFourOhNineAndRetryAfter(): void
     {
-        $error = $this->service(ClaimOutcome::InFlight)->validateIdempotency($this->request(self::KEY));
+        $error = $this->errorFrom($this->service(ClaimOutcome::InFlight)->guard($this->request(self::KEY)));
 
         $this->assertNotNull($error);
         $this->assertSame(ErrorResponseInterface::CODE_IDEMPOTENCY_IN_FLIGHT, $error->getCode());
@@ -89,17 +91,20 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testFirstRequestWithAFreshKeyProceeds(): void
     {
-        $this->assertNull($this->service(ClaimOutcome::Claimed)->validateIdempotency($this->request(self::KEY)));
+        $this->assertNull($this->service(ClaimOutcome::Claimed)->guard($this->request(self::KEY)));
     }
 
     /**
-     * A completed record with a matching body is a replay, handled downstream, not an error.
+     * A completed record with a matching body is replayed rather than refused, so what comes back is
+     * a response to send, not an error.
      *
      * @return void
      */
-    public function testCompletedRecordWithTheSameBodyProceedsToReplay(): void
+    public function testCompletedRecordWithTheSameBodyIsReplayed(): void
     {
-        $this->assertNull($this->service(ClaimOutcome::Replay)->validateIdempotency($this->request(self::KEY)));
+        $outcome = $this->service(ClaimOutcome::Replay)->guard($this->request(self::KEY));
+
+        $this->assertNotInstanceOf(ErrorResponseInterface::class, $outcome);
     }
 
     /**
@@ -111,7 +116,7 @@ class IdempotencyTriadTest extends TestCase
      */
     public function testAnAbandonedClaimLetsTheRetryProceed(): void
     {
-        $this->assertNull($this->service(ClaimOutcome::Claimed)->validateIdempotency($this->request(self::KEY)));
+        $this->assertNull($this->service(ClaimOutcome::Claimed)->guard($this->request(self::KEY)));
     }
 
     /**
@@ -128,12 +133,25 @@ class IdempotencyTriadTest extends TestCase
             static fn (array $args = []): ErrorResponse => new ErrorResponse($args['data'] ?? [])
         );
 
-        return new ComplianceService(
-            $errorFactory,
+        $gate = new Gate(
             $coordinator,
             new RequestHasher(),
-            $this->createMock(JsonFactory::class),
             $this->createMock(EncryptorInterface::class),
+            ['POST', 'PUT', 'PATCH'],
+            true
+        );
+
+        $result = $this->createMock(ResultJson::class);
+        $result->method('setJsonData')->willReturn($result);
+        $result->method('setHttpResponseCode')->willReturn($result);
+
+        $resultJsonFactory = $this->createMock(JsonFactory::class);
+        $resultJsonFactory->method('create')->willReturn($result);
+
+        return new ComplianceService(
+            $errorFactory,
+            $gate,
+            $resultJsonFactory,
             $this->createMock(ConfigInterface::class)
         );
     }
@@ -145,14 +163,32 @@ class IdempotencyTriadTest extends TestCase
      */
     private function request(?string $key, string $method = 'POST'): Http
     {
+        $headers = [
+            'API-Version' => ComplianceService::SUPPORTED_API_VERSIONS[0],
+            'Idempotency-Key' => $key ?? false,
+        ];
+
         $request = $this->createMock(Http::class);
-        $request->method('getHeader')->willReturn($key ?? false);
+        $request->method('getHeader')->willReturnCallback(
+            static fn (string $name): string|bool => $headers[$name] ?? false
+        );
         $request->method('getMethod')->willReturn($method);
         $request->method('getPathInfo')->willReturn('/agentic/checkout');
         $request->method('getQuery')->willReturn([]);
         $request->method('getContent')->willReturn('{}');
 
         return $request;
+    }
+
+    /**
+     * @param mixed $outcome What guard() returned
+     * @return ErrorResponseInterface
+     */
+    private function errorFrom(mixed $outcome): ErrorResponseInterface
+    {
+        $this->assertInstanceOf(ErrorResponseInterface::class, $outcome);
+
+        return $outcome;
     }
 
     /**

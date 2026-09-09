@@ -352,4 +352,20 @@
             </argument>
         </arguments>
     </type>
+    <!-- This protocol requires a key on every write, and names the three methods it applies to. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\Idempotency\Gate" type="Magebit\AgenticCore\Model\Idempotency\Gate">
+        <arguments>
+            <argument name="methods" xsi:type="array">
+                <item name="post" xsi:type="string">POST</item>
+                <item name="put" xsi:type="string">PUT</item>
+                <item name="patch" xsi:type="string">PATCH</item>
+            </argument>
+            <argument name="keyRequired" xsi:type="boolean">true</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magebit\AgenticCommerce\Service\ComplianceService">
+        <arguments>
+            <argument name="gate" xsi:type="object">Magebit\AgenticCommerce\Model\Idempotency\Gate</argument>
+        </arguments>
+    </type>
 </config>

@@ -50,7 +50,7 @@ class Products extends ApiController implements HttpGetActionInterface
         RequestValidator $requestValidator,
         Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly FeedServiceInterface $feedService,
         protected readonly ConfigInterface $config
@@ -60,7 +60,8 @@ class Products extends ApiController implements HttpGetActionInterface
             $request,
             $requestValidator,
             $hydrator,
-            $errorResponseFactory
+            $errorResponseFactory,
+            $complianceService
         );
     }
 
@@ -92,8 +93,8 @@ class Products extends ApiController implements HttpGetActionInterface
         /** @var Http $request */
         $request = $this->getRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
+        if ($response = $this->guard($request)) {
+            return $response;
         }
 
         $feedId = $request->getParam('feed_id');
