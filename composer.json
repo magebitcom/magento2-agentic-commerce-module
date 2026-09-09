@@ -7,7 +7,7 @@
         "magento/framework": "*",
         "magebitcom/magento2-core": "0.1.*",
         "php": ">=8.2",
-        "magebitcom/acp-php-spec": "^1.0",
+        "magebitcom/acp-php-spec": "^1.1",
         "magebitcom/magento2-module-agentic-core": "^0.1"
     },
     "suggest": {
