@@ -13,5 +13,8 @@
         <job name="magebit_agenticcommerce_clean_expired_idempotency" instance="Magebit\AgenticCommerce\Cron\CleanExpiredIdempotency" method="execute">
             <schedule>0 * * * *</schedule>
         </job>
+        <job name="magebit_agenticcommerce_dispatch_webhooks" instance="Magebit\AgenticCommerce\Model\Webhook\DueDeliveries" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
     </group>
 </config>

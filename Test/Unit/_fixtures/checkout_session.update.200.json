@@ -1,38 +1,62 @@
 {
     "id": "checkout_session_placeholder_0001",
-    "line_items": [
+    "marketing_consent_options": [
         {
-            "id": "1001",
-            "base_amount": 9600,
-            "subtotal": 9600,
-            "discount": 0,
-            "total": 9600,
-            "tax": 0,
-            "item": {
-                "id": "24-MB04",
-                "quantity": 3
-            }
+            "channel": "email",
+            "display_text": "promotional emails, product launches, and exclusive offers",
+            "privacy_policy_url": "https://merchant.example/privacy-policy-cookie-restriction-mode"
         }
     ],
-    "fulfillment_address": {
+    "line_items": [
+        {
+            "id": "id-01d54579",
+            "item": {
+                "id": "24-MB04",
+                "name": "Strive Shoulder Pack"
+            },
+            "quantity": 2,
+            "totals": [
+                {
+                    "type": "items_base_amount",
+                    "display_text": "Items base amount",
+                    "amount": 6400
+                },
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 6400
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 6400
+                }
+            ]
+        }
+    ],
+    "fulfillment_details": {
+        "address": {
+            "name": "Ada Lovelace",
+            "line_one": "1 Infinite Loop",
+            "city": "Cupertino",
+            "state": "California",
+            "country": "US",
+            "postal_code": "95014"
+        },
         "name": "Ada Lovelace",
-        "line_one": "123 Main St",
-        "line_two": null,
-        "city": "Austin",
-        "state": "Texas",
-        "country": "US",
-        "postal_code": "78701"
+        "email": "ada@example.com",
+        "phone_number": "+15555550123"
     },
     "totals": [
         {
             "type": "subtotal",
             "display_text": "Subtotal",
-            "amount": 9600
+            "amount": 6400
         },
         {
-            "type": "shipping",
-            "display_text": "Shipping & Handling",
-            "amount": 0
+            "type": "fulfillment",
+            "display_text": "Shipping & Handling (Flat Rate - Fixed)",
+            "amount": 1000
         },
         {
             "type": "tax",
@@ -40,9 +64,9 @@
             "amount": 0
         },
         {
-            "type": "grand_total",
+            "type": "total",
             "display_text": "Grand Total",
-            "amount": 9600
+            "amount": 7400
         }
     ],
     "fulfillment_options": [
@@ -50,40 +74,89 @@
             "type": "shipping",
             "id": "flatrate_flatrate",
             "title": "Flat Rate",
-            "subtotal": 1500,
-            "tax": 0,
-            "total": 1500
+            "description": "Flat Rate",
+            "carrier": "Flat Rate",
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 1000
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 1000
+                }
+            ]
         },
         {
             "type": "shipping",
             "id": "tablerate_bestway",
             "title": "Best Way",
-            "subtotal": 1500,
-            "tax": 0,
-            "total": 1500
+            "description": "Best Way",
+            "carrier": "Best Way",
+            "totals": [
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 1500
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 1500
+                }
+            ]
         }
     ],
-    "payment_provider": {
-        "provider": "stripe",
-        "supported_payment_methods": [
-            "card"
+    "capabilities": {
+        "payment": {
+            "handlers": [
+                {
+                    "id": "stripe",
+                    "name": "stripe",
+                    "display_name": "Stripe",
+                    "version": "2026-04-17",
+                    "spec": "https://agenticcommerce.dev/specs/delegate_payment",
+                    "requires_delegate_payment": true,
+                    "requires_pci_compliance": false,
+                    "psp": "stripe",
+                    "config_schema": "https://merchant.example/agentic_commerce/schema/config",
+                    "instrument_schemas": [
+                        "https://merchant.example/agentic_commerce/schema/instrument_card"
+                    ],
+                    "config": {}
+                }
+            ]
+        },
+        "extensions": [
+            {
+                "name": "discount",
+                "extends": [
+                    "$.CheckoutSession.discounts",
+                    "$.CheckoutSessionCreateRequest.discounts"
+                ],
+                "schema": "https://merchant.example/schemas/discount.json"
+            }
         ]
     },
     "currency": "USD",
     "buyer": {
+        "email": "ada@example.com",
         "first_name": "Ada",
         "last_name": "Lovelace",
-        "email": "ada@example.com",
         "phone_number": "+15555550123"
     },
     "links": [],
-    "messages": [
+    "messages": [],
+    "status": "ready_for_payment",
+    "selected_fulfillment_options": [
         {
-            "type": "error",
-            "code": "invalid",
-            "content_type": "plain",
-            "content": "Shipping method is required"
+            "type": "shipping",
+            "option_id": "flatrate_flatrate",
+            "item_ids": [
+                "id-01d54579"
+            ]
         }
-    ],
-    "status": "not_ready_for_payment"
+    ]
 }

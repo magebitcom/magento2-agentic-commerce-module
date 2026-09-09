@@ -20,4 +20,11 @@
             </argument>
         </arguments>
     </type>
+
+    <virtualType name="Magebit\AgenticCommerce\Controller\Router" type="Magebit\AgenticCore\Controller\PatternRouter">
+        <arguments>
+            <argument name="routeProvider" xsi:type="object">Magebit\AgenticCommerce\Controller\ConfiguredRouteProvider</argument>
+            <argument name="moduleName" xsi:type="string">agentic_commerce</argument>
+        </arguments>
+    </virtualType>
 </config>

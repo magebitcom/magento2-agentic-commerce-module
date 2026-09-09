@@ -22,18 +22,20 @@ use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
 
 class Retrieve extends ApiController implements HttpGetActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
@@ -43,14 +45,22 @@ class Retrieve extends ApiController implements HttpGetActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly ConfigInterface $config
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory,
+            $complianceService
+        );
     }
 
     /**
@@ -68,11 +78,10 @@ class Retrieve extends ApiController implements HttpGetActionInterface
             ]]));
         }
 
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
+        if ($response = $this->guard($request)) {
+            return $response;
         }
 
         $sessionId = $request->getParam('session_id');
@@ -90,7 +99,7 @@ class Retrieve extends ApiController implements HttpGetActionInterface
         try {
 
             /** @var string $sessionId */
-            /** @var CheckoutSessionResponse $response */
+            /** @var CheckoutSession $response */
             $response = $this->checkoutSessionService->retrieve((string) $sessionId);
             $response = $this->makeJsonResponse($response);
 

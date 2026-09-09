@@ -3,38 +3,27 @@
 /**
  * This file is part of the Magebit_AgenticCommerce package.
  *
- * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @copyright Copyright (c) 2026 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionUpdateRequestInterface;
 
-interface UpdateCheckoutSessionRequestInterface extends RequestInterface, ValidatableDataInterface
+/**
+ * The specification's update request, with the line items narrowed to the ones this module accepts.
+ */
+interface UpdateCheckoutSessionRequestInterface extends CheckoutSessionUpdateRequestInterface
 {
     /**
-     * Get items
+     * Narrowed the same way the create request narrows it. Still nullable, because an update that
+     * names no items leaves the ones already there alone, and nullability is what says "optional".
      *
-     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
+     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]|null
      */
-    public function getItems(): array;
-
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
-     */
-    public function getFulfillmentAddress(): ?AddressInterface;
-
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
-
-    /**
-     * @return null|string
-     */
-    public function getFulfillmentOptionId(): ?string;
+    public function getLineItems(): ?array;
 }

@@ -13,10 +13,11 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Controller\Checkout;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Message\ManagerInterface;
@@ -28,7 +29,7 @@ class Order implements HttpGetActionInterface
     /**
      * @param RedirectFactory $redirectFactory
      * @param OrderRepositoryInterface $orderRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param OrderLinkRepositoryInterface $orderLinkRepository
      * @param RequestInterface $request
      * @param ManagerInterface $messageManager
      * @param Session $session
@@ -36,7 +37,7 @@ class Order implements HttpGetActionInterface
     public function __construct(
         protected readonly RedirectFactory $redirectFactory,
         protected readonly OrderRepositoryInterface $orderRepository,
-        protected readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
         protected readonly RequestInterface $request,
         protected readonly ManagerInterface $messageManager,
         protected readonly Session $session
@@ -58,9 +59,19 @@ class Order implements HttpGetActionInterface
             return $this->redirectFactory->create()->setPath('/');
         }
 
-        $order = $this->getOrderBySessionId($orderId);
+        $linkedOrderId = $this->orderLinkRepository->findOrderId(
+            ComplianceService::IDEMPOTENCY_SCOPE,
+            $orderId
+        );
 
-        if (!$order) {
+        if ($linkedOrderId === null) {
+            $this->messageManager->addErrorMessage((string) __('Order not found'));
+            return $this->redirectFactory->create()->setPath('/');
+        }
+
+        try {
+            $order = $this->orderRepository->get($linkedOrderId);
+        } catch (NoSuchEntityException $exception) {
             $this->messageManager->addErrorMessage((string) __('Order not found'));
             return $this->redirectFactory->create()->setPath('/');
         }
@@ -75,22 +86,5 @@ class Order implements HttpGetActionInterface
         $redirect = $this->redirectFactory->create();
         $redirect->setPath('checkout/onepage/success');
         return $redirect;
-    }
-
-    /**
-     * @param string $sessionId
-     * @return OrderInterface|null
-     */
-    protected function getOrderBySessionId(string $sessionId): OrderInterface|null
-    {
-        $result = $this->orderRepository->getList(
-            $this->searchCriteriaBuilder->addFilter('ac_order_id', $sessionId)->create()
-        );
-
-        foreach ($result->getItems() as $order) {
-            return $order;
-        }
-
-        return null;
     }
 }

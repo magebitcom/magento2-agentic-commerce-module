@@ -14,41 +14,62 @@ namespace Magebit\AgenticCommerce\Service;
 
 use LogicException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magento\Quote\Api\Data\AddressInterface as QuoteAddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
+
 use Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface;
-use Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\ItemInterface;
-use Magento\Catalog\Api\Data\ProductInterface;
+
 use Magento\Quote\Api\GuestCartManagementInterface;
 use Magento\Quote\Api\GuestCartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Catalog\Model\Product;
+use Magebit\AgenticCore\Model\Quote\AddressWriter;
+use Magebit\AgenticCore\Model\Quote\LineItemOutcome;
+use Magebit\AgenticCore\Model\Quote\LineItemResult;
+use Magebit\AgenticCore\Model\Quote\LineItemWriter;
+use Magebit\AgenticCore\Model\Quote\PersonalInformationCopier;
+use Magebit\AgenticCore\Model\Quote\PersonName;
+use Magebit\AgenticCore\Model\Quote\PostalAddress;
+use Magebit\AgenticCore\Model\Quote\ShippingMethodWriter;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magebit\AgenticCommerce\Model\Convert\CartItemToLineItem;
-use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentAddress;
+use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentDetails;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magebit\AgenticCommerce\Model\Convert\CartToFulfillmentOptions;
-use Magebit\AgenticCommerce\Model\Convert\CartToPaymentProvider;
+use Magebit\AgenticCommerce\Model\Convert\CartToCapabilities;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
-use Magebit\AgenticCommerce\Api\Data\MessageInterface;
-use Magebit\AgenticCommerce\Api\Data\MessageInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterfaceFactory;
 use Magebit\AgenticCommerce\Api\Data\Webhook\WebhookEventInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magebit\AgenticCommerce\Model\PaymentHandlerPool;
 use Magebit\AgenticCommerce\Model\Convert\CartToBuyer;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magebit\AgenticCommerce\Service\WebhookService;
+use Magebit\AgenticCommerce\Model\Authentication\OutcomePolicy;
+use Magebit\AgenticCommerce\Model\Convert\CartToDiscounts;
+use Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions;
+use Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool as MarketingConsentPool;
+use Magebit\AgenticCommerce\Model\Quote\BuyerWriter;
+use Magebit\AgenticCommerce\Model\Convert\OrderToAcpOrder;
 use Magebit\AgenticCommerce\Model\Convert\OrderToOrderCreatedUpdatedWebhook;
+use Magebit\AgenticCore\Api\OrderLinkRepositoryInterface;
+use Magebit\AgenticCore\Model\Order\Note;
+use Magebit\AgenticCore\Model\Checkout\CheckoutState;
+use Magebit\AgenticCore\Model\Checkout\StateResolver;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -60,64 +81,97 @@ class CheckoutSessionService
      * @param ConfigInterface $config
      * @param CartRepositoryInterface $cartRepository
      * @param GuestCartManagementInterface $guestCartManagement
-     * @param CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory
+     * @param CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory
      * @param LinkInterfaceFactory $linkInterfaceFactory
      * @param GuestCartRepositoryInterface $guestCartRepository
-     * @param ProductRepositoryInterface $productRepository
+     * @param LineItemWriter $lineItemWriter
+     * @param AddressWriter $addressWriter
+     * @param PersonalInformationCopier $personalInformationCopier
+     * @param ShippingMethodWriter $shippingMethodWriter
      * @param CartItemToLineItem $cartItemToLineItem
-     * @param CartToFulfillmentAddress $cartToFulfillmentAddress
+     * @param CartToFulfillmentDetails $cartToFulfillmentDetails
      * @param CartToTotals $cartToTotals
      * @param CartToFulfillmentOptions $cartToFulfillmentOptions
-     * @param CartToPaymentProvider $cartToPaymentProvider
+     * @param CartToCapabilities $cartToCapabilities
+     * @param SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory
      * @param CartValidatorInterface $cartValidator
-     * @param MessageInterfaceFactory $messageInterfaceFactory
+     * @param MessageInfoInterfaceFactory $messageInfoFactory
+     * @param MessageErrorInterfaceFactory $messageErrorFactory
      * @param PaymentHandlerPool $paymentHandlerPool
      * @param CartToBuyer $cartToBuyer
      * @param OrderRepositoryInterface $orderRepository
      * @param WebhookService $webhookService
      * @param OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook
      * @param LoggerInterface $logger
+     * @param StateResolver $stateResolver
+     * @param OrderLinkRepositoryInterface $orderLinkRepository
+     * @param OrderToAcpOrder $orderToAcpOrder
+     * @param CartToDiscounts $cartToDiscounts
+     * @param CartToMarketingConsentOptions $cartToMarketingConsentOptions
+     * @param MarketingConsentPool $marketingConsentPool
+     * @param BuyerWriter $buyerWriter
+     * @param OutcomePolicy $authenticationOutcomePolicy
+     * @param Note $orderNote
      */
     public function __construct(
         protected readonly ConfigInterface $config,
         protected readonly CartRepositoryInterface $cartRepository,
         protected readonly GuestCartManagementInterface $guestCartManagement,
-        protected readonly CheckoutSessionResponseInterfaceFactory $checkoutSessionResponseFactory,
+        protected readonly CheckoutSessionInterfaceFactory $checkoutSessionResponseFactory,
         protected readonly LinkInterfaceFactory $linkInterfaceFactory,
         protected readonly GuestCartRepositoryInterface $guestCartRepository,
-        protected readonly ProductRepositoryInterface $productRepository,
+        protected readonly LineItemWriter $lineItemWriter,
+        protected readonly AddressWriter $addressWriter,
+        protected readonly PersonalInformationCopier $personalInformationCopier,
+        protected readonly ShippingMethodWriter $shippingMethodWriter,
         protected readonly CartItemToLineItem $cartItemToLineItem,
-        protected readonly CartToFulfillmentAddress $cartToFulfillmentAddress,
+        protected readonly CartToFulfillmentDetails $cartToFulfillmentDetails,
         protected readonly CartToTotals $cartToTotals,
         protected readonly CartToFulfillmentOptions $cartToFulfillmentOptions,
-        protected readonly CartToPaymentProvider $cartToPaymentProvider,
+        protected readonly CartToCapabilities $cartToCapabilities,
+        protected readonly SelectedFulfillmentOptionInterfaceFactory $selectedFulfillmentOptionFactory,
         protected readonly CartValidatorInterface $cartValidator,
-        protected readonly MessageInterfaceFactory $messageInterfaceFactory,
+        protected readonly MessageInfoInterfaceFactory $messageInfoFactory,
+        protected readonly MessageErrorInterfaceFactory $messageErrorFactory,
         protected readonly PaymentHandlerPool $paymentHandlerPool,
         protected readonly CartToBuyer $cartToBuyer,
         protected readonly OrderRepositoryInterface $orderRepository,
         protected readonly WebhookService $webhookService,
         protected readonly OrderToOrderCreatedUpdatedWebhook $orderToOrderCreatedUpdatedWebhook,
         protected readonly LoggerInterface $logger,
+        protected readonly StateResolver $stateResolver,
+        protected readonly OrderLinkRepositoryInterface $orderLinkRepository,
+        protected readonly OrderToAcpOrder $orderToAcpOrder,
+        protected readonly CartToDiscounts $cartToDiscounts,
+        protected readonly CartToMarketingConsentOptions $cartToMarketingConsentOptions,
+        protected readonly MarketingConsentPool $marketingConsentPool,
+        protected readonly BuyerWriter $buyerWriter,
+        protected readonly OutcomePolicy $authenticationOutcomePolicy,
+        protected readonly Note $orderNote,
     ) {
     }
 
     /**
      * @param CreateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function create(CreateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function create(CreateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         $maskedCartId = $this->guestCartManagement->createEmptyCart();
         $cart = $this->guestCartRepository->get($maskedCartId);
 
-        /** @var CheckoutSessionResponseInterface $response */
+        /** @var CheckoutSessionInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($maskedCartId);
 
-        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
+        $lineItemResults = $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $this->cartRepository->save($cart);
-        $this->assignCartDataToResponse($cart, $response);
+        $this->assignCartDataToResponse(
+            $cart,
+            $response,
+            $lineItemResults,
+            $this->submittedCodes($checkoutSessionsRequest)
+        );
 
         $this->logger->info('Checkout session created', ['cart_id' => $maskedCartId]);
 
@@ -127,20 +181,25 @@ class CheckoutSessionService
     /**
      * @param string $sessionId
      * @param UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function update(string $sessionId, UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function update(string $sessionId, UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         /** @var Quote $cart */
         $cart = $this->guestCartRepository->get($sessionId);
 
-        $this->processSessionsRequest($cart, $checkoutSessionsRequest);
+        $lineItemResults = $this->processSessionsRequest($cart, $checkoutSessionsRequest);
         $cart->collectTotals();
         $this->cartRepository->save($cart);
 
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
-        $this->assignCartDataToResponse($cart, $response);
+        $this->assignCartDataToResponse(
+            $cart,
+            $response,
+            $lineItemResults,
+            $this->submittedCodes($checkoutSessionsRequest)
+        );
 
         $this->logger->info('Checkout session updated', ['cart_id' => $sessionId]);
 
@@ -150,9 +209,9 @@ class CheckoutSessionService
     /**
      * @param string $sessionId
      * @param CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function complete(string $sessionId, CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionResponseInterface
+    public function complete(string $sessionId, CompleteCheckoutSessionRequestInterface $checkoutSessionsRequest): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
 
@@ -160,34 +219,55 @@ class CheckoutSessionService
             throw new LocalizedException(__('Cart is not active. Please create a new checkout session'));
         }
 
-        $paymentToken = $checkoutSessionsRequest->getPaymentData()->getToken();
+        $paymentData = $checkoutSessionsRequest->getPaymentData();
 
-        if (!$paymentToken) {
-            throw new LocalizedException(__('Payment token is required'));
+        // The token moved inside the instrument's credential; without one there is nothing to charge.
+        if (($paymentData->getInstrument()?->getCredential()?->getToken() ?? '') === '') {
+            throw new LocalizedException(__('Payment credential token is required'));
         }
 
         if ($checkoutSessionsRequest->getBuyer()) {
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
+        // Checked before payment is touched: a refused or unfinished 3DS authentication must not become
+        // an order, and the merchant decides which outcomes count.
+        if (!$this->authenticationOutcomePolicy->permits($checkoutSessionsRequest->getAuthenticationResult())) {
+            throw new LocalizedException(
+                __('The payment could not be authenticated. Please try a different payment method.')
+            );
+        }
+
         $this->setCartEmailAddress($cart);
 
-        if ($checkoutSessionsRequest->getPaymentData()->getBillingAddress()) {
-            $this->addBillingAddressToCart($cart, $checkoutSessionsRequest->getPaymentData()->getBillingAddress());
+        $billingAddress = $paymentData->getBillingAddress();
 
+        if ($billingAddress !== null) {
+            $this->addBillingAddressToCart($cart, $billingAddress);
         } else {
             $this->copyShippingAddressToBillingAddress($cart);
         }
 
-        $cartPayment = $this->paymentHandlerPool->get($cart, $checkoutSessionsRequest->getPaymentData());
+        $cartPayment = $this->paymentHandlerPool->get(
+            $cart,
+            $paymentData,
+            $checkoutSessionsRequest->getAuthenticationResult()
+        );
         $this->cartRepository->save($cart);
 
         $orderId = $this->guestCartManagement->placeOrder($sessionId, $cartPayment);
 
         /** @var Order $order */
         $order = $this->orderRepository->get($orderId);
-        $order->setAcOrderId($sessionId);
-        $this->orderRepository->save($order);
+        $quoteId = $order->getQuoteId();
+        $this->orderLinkRepository->link(
+            ComplianceService::IDEMPOTENCY_SCOPE,
+            $sessionId,
+            is_numeric($quoteId) ? (int) $quoteId : null,
+            (int) $orderId
+        );
+
+        $this->orderNote->add($order, (string) __('Placed by an agent over ACP.'));
 
         $this->webhookService->dispatch(
             $this->orderToOrderCreatedUpdatedWebhook->execute(
@@ -198,17 +278,19 @@ class CheckoutSessionService
             $sessionId
         );
 
-        /** @var CheckoutSessionResponseInterface $response */
+        /** @var CheckoutSessionInterface $response */
         $response = $this->checkoutSessionResponseFactory->create();
         $response->setId($sessionId);
         $this->assignCartDataToResponse($cart, $response);
-        $response->setStatus(CheckoutSessionResponseInterface::STATUS_COMPLETED);
-        $message = $this->messageInterfaceFactory->create(['data' => [
-            'type' => MessageInterface::TYPE_INFO,
-            'code' => 'order_placed',
-            'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-            'content' => sprintf('Order placed successfully: %s', $order->getIncrementId()),
-        ]]);
+        $response->setStatus(CheckoutSessionInterface::STATUS_COMPLETED);
+        // Required on completion: the spec returns CheckoutSessionWithOrder here, and without it an
+        // agent gets no machine-readable reference to the order it just created.
+        $response->setOrder($this->orderToAcpOrder->convert($order, $sessionId));
+
+        // After the order exists, so a handler has something to record against, and after the response is
+        // built, so a failing signup cannot change what the agent is told about the order.
+        $this->marketingConsentPool->apply($checkoutSessionsRequest->getMarketingConsents() ?? [], $order);
+        $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);
 
@@ -219,9 +301,9 @@ class CheckoutSessionService
 
     /**
      * @param string $sessionId
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function retrieve(string $sessionId): CheckoutSessionResponseInterface
+    public function retrieve(string $sessionId): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
         /** @var Quote $cart */
@@ -235,9 +317,9 @@ class CheckoutSessionService
 
     /**
      * @param string $sessionId
-     * @return CheckoutSessionResponseInterface
+     * @return CheckoutSessionInterface
      */
-    public function cancel(string $sessionId): CheckoutSessionResponseInterface
+    public function cancel(string $sessionId): CheckoutSessionInterface
     {
         $cart = $this->guestCartRepository->get($sessionId);
 
@@ -261,39 +343,106 @@ class CheckoutSessionService
     /**
      * @param CartInterface $cart
      * @param CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-     * @return void
+     * @return LineItemResult[] One per submitted item, for the response to report
      */
     public function processSessionsRequest(
         CartInterface $cart,
         CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $checkoutSessionsRequest
-    ): void {
+    ): array {
         /** @var Quote $cart */
-        if ($checkoutSessionsRequest->getItems()) {
-            $this->addItemsToCart($cart, $checkoutSessionsRequest->getItems());
+        $lineItemResults = [];
+
+        if ($checkoutSessionsRequest->getLineItems()) {
+            $lineItemResults = $this->addItemsToCart($cart, $checkoutSessionsRequest->getLineItems());
         }
 
         if ($checkoutSessionsRequest->getBuyer()) {
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
-        if ($checkoutSessionsRequest->getFulfillmentAddress()) {
-            $this->addFulfillmentAddressToCart($cart, $checkoutSessionsRequest->getFulfillmentAddress());
+        // Only touch the coupon when the agent actually sent a discounts field, so a request that
+        // leaves it out keeps the code the shopper already has.
+        if ($checkoutSessionsRequest->getDiscounts() !== null) {
+            /** @var Quote $cart */
+            $this->applyDiscountCodes($cart, $this->submittedCodes($checkoutSessionsRequest));
+        }
+
+        $fulfillmentDetails = $checkoutSessionsRequest->getFulfillmentDetails();
+
+        if ($fulfillmentDetails?->getAddress() !== null) {
+            $this->addFulfillmentAddressToCart($cart, $fulfillmentDetails->getAddress());
         }
 
         if ($checkoutSessionsRequest instanceof UpdateCheckoutSessionRequestInterface) {
-            if ($checkoutSessionsRequest->getFulfillmentOptionId()) {
-                $cart->getShippingAddress()->setShippingMethod($checkoutSessionsRequest->getFulfillmentOptionId());
+            // Magento carries one shipping method per address, so the first selection is the one applied.
+            $selected = ($checkoutSessionsRequest->getSelectedFulfillmentOptions() ?? [])[0] ?? null;
+
+            if ($selected !== null) {
+                $this->shippingMethodWriter->write($cart, $selected->getOptionId());
+            }
+        }
+
+        return $lineItemResults;
+    }
+
+    /**
+     * The codes the agent sent on this request. A submitted empty array clears what was there, which the
+     * spec asks for explicitly.
+     *
+     * @param CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $request
+     * @return array<int, string>
+     */
+    public function submittedCodes(
+        CreateCheckoutSessionRequestInterface|UpdateCheckoutSessionRequestInterface $request
+    ): array {
+        $discounts = $request->getDiscounts();
+
+        if ($discounts === null) {
+            return [];
+        }
+
+        return array_values(array_map('strval', $discounts->getCodes() ?? []));
+    }
+
+    /**
+     * Magento holds a single coupon per quote, so the first code that applies wins and the rest are
+     * reported as rejected rather than retried.
+     *
+     * @param Quote $cart
+     * @param array<int, string> $codes
+     * @return void
+     */
+    private function applyDiscountCodes(Quote $cart, array $codes): void
+    {
+        if ($codes === []) {
+            $cart->setCouponCode('');
+
+            return;
+        }
+
+        foreach ($codes as $code) {
+            $cart->setCouponCode($code);
+            $cart->collectTotals();
+
+            if ((string) $cart->getCouponCode() !== '') {
+                return;
             }
         }
     }
 
     /**
      * @param CartInterface $cart
-     * @param CheckoutSessionResponseInterface $response
+     * @param CheckoutSessionInterface $response
+     * @param LineItemResult[] $lineItemResults Outcomes for items submitted on this request, if any
+     * @param array<int, string> $submittedCodes Discount codes the agent sent on this request
      * @return void
      */
-    public function assignCartDataToResponse(CartInterface $cart, CheckoutSessionResponseInterface $response): void
-    {
+    public function assignCartDataToResponse(
+        CartInterface $cart,
+        CheckoutSessionInterface $response,
+        array $lineItemResults = [],
+        array $submittedCodes = []
+    ): void {
         /** @var Quote $cart */
         $lineItems = [];
 
@@ -302,13 +451,24 @@ class CheckoutSessionService
             $lineItems[] = $lineItem;
         }
 
-        $fulfillmentAddress = $this->cartToFulfillmentAddress->execute($cart);
+        $fulfillmentDetails = $this->cartToFulfillmentDetails->execute($cart);
         $totals = $this->cartToTotals->execute($cart);
         $fulfillmentOptions = $this->cartToFulfillmentOptions->execute($cart);
-        $paymentProvider = $this->cartToPaymentProvider->execute($cart);
+        $capabilities = $this->cartToCapabilities->execute($cart);
         $buyer = $this->cartToBuyer->execute($cart);
         $links = $this->getLinks();
         $validationErrors = $this->cartValidator->validate($cart);
+        $discounts = $this->cartToDiscounts->execute($cart, $submittedCodes);
+
+        if ($discounts !== null) {
+            $response->setDiscounts($discounts);
+        }
+
+        $consentOptions = $this->cartToMarketingConsentOptions->execute($cart);
+
+        if ($consentOptions !== []) {
+            $response->setMarketingConsentOptions($consentOptions);
+        }
 
         // Being very optimistic here
         /** @var string $currency */
@@ -316,13 +476,13 @@ class CheckoutSessionService
 
         $response->setLineItems($lineItems);
 
-        if ($fulfillmentAddress) {
-            $response->setFulfillmentAddress($fulfillmentAddress);
+        if ($fulfillmentDetails) {
+            $response->setFulfillmentDetails($fulfillmentDetails);
         }
 
         $response->setTotals($totals);
         $response->setFulfillmentOptions($fulfillmentOptions);
-        $response->setPaymentProvider($paymentProvider);
+        $response->setCapabilities($capabilities);
         $response->setCurrency($currency);
 
         if ($buyer) {
@@ -330,94 +490,186 @@ class CheckoutSessionService
         }
 
         $response->setLinks($links);
-        $response->setMessages($this->getCartMessages($cart, $validationErrors));
-        $response->setStatus($this->getCartStatus($cart, $validationErrors));
+        $response->setMessages(array_merge(
+            $this->getCartMessages($cart, $validationErrors, (string) $response->getId()),
+            $this->lineItemMessages($lineItemResults)
+        ));
+        $response->setStatus($this->getCartStatus($cart, $validationErrors, (string) $response->getId()));
 
-        $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
-
-        if ($shippingMethod) {
-            $response->setFulfillmentOptionId($shippingMethod);
-        }
+        $response->setSelectedFulfillmentOptions($this->getSelectedFulfillmentOptions($cart));
     }
 
     /**
      * @param CartInterface $cart
      * @param ItemInterface[] $items
-     * @return void
+     * @return LineItemResult[]
      */
-    public function addItemsToCart(CartInterface $cart, array $items): void
+    public function addItemsToCart(CartInterface $cart, array $items): array
     {
         /** @var Quote $cart */
-        $cart->removeAllItems();
+        return $this->lineItemWriter->write($cart, array_map(
+            fn (ItemInterface $item): array => [
+                'sku' => (string) $item->getId(),
+                'quantity' => $item->getQuantity(),
+            ],
+            array_values($items)
+        ));
+    }
 
-        foreach ($items as $item) {
-            /** @var Product $product */
-            $product = $this->getProduct($item);
+    /**
+     * Every unaddable item reports as invalid: the spec's MessageError.code enum is closed and has no
+     * out-of-stock value, so the distinction the other protocol can draw is not available here.
+     *
+     * @param LineItemResult[] $results
+     * @return MessageErrorInterface[]
+     */
+    private function lineItemMessages(array $results): array
+    {
+        $messages = [];
 
-            /** @var Quote $cart */
-            $cart->addProduct($product, $item->getQuantity());
+        foreach ($results as $result) {
+            $content = match ($result->outcome) {
+                LineItemOutcome::Added => null,
+                LineItemOutcome::NotFound => sprintf('Product "%s" does not exist.', $result->sku),
+                LineItemOutcome::NotSalable => sprintf(
+                    'Product "%s" is not available for purchase.',
+                    $result->sku
+                ),
+                LineItemOutcome::InsufficientStock => $result->reason
+                    ?? sprintf('Product "%s" is not available in that quantity.', $result->sku),
+                LineItemOutcome::InvalidQuantity => $result->reason
+                    ?? sprintf('Product "%s" cannot be bought in that quantity.', $result->sku),
+                LineItemOutcome::Rejected => $result->reason
+                    ?? sprintf('Product "%s" could not be added.', $result->sku),
+            };
+
+            if ($content !== null) {
+                $messages[] = $this->errorMessage(MessageErrorInterface::CODE_INVALID, $content);
+            }
         }
+
+        return $messages;
     }
 
     /**
      * @param CartInterface $cart
      * @param string[] $errors
+     * @param string $sessionId Masked cart id the caller issued, not the quote's numeric id
      * @return string
      */
-    public function getCartStatus(CartInterface $cart, array $errors): string
+    public function getCartStatus(CartInterface $cart, array $errors, string $sessionId): string
     {
-        if (!$cart->getIsActive()) {
-            if ($cart->getReservedOrderId() !== null) {
-                return CheckoutSessionResponseInterface::STATUS_COMPLETED;
-            }
+        $state = $this->stateResolver->resolve($cart, $this->hasOrder($sessionId), $errors !== []);
 
-            return CheckoutSessionResponseInterface::STATUS_CANCELED;
-        }
-
-        if (empty($errors)) {
-            return CheckoutSessionResponseInterface::STATUS_READY_FOR_PAYMENT;
-        }
-
-        return CheckoutSessionResponseInterface::STATUS_NOT_READY_FOR_PAYMENT;
+        return match ($state) {
+            CheckoutState::Completed => CheckoutSessionInterface::STATUS_COMPLETED,
+            CheckoutState::Canceled => CheckoutSessionInterface::STATUS_CANCELED,
+            CheckoutState::Ready => CheckoutSessionInterface::STATUS_READY_FOR_PAYMENT,
+            CheckoutState::Incomplete,
+            CheckoutState::RequiresEscalation => CheckoutSessionInterface::STATUS_NOT_READY_FOR_PAYMENT,
+        };
     }
 
     /**
      * @param CartInterface $cart
      * @param string[] $errors
-     * @return MessageInterface[]
+     * @param string $sessionId Masked cart id the caller issued, not the quote's numeric id
+     * @return array<MessageInfoInterface|MessageErrorInterface>
      */
-    public function getCartMessages(CartInterface $cart, array $errors): array
+    public function getCartMessages(CartInterface $cart, array $errors, string $sessionId): array
     {
         if (!$cart->getIsActive()) {
-            if ($cart->getReservedOrderId() !== null) {
+            $orderId = $this->orderLinkRepository->findOrderId(
+                ComplianceService::IDEMPOTENCY_SCOPE,
+                $sessionId
+            );
+
+            if ($orderId !== null) {
                 return [
-                    $this->messageInterfaceFactory->create(['data' => [
-                        'type' => MessageInterface::TYPE_INFO,
-                        'code' => 'order_placed',
-                        'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                        'content' => sprintf('Order placed successfully: %s', $cart->getReservedOrderId()),
-                    ]]),
+                    $this->infoMessage(
+                        sprintf('Order placed successfully: %s', $this->incrementIdOf($orderId))
+                    ),
                 ];
             }
 
+            // `cart_not_active` is not one of the spec's codes; a spent session is a conflict.
             return [
-                $this->messageInterfaceFactory->create(['data' => [
-                    'type' => MessageInterface::TYPE_ERROR,
-                    'code' => 'cart_not_active',
-                    'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                    'content' => 'Cart is not active. Please create a new checkout session',
-                ]]),
+                $this->errorMessage(
+                    MessageErrorInterface::CODE_CONFLICT,
+                    'Cart is not active. Please create a new checkout session'
+                ),
             ];
         }
 
-        return array_map(function ($error) {
-            return $this->messageInterfaceFactory->create(['data' => [
-                'type' => MessageInterface::TYPE_ERROR,
-                'code' => 'invalid',
-                'content_type' => MessageInterface::CONTENT_TYPE_PLAIN,
-                'content' => $error,
-            ]]);
-        }, $errors);
+        return array_map(
+            fn (string $error): MessageErrorInterface => $this->errorMessage(
+                MessageErrorInterface::CODE_INVALID,
+                $error
+            ),
+            $errors
+        );
+    }
+
+    /**
+     * A placed order is now a recorded fact rather than an inference from the reserved increment id,
+     * which Magento sets at reservation and not at placement.
+     *
+     * @param string $sessionId
+     * @return bool
+     */
+    private function hasOrder(string $sessionId): bool
+    {
+        return $this->orderLinkRepository->findOrderId(
+            ComplianceService::IDEMPOTENCY_SCOPE,
+            $sessionId
+        ) !== null;
+    }
+
+    /**
+     * @param int $orderId
+     * @return string
+     */
+    private function incrementIdOf(int $orderId): string
+    {
+        try {
+            return (string) $this->orderRepository->get($orderId)->getIncrementId();
+        } catch (NoSuchEntityException $exception) {
+            // The link outlives nothing — the order cascades on delete — but a mid-flight read can
+            // still miss it, and reporting the internal id beats failing the whole response.
+            return (string) $orderId;
+        }
+    }
+
+    /**
+     * @param string $content
+     * @return MessageInfoInterface
+     */
+    protected function infoMessage(string $content): MessageInfoInterface
+    {
+        /** @var MessageInfoInterface $message */
+        $message = $this->messageInfoFactory->create();
+        $message->setType(MessageInfoInterface::TYPE_INFO);
+        $message->setContentType(MessageInfoInterface::CONTENT_TYPE_PLAIN);
+        $message->setContent($content);
+
+        return $message;
+    }
+
+    /**
+     * @param string $code One of the spec's MessageError codes
+     * @param string $content
+     * @return MessageErrorInterface
+     */
+    protected function errorMessage(string $code, string $content): MessageErrorInterface
+    {
+        /** @var MessageErrorInterface $message */
+        $message = $this->messageErrorFactory->create();
+        $message->setType(MessageErrorInterface::TYPE_ERROR);
+        $message->setCode($code);
+        $message->setContentType(MessageErrorInterface::CONTENT_TYPE_PLAIN);
+        $message->setContent($content);
+
+        return $message;
     }
 
     /**
@@ -445,53 +697,26 @@ class CheckoutSessionService
     public function addBuyerToCart(CartInterface $cart, BuyerInterface $buyer): void
     {
         /** @var Quote $cart */
-        if ($firstName = $buyer->getFirstName()) {
-            $cart->setCustomerFirstname($firstName);
-        }
-
-        if ($lastName = $buyer->getLastName()) {
-            $cart->setCustomerLastname($lastName);
-        }
-
-        if ($email = $buyer->getEmail()) {
-            $cart->setCustomerEmail($email);
-        }
-
-        if ($email = $buyer->getEmail()) {
-            $cart->getShippingAddress()->setEmail($email);
-        }
-
-        if ($phoneNumber = $buyer->getPhoneNumber()) {
-            $cart->getShippingAddress()->setTelephone($phoneNumber);
-        }
-    }
-
-    /**
-     * @param ItemInterface $item
-     * @return ProductInterface
-     */
-    public function getProduct(ItemInterface $item): ProductInterface
-    {
-        return $this->productRepository->get($item->getId());
+        $this->buyerWriter->write($cart, $buyer);
     }
 
     /**
      * @param CartInterface $cart
-     * @param AddressInterface $address
+     * @param FulfillmentAddressInterface $address
      * @return void
      */
-    public function addFulfillmentAddressToCart(CartInterface $cart, AddressInterface $address): void
+    public function addFulfillmentAddressToCart(CartInterface $cart, FulfillmentAddressInterface $address): void
     {
         /** @var Quote $cart */
-        $shippingAddress = $cart->getShippingAddress();
-        $this->addDataToQuoteAddress($shippingAddress, $address);
+        $this->addressWriter->write($cart->getShippingAddress(), $this->toPostalAddress($address));
 
         if (!$cart->getCustomerFirstname() || !$cart->getCustomerLastname()) {
-            if (!$this->isValidName($address->getName())) {
+            [$firstName, $lastName] = PersonName::split($address->getName());
+
+            if ($firstName === null) {
                 return;
             }
 
-            [$firstName, $lastName] = explode(' ', $address->getName(), 2);
             $cart->setCustomerFirstname($firstName);
             $cart->setCustomerLastname($lastName);
         }
@@ -499,18 +724,48 @@ class CheckoutSessionService
 
     /**
      * @param CartInterface $cart
-     * @param AddressInterface $address
+     * @param FulfillmentAddressInterface $address
      * @return void
      */
-    public function addBillingAddressToCart(CartInterface $cart, AddressInterface $address): void
+    public function addBillingAddressToCart(CartInterface $cart, FulfillmentAddressInterface $address): void
     {
         /** @var Quote $cart */
         $billingAddress = $cart->getBillingAddress();
-        $this->addDataToQuoteAddress($billingAddress, $address);
+        $this->addressWriter->write($billingAddress, $this->toPostalAddress($address));
 
         if ($billingAddress && !$billingAddress->getTelephone() && $cart->getShippingAddress()) {
             $billingAddress->setTelephone($cart->getShippingAddress()->getTelephone());
         }
+    }
+
+    /**
+     * Magento selects one shipping method for the whole cart, so this is a single-element list
+     * covering every item until fulfillment groups are implemented.
+     *
+     * @param Quote $cart
+     * @return SelectedFulfillmentOptionInterface[]
+     */
+    protected function getSelectedFulfillmentOptions(Quote $cart): array
+    {
+        $shippingMethod = $cart->getShippingAddress()->getShippingMethod();
+
+        if (!$shippingMethod) {
+            return [];
+        }
+
+        $itemIds = [];
+
+        foreach ($cart->getAllItems() as $item) {
+            $itemIds[] = (string)$item->getId();
+        }
+
+        /** @var SelectedFulfillmentOptionInterface $selected */
+        $selected = $this->selectedFulfillmentOptionFactory->create();
+        $selected->setType(SelectedFulfillmentOptionInterface::TYPE_SHIPPING);
+        $selected->setOptionId($shippingMethod);
+        $selected->setItemIds($itemIds);
+
+        return [$selected];
     }
 
     /**
@@ -528,27 +783,25 @@ class CheckoutSessionService
     }
 
     /**
-     * @param QuoteAddressInterface $cartAddress
-     * @param AddressInterface $address
-     * @return void
+     * Turns the spec address into the shared writer's protocol-free value object.
+     *
+     * @param FulfillmentAddressInterface $address
+     * @return PostalAddress
      */
-    protected function addDataToQuoteAddress(QuoteAddressInterface $cartAddress, AddressInterface $address): void
+    protected function toPostalAddress(FulfillmentAddressInterface $address): PostalAddress
     {
-        if (!$this->isValidName($address->getName())) {
-            return;
-        }
+        [$firstName, $lastName] = PersonName::split($address->getName());
 
-        [$firstName, $lastName] = explode(' ', $address->getName(), 2);
-
-        $street = array_filter([$address->getLineOne(), $address->getLineTwo()]);
-
-        $cartAddress->setFirstname($firstName);
-        $cartAddress->setLastname($lastName);
-        $cartAddress->setStreet($street);
-        $cartAddress->setCity($address->getCity());
-        $cartAddress->setRegion($address->getState());
-        $cartAddress->setCountryId($address->getCountry());
-        $cartAddress->setPostcode($address->getPostalCode());
+        return new PostalAddress(
+            streetLine: $address->getLineOne(),
+            extendedLine: $address->getLineTwo(),
+            locality: $address->getCity(),
+            region: $address->getState(),
+            country: $address->getCountry(),
+            postalCode: $address->getPostalCode(),
+            firstName: $firstName,
+            lastName: $lastName
+        );
     }
 
     /**
@@ -561,23 +814,7 @@ class CheckoutSessionService
         $shippingAddress = $cart->getShippingAddress();
         $billingAddress = $cart->getBillingAddress();
 
-        $billingAddress->setFirstname($shippingAddress->getFirstname());
-        $billingAddress->setLastname($shippingAddress->getLastname());
-        $billingAddress->setStreet($shippingAddress->getStreet());
-        $billingAddress->setCity($shippingAddress->getCity());
-        $billingAddress->setRegionId($shippingAddress->getRegionId());
-        $billingAddress->setCountryId($shippingAddress->getCountryId());
-        $billingAddress->setPostcode($shippingAddress->getPostcode());
-        $billingAddress->setTelephone($shippingAddress->getTelephone());
-        $billingAddress->setEmail($shippingAddress->getEmail());
-    }
-
-    /**
-     * @param string|null $name
-     * @return bool
-     */
-    protected function isValidName(?string $name): bool
-    {
-        return !empty($name) && strpos($name, ' ') !== false;
+        $this->personalInformationCopier->copyIdentity($shippingAddress, $billingAddress);
+        $this->personalInformationCopier->copyPostalFields($shippingAddress, $billingAddress);
     }
 }

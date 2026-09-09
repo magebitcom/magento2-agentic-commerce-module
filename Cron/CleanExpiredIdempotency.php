@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Cron;
 
-use Magebit\AgenticCommerce\Api\Data\IdempotencyInterface;
-use Magebit\AgenticCommerce\Model\Idempotency\CollectionFactory;
+use Magebit\AgenticCommerce\Api\ConfigInterface;
+use Magebit\AgenticCore\Model\Idempotency\Purge;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,40 +22,25 @@ use Psr\Log\LoggerInterface;
 class CleanExpiredIdempotency
 {
     /**
-     * @param CollectionFactory $collectionFactory
+     * @param Purge $purge
+     * @param ConfigInterface $config
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private readonly CollectionFactory $collectionFactory,
+        private readonly Purge $purge,
+        private readonly ConfigInterface $config,
         private readonly LoggerInterface $logger
     ) {
     }
 
     /**
-     * Execute cron job to clean expired idempotency records
-     *
      * @return void
      */
     public function execute(): void
     {
         try {
-            $collection = $this->collectionFactory->create();
-            $collection->addFieldToFilter(
-                IdempotencyInterface::EXPIRES_AT,
-                ['lt' => date('Y-m-d H:i:s')]
-            );
-
-            $count = $collection->getSize();
-
-            if ($count === 0) {
-                $this->logger->info('No expired idempotency records to clean.');
-                return;
-            }
-
-            // @phpstan-ignore-next-line
-            $collection->walk('delete');
-
-            $this->logger->info(sprintf('Successfully cleaned %d expired idempotency records.', $count));
+            $deleted = $this->purge->execute($this->config->getIdempotencyTtl());
+            $this->logger->info(sprintf('Cleaned %d expired idempotency records.', $deleted));
         } catch (\Exception $exception) {
             $this->logger->error(
                 sprintf('Error cleaning expired idempotency records: %s', $exception->getMessage()),

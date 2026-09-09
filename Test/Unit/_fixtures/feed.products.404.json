@@ -1,0 +1,5 @@
+{
+    "type": "invalid_request",
+    "code": "feed_not_found",
+    "message": "Feed not found"
+}

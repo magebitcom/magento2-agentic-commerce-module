@@ -6,8 +6,9 @@
     "require": {
         "magento/framework": "*",
         "magebitcom/magento2-core": "0.1.*",
-        "symfony/validator": "^7.3",
-        "php": ">=8.1"
+        "php": ">=8.2",
+        "magebitcom/acp-php-spec": "^1.1",
+        "magebitcom/magento2-module-agentic-core": "^0.1"
     },
     "suggest": {
         "stripe/stripe-payments": "*"

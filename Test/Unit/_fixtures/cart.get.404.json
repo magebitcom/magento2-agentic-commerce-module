@@ -1,0 +1,5 @@
+{
+    "type": "invalid_request",
+    "code": "cart_not_found",
+    "message": "Cart not found"
+}

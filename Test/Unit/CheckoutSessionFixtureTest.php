@@ -16,11 +16,18 @@ use JsonException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Guards the golden ACP fixtures. No ACP JSON Schema set is vendored yet, so these pin
- * structure only; swap in schema assertions once a spec is available.
+ * Validates the golden ACP fixtures against the vendored schema bundle.
  */
 class CheckoutSessionFixtureTest extends TestCase
 {
+    use SchemaAssert;
+
+    private const SESSION_SCHEMA = 'schema.agentic_checkout.json#/$defs/CheckoutSession';
+    private const ORDER_SCHEMA = 'schema.agentic_checkout.json#/$defs/Order';
+    private const COMPLETE_FIXTURE = 'checkout_session.complete.200.json';
+    private const DISCOUNTED_FIXTURE = 'checkout_session.create.discounted.200.json';
+    private const DISCOUNT_SCHEMA = 'schema.discount.json#/$defs/checkout_with_discount';
+
     /**
      * @return array<string, array{0: string}>
      */
@@ -58,47 +65,146 @@ class CheckoutSessionFixtureTest extends TestCase
      * @return void
      * @throws JsonException
      */
-    public function testSessionFixtureCarriesNoSchemaYet(string $fixture): void
+    public function testSessionFixtureMatchesSpec(string $fixture): void
     {
-        $this->assertNotEmpty(self::loadFixture($fixture));
-        $this->markTestSkipped(
-            'No ACP JSON Schema set is vendored; fixtures are captured for future conformance checks.'
+        $this->assertMatchesSchema(self::loadFixtureObject($fixture), self::SESSION_SCHEMA);
+    }
+
+    /**
+     * @return void
+     * @throws JsonException
+     */
+    public function testCompletedSessionMatchesSpec(): void
+    {
+        $this->assertMatchesSchema(
+            self::loadFixtureObject(self::COMPLETE_FIXTURE),
+            'schema.agentic_checkout.json#/$defs/CheckoutSessionWithOrder'
         );
     }
 
     /**
-     * POST /checkout_sessions/{id}/complete returns HTTP 400 for the seeded payment token.
+     * Every total needs a type from the spec's enum and a label, at cart level and inside each line item
+     * and fulfillment option. Magento's own codes are not that vocabulary.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testEveryTotalIsLabelledAndTyped(string $fixture): void
+    {
+        $payload = self::loadFixture($fixture);
+        $groups = [$payload['totals']];
+
+        foreach ($payload['line_items'] as $lineItem) {
+            $groups[] = $lineItem['totals'];
+        }
+
+        foreach ($payload['fulfillment_options'] ?? [] as $option) {
+            $groups[] = $option['totals'];
+        }
+
+        foreach ($groups as $totals) {
+            foreach ($totals as $total) {
+                $this->assertNotEmpty($total['display_text'], 'every total carries a label');
+                $this->assertNotContains($total['type'], ['shipping', 'grand_total'], 'Magento codes are mapped');
+            }
+        }
+    }
+
+    /**
+     * The spec returns CheckoutSessionWithOrder on completion, and the order it carries requires an id,
+     * the session id and a permalink.
      *
      * @return void
      * @throws JsonException
      */
-    public function testCompleteResponseRecordsKnownBrokenState(): void
+    public function testCompletedSessionCarriesAConformantOrder(): void
     {
-        $payload = self::loadFixture('checkout_session.complete.400.BROKEN.json');
+        $payload = self::loadFixture(self::COMPLETE_FIXTURE);
 
-        $this->assertSame('invalid_request', $payload['code']);
-        $this->markTestIncomplete(
-            'ACP complete returns 400 "The requested Payment Method is not available." '
-            . 'Fixture records the broken state.'
-        );
+        $this->assertMatchesSchema(self::loadFixtureObject(self::COMPLETE_FIXTURE)->order, self::ORDER_SCHEMA);
+        $this->assertSame('completed', $payload['status']);
+        $this->assertSame($payload['id'], $payload['order']['checkout_session_id']);
+        $this->assertStringContainsString($payload['id'], $payload['order']['permalink_url']);
     }
 
     /**
-     * @param string $name
-     * @return array<mixed>
+     * @return void
      * @throws JsonException
      */
-    private static function loadFixture(string $name): array
+    public function testADiscountedSessionMatchesTheDiscountExtension(): void
     {
-        $path = __DIR__ . '/_fixtures/' . $name;
+        $this->assertMatchesSchema(self::loadFixtureObject(self::DISCOUNTED_FIXTURE), self::DISCOUNT_SCHEMA);
+    }
 
-        if (!is_file($path)) {
-            self::markTestSkipped(sprintf('Fixture "%s" is missing.', $name));
+    /**
+     * Magento holds one coupon per quote, so a second code is reported rejected rather than dropped
+     * without explanation.
+     *
+     * @return void
+     * @throws JsonException
+     */
+    public function testASecondDiscountCodeIsRejectedWithAReason(): void
+    {
+        $discounts = self::loadFixture(self::DISCOUNTED_FIXTURE)['discounts'];
+
+        $this->assertCount(2, $discounts['codes']);
+        $this->assertCount(1, $discounts['applied']);
+        $this->assertCount(1, $discounts['rejected']);
+        $this->assertSame('discount_code_combination_disallowed', $discounts['rejected'][0]['reason']);
+    }
+
+    /**
+     * The spec wants a positive amount on an applied discount; Magento carries it as a reduction.
+     *
+     * @return void
+     * @throws JsonException
+     */
+    public function testTheAppliedDiscountAmountIsPositive(): void
+    {
+        $applied = self::loadFixture(self::DISCOUNTED_FIXTURE)['discounts']['applied'][0];
+
+        $this->assertGreaterThan(0, $applied['amount']);
+        $this->assertSame($applied['code'], $applied['coupon']['id']);
+    }
+
+    /**
+     * An agent learns which extra fields to expect from the declaration rather than by inspecting the
+     * payload, so every extension the session serves is named here.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testActiveExtensionsAreDeclared(string $fixture): void
+    {
+        $extensions = self::loadFixture($fixture)['capabilities']['extensions'] ?? [];
+
+        $this->assertSame(['discount'], array_column($extensions, 'name'));
+        $this->assertContains('$.CheckoutSession.discounts', $extensions[0]['extends']);
+    }
+
+    /**
+     * The seller declares a consent option only for a channel it has a handler for and a privacy policy
+     * behind, so it never asks for consent it cannot honour or explain.
+     *
+     * @dataProvider sessionFixtureProvider
+     * @param string $fixture
+     * @return void
+     * @throws JsonException
+     */
+    public function testMarketingConsentOptionsAreFullyDeclared(string $fixture): void
+    {
+        $options = self::loadFixture($fixture)['marketing_consent_options'] ?? [];
+
+        $this->assertNotEmpty($options);
+
+        foreach ($options as $option) {
+            $this->assertNotEmpty($option['channel']);
+            $this->assertNotEmpty($option['display_text']);
+            $this->assertNotEmpty($option['privacy_policy_url']);
         }
-
-        /** @var array<mixed> $decoded */
-        $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
-
-        return $decoded;
     }
 }

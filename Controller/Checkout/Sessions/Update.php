@@ -25,16 +25,18 @@ use Magebit\AgenticCommerce\Service\CheckoutSessionService;
 use Psr\Log\LoggerInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
 use Magento\Framework\Exception\LocalizedException;
-use Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse;
+use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
 
 class Update extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
@@ -45,15 +47,23 @@ class Update extends ApiController implements HttpPostActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
-        protected readonly ComplianceService $complianceService,
+        ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly UpdateCheckoutSessionRequestInterfaceFactory $checkoutSessionsRequestFactory,
         protected readonly ConfigInterface $config,
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory,
+            $complianceService
+        );
     }
 
     /**
@@ -71,15 +81,9 @@ class Update extends ApiController implements HttpPostActionInterface
             ]]));
         }
 
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
-        if ($validationError = $this->complianceService->validateRequest($request)) {
-            return $this->makeErrorResponse($validationError);
-        }
-
-        if ($response = $this->complianceService->handleIdempotency($request)) {
-            $this->addHeaders($response, $request);
+        if ($response = $this->guard($request)) {
             return $response;
         }
 
@@ -96,7 +100,10 @@ class Update extends ApiController implements HttpPostActionInterface
             ]]));
         }
 
-        $checkoutSessionsRequest = $this->createRequestObjectAndValidate($this->checkoutSessionsRequestFactory->create(...));
+        $checkoutSessionsRequest = $this->createRequestObjectAndValidate(
+            UpdateCheckoutSessionRequestInterface::class,
+            $this->checkoutSessionsRequestFactory->create(...)
+        );
 
         if ($checkoutSessionsRequest instanceof ErrorResponseInterface) {
             return $this->makeErrorResponse($checkoutSessionsRequest);
@@ -105,13 +112,9 @@ class Update extends ApiController implements HttpPostActionInterface
         try {
             $checkoutSessionResponse = $this->checkoutSessionService->update($sessionId, $checkoutSessionsRequest);
 
-            /** @var CheckoutSessionResponse $checkoutSessionResponse */
+            /** @var CheckoutSession $checkoutSessionResponse */
             $responseData = $checkoutSessionResponse->toArray();
-            $this->complianceService->storeResponse($request, (string) json_encode($responseData), 200);
-
-            $response = $this->makeJsonResponse($responseData);
-            $this->addHeaders($response, $request);
-            return $response;
+            return $this->respond($request, $responseData);
         } catch (LocalizedException $e) {
             $this->logger->critical('[AgenticCommerce] Error creating checkout session', ['exception' => $e]);
 

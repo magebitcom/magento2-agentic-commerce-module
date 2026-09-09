@@ -14,39 +14,50 @@
     <preference for="Magebit\AgenticCommerce\Api\ProductMapperInterface" type="Magebit\AgenticCommerce\Model\Mapping\MapperComposite" />
     <preference for="Magebit\AgenticCommerce\Api\ProductFeedWriterInterface" type="Magebit\AgenticCommerce\Model\Export\Writer\CsvWriter" />
     <preference for="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\DataInterface" type="Magebit\AgenticCommerce\Model\Config\ProductFeedMapping\Data" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\IdempotencyInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Model" />
-    <preference for="Magebit\AgenticCommerce\Api\IdempotencyRepositoryInterface" type="Magebit\AgenticCommerce\Model\Idempotency\Repository" />
     <preference for="Magebit\AgenticCommerce\Api\CartValidatorInterface" type="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite" />
 
     <!-- Request Interfaces -->
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\UpdateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CompleteCheckoutSessionRequest" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\DelegatePaymentRequest" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterface" type="Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentRequest" />
 
     <!-- Supporting Data Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\AddressInterface" type="Magebit\AgenticCommerce\Model\Data\Address" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\BuyerInterface" type="Magebit\AgenticCommerce\Model\Data\Buyer" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Address" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Buyer" />
     <preference for="Magebit\AgenticCommerce\Api\Data\ItemInterface" type="Magebit\AgenticCommerce\Model\Data\Item" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentProviderInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentProvider" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentMethodInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentMethod" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\PaymentMethodCardInterface" type="Magebit\AcpSpec\Data\DelegatePayment\PaymentMethodCard" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\AllowanceInterface" type="Magebit\AcpSpec\Data\DelegatePayment\Allowance" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\RiskSignalInterface" type="Magebit\AcpSpec\Data\DelegatePayment\RiskSignal" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\LineItemInterface" type="Magebit\AgenticCommerce\Model\Data\LineItem" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LineItemInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\LineItem" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Total" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\PaymentDataInterface" type="Magebit\AgenticCommerce\Model\Data\PaymentData" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\OrderInterface" type="Magebit\AgenticCommerce\Model\Data\Order" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentData" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\OrderInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Order" />
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\LinkInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Link" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\MessageInterface" type="Magebit\AgenticCommerce\Model\Data\Message" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageInfoInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageInfo" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MessageError" />
 
     <!-- Fulfillment Option Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOption" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionShippingInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionShipping" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\FulfillmentOptionDigitalInterface" type="Magebit\AgenticCommerce\Model\Data\FulfillmentOptionDigital" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionShippingInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionShipping" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentOptionDigitalInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentOptionDigital" />
+
+    <!-- Spec types the module builds through a factory but had no preference for, so every endpoint
+         that emitted one raised "cannot instantiate interface" at runtime. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentDetails" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\SelectedFulfillmentOption" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CapabilitiesInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Capabilities" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Item" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Payment" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentHandlerInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentHandler" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryProtocolInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryProtocol" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscoveryCapabilitiesInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscoveryCapabilities" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrument" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentCredentialInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrumentCredential" />
 
     <!-- Response Interfaces -->
-    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionResponse" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Response\CheckoutSessionWithOrderResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\CheckoutSessionWithOrderResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionWithOrderInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSessionWithOrder" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface" type="Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse" />
     <preference for="Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentResponseInterface" type="Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentResponse" />
 
@@ -142,9 +153,20 @@
         </arguments>
     </type>
 
-    <type name="Magebit\AgenticCommerce\Model\Idempotency\Repository">
+    <preference for="Magebit\AgenticCore\Api\Webhook\SecretProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\SecretProvider"/>
+
+    <!-- Two modules now deliver webhooks with different headers, so the shared queue is a virtual type
+         per consumer rather than one preference. The base binds no default header provider: a consumer
+         that forgets to supply one should fail at compile rather than send an unattributable request. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\Webhook\Dispatcher" type="Magebit\AgenticCore\Model\Webhook\Dispatcher">
         <arguments>
-            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+            <argument name="headersProvider" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\DeliveryHeadersProvider</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magebit\AgenticCommerce\Service\WebhookService">
+        <arguments>
+            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
         </arguments>
     </type>
 
@@ -186,8 +208,7 @@
     <type name="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite">
         <arguments>
             <argument name="validators" xsi:type="array">
-                <item name="shipping_address" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\ShippingAddressValidator</item>
-                <item name="customer" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\CustomerValidator</item>
+                <item name="readiness" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\ReadinessValidator</item>
             </argument>
         </arguments>
     </type>
@@ -214,4 +235,137 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- Discount extension. The checkout bundle's variants, which the session response accepts. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\ExtensionDeclarationInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\ExtensionDeclaration" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsRequest" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\DiscountsResponseInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\DiscountsResponse" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AppliedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AppliedDiscount" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\RejectedDiscountInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\RejectedDiscount" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\CouponInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Coupon" />
+
+    <!-- Delegated 3DS authentication, merchant side. The agent runs the authentication with its own
+         provider; this decides which outcomes may become an order, which is a liability call. -->
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AuthenticationResult" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultOutcomeDetailsInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\AuthenticationResultOutcomeDetails" />
+    <type name="Magebit\AgenticCommerce\Model\Authentication\OutcomePolicy">
+        <arguments>
+            <argument name="allowedOutcomes" xsi:type="array">
+                <item name="authenticated" xsi:type="string">authenticated</item>
+                <!-- The issuer acknowledged the attempt without authenticating. Most schemes still
+                     shift liability, so it is allowed; remove it to require a full challenge. -->
+                <item name="attempt_acknowledged" xsi:type="string">attempt_acknowledged</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- How an order placed through this protocol reads in admin. -->
+    <type name="Magebit\AgenticCore\Block\Adminhtml\Order\View\PlacedBy">
+        <arguments>
+            <argument name="labels" xsi:type="array">
+                <item name="acp" xsi:type="string">Placed by an agent over ACP</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- ACP feed, read side. The nested product shape is a second serialiser: the flat OpenAI feed
+         vocabulary stays as it is, because agents consume both. -->
+    <preference for="Magebit\AgenticCommerce\Api\FeedServiceInterface" type="Magebit\AgenticCommerce\Service\FeedService" />
+    <preference for="Magebit\AcpSpec\Api\Feed\FeedMetadataInterface" type="Magebit\AcpSpec\Data\Feed\FeedMetadata" />
+    <preference for="Magebit\AcpSpec\Api\Feed\ProductsResponseInterface" type="Magebit\AcpSpec\Data\Feed\ProductsResponse" />
+    <preference for="Magebit\AcpSpec\Api\Feed\ProductInterface" type="Magebit\AcpSpec\Data\Feed\Product" />
+    <preference for="Magebit\AcpSpec\Api\Feed\VariantInterface" type="Magebit\AcpSpec\Data\Feed\Variant" />
+    <preference for="Magebit\AcpSpec\Api\Feed\DescriptionInterface" type="Magebit\AcpSpec\Data\Feed\Description" />
+    <preference for="Magebit\AcpSpec\Api\Feed\PriceInterface" type="Magebit\AcpSpec\Data\Feed\Price" />
+    <preference for="Magebit\AcpSpec\Api\Feed\AvailabilityInterface" type="Magebit\AcpSpec\Data\Feed\Availability" />
+    <preference for="Magebit\AcpSpec\Api\Feed\MediaInterface" type="Magebit\AcpSpec\Data\Feed\Media" />
+
+    <!-- Cart capability -->
+    <preference for="Magebit\AgenticCommerce\Api\CartServiceInterface" type="Magebit\AgenticCommerce\Service\CartService" />
+    <preference for="Magebit\AcpSpec\Api\Cart\CartInterface" type="Magebit\AcpSpec\Data\Cart\Cart" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CartCreateRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CartCreateRequest" />
+    <preference for="Magebit\AgenticCommerce\Api\Data\Request\CartUpdateRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CartUpdateRequest" />
+
+    <!-- Marketing consent. Every channel here is declared to the agent and receives the buyer's
+         decision; a merchant adds a channel by binding a handler, and replaces the behaviour by
+         binding their own. -->
+    <type name="Magebit\AgenticCommerce\Model\MarketingConsent\HandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="email" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\EmailConsent</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- The default email behaviour: record the decision on the order, and optionally subscribe. The
+         composite is what a merchant replaces or extends. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\MarketingConsent\EmailConsent" type="Magebit\AgenticCommerce\Model\MarketingConsent\Composite">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="record" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\RecordOnOrder</item>
+                <item name="newsletter" xsi:type="object">Magebit\AgenticCommerce\Model\MarketingConsent\NewsletterSubscription</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToMarketingConsentOptions">
+        <arguments>
+            <argument name="displayText" xsi:type="array">
+                <item name="email" xsi:type="string">promotional emails, product launches, and exclusive offers</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MarketingConsent" />
+    <preference for="Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentOptionInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\MarketingConsentOption" />
+
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToCapabilities">
+        <arguments>
+            <argument name="extensions" xsi:type="array">
+                <item name="discount" xsi:type="array">
+                    <item name="extends" xsi:type="array">
+                        <item name="response" xsi:type="string">$.CheckoutSession.discounts</item>
+                        <item name="request" xsi:type="string">$.CheckoutSessionCreateRequest.discounts</item>
+                    </item>
+                    <item name="schema" xsi:type="string">https://agentic-commerce-protocol.com/schemas/discount.json</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magebit\AgenticCommerce\Model\Convert\CartToTotals">
+        <arguments>
+            <argument name="typeMapping" xsi:type="array">
+                <item name="subtotal" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_SUBTOTAL</item>
+                <item name="shipping" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_FULFILLMENT</item>
+                <item name="tax" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_TAX</item>
+                <item name="discount" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_DISCOUNT</item>
+                <item name="giftwrapping" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_GIFT_WRAP</item>
+                <item name="customerbalance" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_STORE_CREDIT</item>
+                <item name="grand_total" xsi:type="const">\Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface::TYPE_TOTAL</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- This protocol requires a key on every write, and names the three methods it applies to. -->
+    <virtualType name="Magebit\AgenticCommerce\Model\Idempotency\Gate" type="Magebit\AgenticCore\Model\Idempotency\Gate">
+        <arguments>
+            <argument name="methods" xsi:type="array">
+                <item name="post" xsi:type="string">POST</item>
+                <item name="put" xsi:type="string">PUT</item>
+                <item name="patch" xsi:type="string">PATCH</item>
+            </argument>
+            <argument name="keyRequired" xsi:type="boolean">true</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magebit\AgenticCommerce\Service\ComplianceService">
+        <arguments>
+            <argument name="gate" xsi:type="object">Magebit\AgenticCommerce\Model\Idempotency\Gate</argument>
+        </arguments>
+    </type>
+    <virtualType name="Magebit\AgenticCommerce\Model\Webhook\DueDeliveries" type="Magebit\AgenticCore\Model\Webhook\DueDeliveries">
+        <arguments>
+            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+            <argument name="scope" xsi:type="string">acp</argument>
+        </arguments>
+    </virtualType>
 </config>

@@ -3,26 +3,21 @@
 /**
  * This file is part of the Magebit_AgenticCommerce package.
  *
- * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @copyright Copyright (c) 2026 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionCompleteRequestInterface;
 
-interface CompleteCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
+/**
+ * The specification's complete request. Nothing is narrowed: the generated interface already says
+ * everything this module needs, and it is named here so the module owns the type its services take.
+ */
+interface CompleteCheckoutSessionRequestInterface extends CheckoutSessionCompleteRequestInterface
 {
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
-
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\PaymentDataInterface
-     */
-    public function getPaymentData(): PaymentDataInterface;
 }

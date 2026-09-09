@@ -3,33 +3,27 @@
 /**
  * This file is part of the Magebit_AgenticCommerce package.
  *
- * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @copyright Copyright (c) 2026 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AgenticCommerce\Api\Data\AddressInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
-use Magebit\AgenticCommerce\Api\Data\BuyerInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionCreateRequestInterface;
 
-interface CreateCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
+/**
+ * The specification's create request, with the line items narrowed to the ones this module accepts.
+ */
+interface CreateCheckoutSessionRequestInterface extends CheckoutSessionCreateRequestInterface
 {
     /**
-     * Get items
+     * Narrowed so each item carries the `quantity` every upstream example sends; the specification's
+     * own `Item` does not declare it. See the defect recorded in the acp-php-spec README.
      *
      * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
      */
-    public function getItems(): array;
-
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\AddressInterface|null
-     */
-    public function getFulfillmentAddress(): ?AddressInterface;
-
-    /**
-     * @return \Magebit\AgenticCommerce\Api\Data\BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
+    public function getLineItems(): array;
 }

@@ -21,6 +21,11 @@
 					<label>Enable Feed</label>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
+				<field id="marketing_consent_subscribes" translate="label comment" type="select" sortOrder="25" showInWebsite="1" showInStore="1" showInDefault="1">
+					<label>Act On Marketing Consent</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<comment>When enabled, an opt-in reported by the agent creates a Magento newsletter subscriber and an opt-out removes one. The decision is always recorded against the order either way. Leave disabled if consent relayed by a third party is not enough for you, or if your own confirmation flow should stay the only way someone is subscribed.</comment>
+				</field>
 				<field id="enable_checkout" type="select" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
 					<label>Enable Checkout</label>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

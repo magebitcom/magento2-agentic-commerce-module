@@ -13,7 +13,8 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model;
 
 use Magebit\AgenticCommerce\Api\PaymentHandlerInterface;
-use Magebit\AgenticCommerce\Api\Data\PaymentDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
 
@@ -30,14 +31,18 @@ class PaymentHandlerPool
     /**
      * @param CartInterface $cart
      * @param PaymentDataInterface $paymentData
+     * @param AuthenticationResultInterface|null $authentication
      * @return PaymentInterface
      */
-    public function get(CartInterface $cart, PaymentDataInterface $paymentData): PaymentInterface
-    {
-        if (!isset($this->handlers[$paymentData->getProvider()])) {
-            throw new \InvalidArgumentException(sprintf('Payment handler for method %s not found', $paymentData->getProvider()));
+    public function get(
+        CartInterface $cart,
+        PaymentDataInterface $paymentData,
+        ?AuthenticationResultInterface $authentication = null
+    ): PaymentInterface {
+        if (!isset($this->handlers[$paymentData->getHandlerId()])) {
+            throw new \InvalidArgumentException(sprintf('Payment handler %s not found', $paymentData->getHandlerId()));
         }
 
-        return $this->handlers[$paymentData->getProvider()]->handle($cart, $paymentData);
+        return $this->handlers[$paymentData->getHandlerId()]->handle($cart, $paymentData, $authentication);
     }
 }

@@ -1,0 +1,56 @@
+{
+    "id": "checkout_session_placeholder_0001",
+    "line_items": [
+        {
+            "id": "id-b8aed072",
+            "item": {
+                "id": "24-MB04",
+                "name": "Strive Shoulder Pack"
+            },
+            "quantity": 5,
+            "totals": [
+                {
+                    "type": "items_base_amount",
+                    "display_text": "Items base amount",
+                    "amount": 16000
+                },
+                {
+                    "type": "subtotal",
+                    "display_text": "Subtotal",
+                    "amount": 16000
+                },
+                {
+                    "type": "total",
+                    "display_text": "Total",
+                    "amount": 16000
+                }
+            ]
+        }
+    ],
+    "currency": "USD",
+    "totals": [
+        {
+            "type": "subtotal",
+            "display_text": "Subtotal",
+            "amount": 16000
+        },
+        {
+            "type": "fulfillment",
+            "display_text": "Shipping & Handling",
+            "amount": 0
+        },
+        {
+            "type": "tax",
+            "display_text": "Tax",
+            "amount": 0
+        },
+        {
+            "type": "total",
+            "display_text": "Grand Total",
+            "amount": 16000
+        }
+    ],
+    "buyer": {
+        "email": "ada@example.com"
+    }
+}

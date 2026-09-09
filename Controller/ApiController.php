@@ -13,45 +13,96 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Controller;
 
 use InvalidArgumentException;
+use JsonSerializable;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magento\Framework\App\ActionInterface;
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
+use Magebit\AgenticCore\Controller\JsonController;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
 use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
+use Magebit\AgenticCore\Model\Validation\ValidationResult;
 use Magento\Framework\DataObject;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
 
-abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
+abstract class ApiController extends JsonController
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
+     * @param ComplianceService $complianceService
      */
     public function __construct(
-        protected readonly JsonFactory $resultJsonFactory,
-        protected readonly RequestInterface $request,
-        protected readonly RequestValidationService $requestValidationService,
-        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory
+        JsonFactory $resultJsonFactory,
+        RequestInterface $request,
+        protected readonly RequestValidator $requestValidator,
+        protected readonly Hydrator $hydrator,
+        protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
+        protected readonly ComplianceService $complianceService
     ) {
+        parent::__construct($resultJsonFactory, $request);
     }
 
     /**
-     * @template T of \Magebit\AgenticCommerce\Api\Data\Request\RequestInterface
-     * @param callable(array<mixed>): T $factory
+     * Everything that has to hold before an operation runs: the version, the token and the
+     * idempotency key. Returns the response to send instead of running it, or null to go ahead.
+     *
+     * @param Http $request
+     * @return ResultJson|null
+     */
+    protected function guard(Http $request): ?ResultJson
+    {
+        $outcome = $this->complianceService->guard($request);
+
+        if ($outcome instanceof ErrorResponseInterface) {
+            return $this->makeErrorResponse($outcome);
+        }
+
+        if ($outcome !== null) {
+            $this->addHeaders($outcome, $request);
+        }
+
+        return $outcome;
+    }
+
+    /**
+     * The success path of a write. The response is stored under the request's idempotency key before
+     * it is sent, so a repeat of the same request is answered with this same body rather than doing
+     * the work twice. Going through here is what keeps that from being forgotten.
+     *
+     * @param Http $request
+     * @param array<mixed>|JsonSerializable $payload
+     * @param int $status
+     * @return ResultJson
+     */
+    protected function respond(Http $request, array|JsonSerializable $payload, int $status = 200): ResultJson
+    {
+        $this->complianceService->storeResponse($request, (string) json_encode($payload), $status);
+
+        $response = $this->makeJsonResponse($payload, $status);
+        $this->addHeaders($response, $request);
+
+        return $response;
+    }
+
+    /**
+     * Reads the body, checks it against the interface the specification generated, and fills the
+     * request object from it. Nothing about the shape is stated here: the interface carries it all.
+     *
+     * @template T of object
+     * @param class-string<T> $interface Generated interface the body must match
+     * @param callable(): T $factory Builds the empty request object
      * @return T|ErrorResponseInterface
      */
-    protected function createRequestObjectAndValidate(callable $factory): mixed
+    protected function createRequestObjectAndValidate(string $interface, callable $factory): mixed
     {
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
         /** @var string $content */
         $content = $request->getContent();
@@ -65,13 +116,39 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
             ]]);
         }
 
-        $requestObject = $factory(['data' => $rawData]);
+        $result = $this->requestValidator->validate($rawData, $interface);
 
-        if ($validationError = $this->requestValidationService->validate($requestObject)) {
-            return $validationError;
+        if (!$result->isValid()) {
+            return $this->validationResultToResponse($result);
         }
 
+        $requestObject = $factory();
+        $this->hydrator->populateWithArray($requestObject, $rawData, $interface);
+
         return $requestObject;
+    }
+
+    /**
+     * The first complaint is reported, since `param` names one field and the spec's error carries
+     * one error.
+     *
+     * @param ValidationResult $result
+     * @return ErrorResponseInterface
+     */
+    protected function validationResultToResponse(ValidationResult $result): ErrorResponseInterface
+    {
+        $errors = $result->getErrors();
+        $path = (string) array_key_first($errors);
+
+        /** @var ErrorResponseInterface $error */
+        $error = $this->errorResponseFactory->create(['data' => [
+            'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+            'code' => 'invalid_request',
+            'message' => (string) reset($errors),
+            'param' => $this->jsonPath($path),
+        ]]);
+
+        return $error;
     }
 
     /**
@@ -89,24 +166,19 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
             $errorResponse->unsetData('_statusCode');
         }
 
+        // The spec requires Retry-After on an in-flight idempotency collision.
+        $retryAfter = $errorResponse->getData('_retryAfter');
+        $errorResponse->unsetData('_retryAfter');
+
         /** @var array<mixed> $data */
         $data = $errorResponse->toArray();
+        $response = $this->makeJsonResponse($data, $statusCode);
 
-        return $this->makeJsonResponse($data, $statusCode);
-    }
+        if (is_numeric($retryAfter)) {
+            $response->setHeader('Retry-After', (string) (int) $retryAfter, true);
+        }
 
-    /**
-     * @param array<mixed>|DataObject $data
-     * @param int $statusCode
-     * @return ResultJson
-     */
-    public function makeJsonResponse(array|DataObject $data, int $statusCode = 200): ResultJson
-    {
-        $resultJson = $this->resultJsonFactory->create();
-        $resultJson->setData($data);
-        $resultJson->setHttpResponseCode($statusCode);
-
-        return $resultJson;
+        return $response;
     }
 
     /**
@@ -119,31 +191,5 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
         $resultJson->setHeader('Idempotency-Key', (string) $request->getHeader('Idempotency-Key', ''));
         $resultJson->setHeader('API-Version', ComplianceService::API_VERSION);
         $resultJson->setHeader('Request-Id', (string) $request->getHeader('Request-Id', ''));
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return InvalidRequestException|null
-     */
-    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
-    {
-        return null;
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return bool|null
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
-    }
-
-    /**
-     * @return RequestInterface
-     */
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
     }
 }
