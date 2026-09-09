@@ -78,8 +78,7 @@ class Metadata extends ApiController implements HttpGetActionInterface
             ]]));
         }
 
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
         if ($response = $this->guard($request)) {
             return $response;

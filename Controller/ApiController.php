@@ -16,9 +16,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
-use Magento\Framework\App\ActionInterface;
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
+use Magebit\AgenticCore\Controller\JsonController;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -30,7 +28,7 @@ use Magebit\AgenticCore\Model\Validation\RequestValidator;
 use Magebit\AgenticCore\Model\Validation\ValidationResult;
 use Magento\Framework\DataObject;
 
-abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
+abstract class ApiController extends JsonController
 {
     /**
      * @param JsonFactory $resultJsonFactory
@@ -41,13 +39,14 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
      * @param ComplianceService $complianceService
      */
     public function __construct(
-        protected readonly JsonFactory $resultJsonFactory,
-        protected readonly RequestInterface $request,
+        JsonFactory $resultJsonFactory,
+        RequestInterface $request,
         protected readonly RequestValidator $requestValidator,
         protected readonly Hydrator $hydrator,
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService
     ) {
+        parent::__construct($resultJsonFactory, $request);
     }
 
     /**
@@ -103,8 +102,7 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
      */
     protected function createRequestObjectAndValidate(string $interface, callable $factory): mixed
     {
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
         /** @var string $content */
         $content = $request->getContent();
@@ -154,18 +152,6 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
     }
 
     /**
-     * The validator reports dot-notation paths; `param` is a JSONPath, which roots at `$` and
-     * brackets list positions.
-     *
-     * @param string $dotted
-     * @return string
-     */
-    protected function jsonPath(string $dotted): string
-    {
-        return '$.' . preg_replace('/\.(\d+)(?=\.|$)/', '[$1]', $dotted);
-    }
-
-    /**
      * @param ErrorResponseInterface $errorResponse
      * @param int $statusCode
      * @return ResultJson
@@ -196,20 +182,6 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
     }
 
     /**
-     * @param array<mixed>|DataObject|JsonSerializable $data
-     * @param int $statusCode
-     * @return ResultJson
-     */
-    public function makeJsonResponse(array|DataObject|JsonSerializable $data, int $statusCode = 200): ResultJson
-    {
-        $resultJson = $this->resultJsonFactory->create();
-        $resultJson->setData($data);
-        $resultJson->setHttpResponseCode($statusCode);
-
-        return $resultJson;
-    }
-
-    /**
      * @param ResultJson $resultJson
      * @param Http $request
      * @return void
@@ -219,31 +191,5 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
         $resultJson->setHeader('Idempotency-Key', (string) $request->getHeader('Idempotency-Key', ''));
         $resultJson->setHeader('API-Version', ComplianceService::API_VERSION);
         $resultJson->setHeader('Request-Id', (string) $request->getHeader('Request-Id', ''));
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return InvalidRequestException|null
-     */
-    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
-    {
-        return null;
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return bool|null
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
-    }
-
-    /**
-     * @return RequestInterface
-     */
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
     }
 }

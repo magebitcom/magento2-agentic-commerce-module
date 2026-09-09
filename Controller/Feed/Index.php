@@ -92,8 +92,7 @@ class Index extends ApiController implements HttpPostActionInterface
             ]]));
         }
 
-        /** @var Http $request */
-        $request = $this->getRequest();
+        $request = $this->getHttpRequest();
 
         if ($response = $this->guard($request)) {
             return $response;
