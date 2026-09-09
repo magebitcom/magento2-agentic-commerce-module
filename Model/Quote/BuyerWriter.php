@@ -13,38 +13,40 @@ declare(strict_types=1);
 namespace Magebit\AgenticCommerce\Model\Quote;
 
 use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
+use Magebit\AgenticCore\Model\Buyer\BuyerIdentity;
+use Magebit\AgenticCore\Model\Buyer\BuyerWriter as SharedBuyerWriter;
 use Magento\Quote\Model\Quote;
 
 /**
- * Copies the buyer onto the quote. Shared by checkout sessions and carts, which both accept a buyer.
+ * Copies this protocol's buyer onto the quote. Shared by checkout sessions and carts, which both
+ * accept a buyer. The contact details go on the shipping address, which is where this protocol
+ * carries the delivery destination.
  */
 class BuyerWriter
 {
     /**
-     * An absent field leaves what is already on the quote alone, so a later request cannot blank a
-     * value by omitting it.
-     *
+     * @param SharedBuyerWriter $writer
+     */
+    public function __construct(
+        private readonly SharedBuyerWriter $writer
+    ) {
+    }
+
+    /**
      * @param Quote $quote
      * @param BuyerInterface $buyer
      * @return void
      */
     public function write(Quote $quote, BuyerInterface $buyer): void
     {
-        if ($firstName = $buyer->getFirstName()) {
-            $quote->setCustomerFirstname($firstName);
-        }
+        $identity = new BuyerIdentity(
+            $buyer->getFirstName(),
+            $buyer->getLastName(),
+            $buyer->getEmail(),
+            $buyer->getPhoneNumber()
+        );
 
-        if ($lastName = $buyer->getLastName()) {
-            $quote->setCustomerLastname($lastName);
-        }
-
-        if ($email = $buyer->getEmail()) {
-            $quote->setCustomerEmail($email);
-            $quote->getShippingAddress()->setEmail($email);
-        }
-
-        if ($phoneNumber = $buyer->getPhoneNumber()) {
-            $quote->getShippingAddress()->setTelephone($phoneNumber);
-        }
+        $this->writer->writeCustomer($quote, $identity);
+        $this->writer->writeContact($quote->getShippingAddress(), $identity);
     }
 }

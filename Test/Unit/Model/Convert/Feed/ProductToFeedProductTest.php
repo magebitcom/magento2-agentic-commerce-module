@@ -26,7 +26,7 @@ use Magebit\AcpSpec\Data\Feed\Price;
 use Magebit\AcpSpec\Data\Feed\Product;
 use Magebit\AcpSpec\Data\Feed\Variant;
 use Magebit\AgenticCommerce\Model\Convert\Feed\ProductToFeedProduct;
-use Magebit\AgenticCommerce\Model\Stock\Availability as StockAvailability;
+use Magebit\AgenticCore\Model\Stock\Availability as StockAvailability;
 use Magebit\AgenticCore\Model\Money\MinorUnits;
 use Magento\Catalog\Model\Product as MagentoProduct;
 use PHPUnit\Framework\TestCase;

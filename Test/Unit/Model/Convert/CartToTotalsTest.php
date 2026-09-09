@@ -16,6 +16,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magebit\AcpSpec\Data\AgenticCheckout\Total;
 use Magebit\AgenticCore\Model\Money\MinorUnits;
+use Magebit\AgenticCore\Model\Total\TypeLabel;
 use Magebit\AgenticCommerce\Model\Convert\CartToTotals;
 use Magento\Quote\Model\Quote\Address\Total as QuoteTotal;
 use Magento\Quote\Model\Quote;
@@ -144,7 +145,7 @@ class CartToTotalsTest extends TestCase
         $cart->method('getTotals')->willReturn($cartTotals);
         $cart->method('getCurrency')->willReturn(null);
 
-        return (new CartToTotals($factory, new MinorUnits(), [
+        return (new CartToTotals($factory, new MinorUnits(), new TypeLabel(), [
             'subtotal' => TotalInterface::TYPE_SUBTOTAL,
             'shipping' => TotalInterface::TYPE_FULFILLMENT,
             'tax' => TotalInterface::TYPE_TAX,

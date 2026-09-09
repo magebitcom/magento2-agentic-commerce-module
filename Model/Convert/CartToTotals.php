@@ -14,17 +14,20 @@ use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\TotalInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magebit\AgenticCore\Model\Money\MinorUnits;
+use Magebit\AgenticCore\Model\Total\TypeLabel;
 
 class CartToTotals
 {
     /**
      * @param TotalInterfaceFactory $totalInterfaceFactory
      * @param MinorUnits $minorUnits
+     * @param TypeLabel $typeLabel
      * @param array<string, string> $typeMapping Magento total code to spec total type
      */
     public function __construct(
         protected readonly TotalInterfaceFactory $totalInterfaceFactory,
         protected readonly MinorUnits $minorUnits,
+        protected readonly TypeLabel $typeLabel,
         protected readonly array $typeMapping = [],
     ) {
     }
@@ -51,7 +54,7 @@ class CartToTotals
             $total = $this->totalInterfaceFactory->create();
 
             $total->setType($type);
-            $total->setDisplayText($this->labelFor((string) $cartTotal->getTitle(), $type));
+            $total->setDisplayText($this->typeLabel->orFallback((string) $cartTotal->getTitle(), $type));
             $total->setAmount($this->minorUnits->convert((float) $cartTotal->getValue(), $currencyCode));
             $totals[] = $total;
         }
@@ -69,17 +72,5 @@ class CartToTotals
     private function mapType(string $magentoCode): ?string
     {
         return $this->typeMapping[$magentoCode] ?? null;
-    }
-
-    /**
-     * `display_text` is required, so an untitled total gets a label derived from its type.
-     *
-     * @param string $title
-     * @param string $type
-     * @return string
-     */
-    private function labelFor(string $title, string $type): string
-    {
-        return $title !== '' ? $title : ucfirst(str_replace('_', ' ', $type));
     }
 }

@@ -24,7 +24,7 @@ use Magebit\AcpSpec\Api\Feed\ProductInterface;
 use Magebit\AcpSpec\Api\Feed\ProductInterfaceFactory;
 use Magebit\AcpSpec\Api\Feed\VariantInterface;
 use Magebit\AcpSpec\Api\Feed\VariantInterfaceFactory;
-use Magebit\AgenticCommerce\Model\Stock\Availability;
+use Magebit\AgenticCore\Model\Stock\Availability;
 use Magebit\AgenticCore\Model\Money\MinorUnits;
 use Magento\Catalog\Model\Product as MagentoProduct;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
