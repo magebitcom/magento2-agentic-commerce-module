@@ -360,8 +360,12 @@ class CheckoutSessionService
             $this->addBuyerToCart($cart, $checkoutSessionsRequest->getBuyer());
         }
 
-        /** @var Quote $cart */
-        $this->applyDiscountCodes($cart, $this->submittedCodes($checkoutSessionsRequest));
+        // Only touch the coupon when the agent actually sent a discounts field, so a request that
+        // leaves it out keeps the code the shopper already has.
+        if ($checkoutSessionsRequest->getDiscounts() !== null) {
+            /** @var Quote $cart */
+            $this->applyDiscountCodes($cart, $this->submittedCodes($checkoutSessionsRequest));
+        }
 
         $fulfillmentDetails = $checkoutSessionsRequest->getFulfillmentDetails();
 

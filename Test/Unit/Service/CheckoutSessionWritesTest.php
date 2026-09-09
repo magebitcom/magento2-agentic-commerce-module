@@ -15,6 +15,7 @@ namespace Magebit\AgenticCommerce\Test\Unit\Service;
 use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface as FulfillmentAddressInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\LinkInterfaceFactory;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\MessageErrorInterfaceFactory;
@@ -23,6 +24,7 @@ use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface;
 use Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterfaceFactory;
 use Magebit\AcpSpec\Data\AgenticCheckout\Address as SpecAddress;
 use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
+use Magebit\AcpSpec\Data\AgenticCheckout\DiscountsRequest;
 use Magebit\AcpSpec\Data\AgenticCheckout\MessageError;
 use Magebit\AgenticCommerce\Api\CartValidatorInterface;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
@@ -202,6 +204,41 @@ class CheckoutSessionWritesTest extends TestCase
     }
 
     /**
+     * The coupon was wiped on every update, so a shopper who only changed their address lost a code
+     * they had already applied.
+     *
+     * @return void
+     */
+    public function testAnOmittedDiscountsFieldKeepsTheCouponOnTheCart(): void
+    {
+        $cart = $this->cart();
+        $cart->setCouponCode('SUMMER10');
+
+        $this->service->processSessionsRequest($cart, $this->updateRequest(null));
+
+        $this->assertSame('SUMMER10', $cart->getCouponCode());
+    }
+
+    /**
+     * The spec asks for an empty codes array to mean "clear what is there", so that has to stay
+     * working alongside the fix above.
+     *
+     * @return void
+     */
+    public function testASubmittedEmptyCodesArrayClearsTheCoupon(): void
+    {
+        $cart = $this->cart();
+        $cart->setCouponCode('SUMMER10');
+
+        $discounts = new DiscountsRequest();
+        $discounts->setCodes([]);
+
+        $this->service->processSessionsRequest($cart, $this->updateRequest($discounts));
+
+        $this->assertSame('', $cart->getCouponCode());
+    }
+
+    /**
      * addItemsToCart() let productRepository->get() throw, so one unknown SKU turned the whole request
      * into a 500 instead of a message.
      *
@@ -332,6 +369,25 @@ class CheckoutSessionWritesTest extends TestCase
         $this->assertCount(1, $messages);
         $this->assertInstanceOf(MessageErrorInterface::class, $messages[0]);
         $this->assertSame(MessageErrorInterface::CODE_CONFLICT, $messages[0]->getCode());
+    }
+
+    /**
+     * An update request that carries nothing but the discounts field under test.
+     *
+     * @param DiscountsRequestInterface|null $discounts
+     * @return UpdateCheckoutSessionRequestInterface&MockObject
+     */
+    private function updateRequest(
+        ?DiscountsRequestInterface $discounts
+    ): UpdateCheckoutSessionRequestInterface&MockObject {
+        $request = $this->createMock(UpdateCheckoutSessionRequestInterface::class);
+        $request->method('getLineItems')->willReturn(null);
+        $request->method('getBuyer')->willReturn(null);
+        $request->method('getFulfillmentDetails')->willReturn(null);
+        $request->method('getSelectedFulfillmentOptions')->willReturn(null);
+        $request->method('getDiscounts')->willReturn($discounts);
+
+        return $request;
     }
 
     /**
