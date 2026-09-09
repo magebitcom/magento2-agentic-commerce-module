@@ -68,6 +68,14 @@ jobs:
           composer-auth-pass: ${{ secrets.MAGENTO_AUTH_PASS }}
           extra-packages: phpunit/phpunit:^9.5
 
+      # Extension attribute interfaces such as CartExtensionInterface are generated, and tests that
+      # mock one need the real thing rather than the empty stub that ships in vendor.
+      - name: Generate the extension attribute classes
+        working-directory: ${{ steps.magento.outputs.project-path }}
+        run: |
+          php bin/magento module:enable --all
+          php -d memory_limit=-1 bin/magento setup:di:compile
+
       - name: Run unit tests
         working-directory: ${{ steps.magento.outputs.project-path }}
         run: >-
