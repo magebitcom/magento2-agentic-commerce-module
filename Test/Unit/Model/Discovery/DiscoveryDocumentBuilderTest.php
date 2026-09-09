@@ -36,8 +36,17 @@ class DiscoveryDocumentBuilderTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->builder = $this->builderWithBasePath('checkout_sessions');
+    }
+
+    /**
+     * @param string $basePath Where the store serves the checkout sessions
+     * @return DiscoveryDocumentBuilder
+     */
+    private function builderWithBasePath(string $basePath): DiscoveryDocumentBuilder
+    {
         $config = $this->createMock(ConfigInterface::class);
-        $config->method('getCheckoutRouterBasePath')->willReturn('checkout_sessions');
+        $config->method('getCheckoutRouterBasePath')->willReturn($basePath);
 
         $urlBuilder = $this->createMock(UrlInterface::class);
         $urlBuilder->method('getBaseUrl')->willReturn('https://shop.example.com/');
@@ -55,7 +64,7 @@ class DiscoveryDocumentBuilderTest extends TestCase
         $localeResolver = $this->createMock(ResolverInterface::class);
         $localeResolver->method('getLocale')->willReturn('en_US');
 
-        $this->builder = new DiscoveryDocumentBuilder(
+        return new DiscoveryDocumentBuilder(
             $this->factory(DiscoveryResponseInterfaceFactory::class, DiscoveryResponse::class),
             $this->factory(DiscoveryProtocolInterfaceFactory::class, DiscoveryProtocol::class),
             $this->factory(DiscoveryCapabilitiesInterfaceFactory::class, DiscoveryCapabilities::class),
@@ -102,26 +111,52 @@ class DiscoveryDocumentBuilderTest extends TestCase
     }
 
     /**
+     * Agents build every URL as {api_base_url}/{resource}, so this names what the resources hang
+     * off. Naming the sessions themselves made an agent ask for /checkout_sessions/checkout_sessions.
+     *
      * @return void
      */
-    public function testApiBaseUrlIsAbsoluteAndHasNoDoubleSlash(): void
+    public function testApiBaseUrlIsWhatTheResourcesHangOff(): void
     {
-        $url = $this->builder->build()->getApiBaseUrl();
+        $this->assertSame('https://shop.example.com', $this->builder->build()->getApiBaseUrl());
+    }
 
-        $this->assertSame('https://shop.example.com/checkout_sessions', $url);
+    /**
+     * A store can move the endpoints under a prefix, and then the prefix is the base.
+     *
+     * @return void
+     */
+    public function testAPrefixedStoreAdvertisesThePrefixAsTheBase(): void
+    {
+        $builder = $this->builderWithBasePath('acp/checkout_sessions');
+
+        $this->assertSame('https://shop.example.com/acp', $builder->build()->getApiBaseUrl());
     }
 
     /**
      * @return void
      */
-    public function testCapabilitiesReportTheStoreCurrenciesAndLocale(): void
+    public function testEveryServiceTheStoreAnswersOnIsAdvertised(): void
     {
         $capabilities = $this->builder->build()->getCapabilities();
 
         $this->assertNotNull($capabilities);
-        $this->assertSame(['checkout'], $capabilities->getServices());
-        $this->assertSame(['EUR', 'USD'], $capabilities->getSupportedCurrencies());
-        $this->assertSame(['en_US'], $capabilities->getSupportedLocales());
+        $this->assertSame(['checkout', 'carts', 'delegate_payment'], $capabilities->getServices());
+    }
+
+    /**
+     * The specification asks for lowercase currency codes and hyphenated locale tags; Magento holds
+     * them as USD and en_US.
+     *
+     * @return void
+     */
+    public function testCurrenciesAndLocalesAreInTheFormTheSpecificationAsksFor(): void
+    {
+        $capabilities = $this->builder->build()->getCapabilities();
+
+        $this->assertNotNull($capabilities);
+        $this->assertSame(['eur', 'usd'], $capabilities->getSupportedCurrencies());
+        $this->assertSame(['en-US'], $capabilities->getSupportedLocales());
     }
 
     /**
