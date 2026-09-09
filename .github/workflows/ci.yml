@@ -34,6 +34,7 @@ jobs:
             bitexpert/phpstan-magento:^0.42
             phpstan/extension-installer:^1.4
             phpunit/phpunit:^9.5
+            opis/json-schema:^2.6
 
       # bitexpert/phpstan-magento only invents a factory class when Composer cannot find a real
       # one, and that fallback is broken on newer phpstan/phpstan. Compiling writes the real
@@ -44,12 +45,21 @@ jobs:
           php bin/magento module:enable --all
           php -d memory_limit=-1 bin/magento setup:di:compile
 
+      # The factories compiled above are loaded by a Magento autoloader at runtime, not through
+      # Composer, so PHPStan has to be pointed at them. Left unfound, it invents its own and trips
+      # over the broken fallback described above.
       - name: Run PHPStan
         working-directory: ${{ steps.magento.outputs.project-path }}
-        run: >-
-          vendor/bin/phpstan analyse "${{ steps.magento.outputs.module-path }}"
-          -c "${{ steps.magento.outputs.module-path }}/phpstan.neon"
-          --no-progress --memory-limit=4G
+        run: |
+          cat > phpstan-ci.neon <<'NEON'
+          includes:
+              - ${{ steps.magento.outputs.module-path }}/phpstan.neon
+          parameters:
+              scanDirectories:
+                  - generated/code
+          NEON
+          vendor/bin/phpstan analyse "${{ steps.magento.outputs.module-path }}" \
+            -c phpstan-ci.neon --no-progress --memory-limit=4G
 
   unit-tests:
     name: Unit tests
@@ -66,7 +76,9 @@ jobs:
           php-version: "8.3"
           composer-auth-user: ${{ secrets.MAGENTO_AUTH_USER }}
           composer-auth-pass: ${{ secrets.MAGENTO_AUTH_PASS }}
-          extra-packages: phpunit/phpunit:^9.5
+          extra-packages: >-
+            phpunit/phpunit:^9.5
+            opis/json-schema:^2.6
 
       # Extension attribute interfaces such as CartExtensionInterface are generated, and tests that
       # mock one need the real thing rather than the empty stub that ships in vendor.
