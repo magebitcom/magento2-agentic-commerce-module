@@ -214,8 +214,7 @@
     <type name="Magebit\AgenticCommerce\Model\Validation\CartValidatorComposite">
         <arguments>
             <argument name="validators" xsi:type="array">
-                <item name="shipping_address" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\ShippingAddressValidator</item>
-                <item name="customer" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\CustomerValidator</item>
+                <item name="readiness" xsi:type="object">Magebit\AgenticCommerce\Model\Validation\ReadinessValidator</item>
             </argument>
         </arguments>
     </type>
