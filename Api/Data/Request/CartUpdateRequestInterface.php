@@ -12,21 +12,18 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
+use Magebit\AcpSpec\Api\Cart\CartUpdateRequestInterface as SpecCartUpdateRequestInterface;
 
 /**
  * The body of a cart update. A full replacement: the submitted resource becomes the cart.
  */
-interface CartUpdateRequestInterface extends ValidatableRequest
+interface CartUpdateRequestInterface extends SpecCartUpdateRequestInterface
 {
     /**
-     * @return ItemInterface[]
+     * Narrowed the same way the checkout session requests narrow it, so a submitted quantity is kept
+     * rather than dropped: the specification's own `Item` declares no quantity to keep.
+     *
+     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
      */
     public function getLineItems(): array;
-
-    /**
-     * @return BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
 }

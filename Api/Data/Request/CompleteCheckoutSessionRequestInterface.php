@@ -3,43 +3,21 @@
 /**
  * This file is part of the Magebit_AgenticCommerce package.
  *
- * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @copyright Copyright (c) 2026 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\AuthenticationResultInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\MarketingConsentInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionCompleteRequestInterface;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
-
-interface CompleteCheckoutSessionRequestInterface extends ValidatableDataInterface, RequestInterface
+/**
+ * The specification's complete request. Nothing is narrowed: the generated interface already says
+ * everything this module needs, and it is named here so the module owns the type its services take.
+ */
+interface CompleteCheckoutSessionRequestInterface extends CheckoutSessionCompleteRequestInterface
 {
-    /**
-     * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
-
-    /**
-     * @return \Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface
-     */
-    public function getPaymentData(): PaymentDataInterface;
-
-    /**
-     * The buyer's marketing consent decisions, one per channel.
-     *
-     * @return MarketingConsentInterface[]
-     */
-    public function getMarketingConsents(): array;
-
-    /**
-     * The 3DS outcome the agent obtained from its authentication provider, when it ran one.
-     *
-     * @return AuthenticationResultInterface|null
-     */
-    public function getAuthenticationResult(): ?AuthenticationResultInterface;
 }

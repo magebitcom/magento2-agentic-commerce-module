@@ -158,14 +158,4 @@ abstract class DataTransferObject extends DataObject
         // @phpstan-ignore cast.int
         return (int) $this->getData($key);
     }
-
-    /**
-     * Get raw data array for validation
-     *
-     * @return array<string, mixed>
-     */
-    public function getRawData(): array
-    {
-        return $this->_data;
-    }
 }

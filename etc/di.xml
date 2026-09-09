@@ -20,7 +20,7 @@
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CreateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CreateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\UpdateCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\UpdateCheckoutSessionRequest" />
     <preference for="Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\CompleteCheckoutSessionRequest" />
-    <preference for="Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface" type="Magebit\AgenticCommerce\Model\Data\Request\DelegatePaymentRequest" />
+    <preference for="Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterface" type="Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentRequest" />
 
     <!-- Supporting Data Interfaces -->
     <preference for="Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface" type="Magebit\AcpSpec\Data\AgenticCheckout\Address" />

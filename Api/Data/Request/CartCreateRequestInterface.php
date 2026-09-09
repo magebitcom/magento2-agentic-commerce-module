@@ -12,26 +12,18 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
+use Magebit\AcpSpec\Api\Cart\CartCreateRequestInterface as SpecCartCreateRequestInterface;
 
 /**
  * The body of a cart create. `line_items` carries the items to add.
  */
-interface CartCreateRequestInterface extends ValidatableRequest
+interface CartCreateRequestInterface extends SpecCartCreateRequestInterface
 {
     /**
-     * @return ItemInterface[]
+     * Narrowed the same way the checkout session requests narrow it, so a submitted quantity is kept
+     * rather than dropped: the specification's own `Item` declares no quantity to keep.
+     *
+     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
      */
     public function getLineItems(): array;
-
-    /**
-     * @return BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
-
-    /**
-     * @return string|null
-     */
-    public function getLocale(): ?string;
 }

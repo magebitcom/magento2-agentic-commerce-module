@@ -289,7 +289,7 @@ class CheckoutSessionService
 
         // After the order exists, so a handler has something to record against, and after the response is
         // built, so a failing signup cannot change what the agent is told about the order.
-        $this->marketingConsentPool->apply($checkoutSessionsRequest->getMarketingConsents(), $order);
+        $this->marketingConsentPool->apply($checkoutSessionsRequest->getMarketingConsents() ?? [], $order);
         $message = $this->infoMessage(sprintf('Order placed successfully: %s', $order->getIncrementId()));
 
         $response->setMessages([$message]);
@@ -371,7 +371,7 @@ class CheckoutSessionService
 
         if ($checkoutSessionsRequest instanceof UpdateCheckoutSessionRequestInterface) {
             // Magento carries one shipping method per address, so the first selection is the one applied.
-            $selected = $checkoutSessionsRequest->getSelectedFulfillmentOptions()[0] ?? null;
+            $selected = ($checkoutSessionsRequest->getSelectedFulfillmentOptions() ?? [])[0] ?? null;
 
             if ($selected !== null) {
                 $this->shippingMethodWriter->write($cart, $selected->getOptionId());

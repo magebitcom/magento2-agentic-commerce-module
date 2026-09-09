@@ -18,7 +18,8 @@ use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Controller\ApiController;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\RequestInterface;
@@ -37,7 +38,8 @@ class Index extends ApiController implements HttpPostActionInterface
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
@@ -48,7 +50,8 @@ class Index extends ApiController implements HttpPostActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
@@ -56,7 +59,13 @@ class Index extends ApiController implements HttpPostActionInterface
         protected readonly ConfigInterface $config,
         protected readonly CartCreateRequestInterfaceFactory $cartRequestFactory
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory
+        );
     }
 
     /**
@@ -86,7 +95,10 @@ class Index extends ApiController implements HttpPostActionInterface
         }
 
         /** @var CartCreateRequestInterface $cartRequest */
-        $cartRequest = $this->createRequestObjectAndValidate($this->cartRequestFactory->create(...));
+        $cartRequest = $this->createRequestObjectAndValidate(
+            CartCreateRequestInterface::class,
+            $this->cartRequestFactory->create(...)
+        );
 
         if ($cartRequest instanceof ErrorResponseInterface) {
             return $this->makeErrorResponse($cartRequest);

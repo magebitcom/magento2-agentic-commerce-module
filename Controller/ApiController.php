@@ -25,31 +25,39 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Json as ResultJson;
 use Magebit\AgenticCommerce\Model\Data\Response\ErrorResponse;
 use Magebit\AgenticCommerce\Service\ComplianceService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
+use Magebit\AgenticCore\Model\Validation\ValidationResult;
 use Magento\Framework\DataObject;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
 
 abstract class ApiController implements ActionInterface, CsrfAwareActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      */
     public function __construct(
         protected readonly JsonFactory $resultJsonFactory,
         protected readonly RequestInterface $request,
-        protected readonly RequestValidationService $requestValidationService,
+        protected readonly RequestValidator $requestValidator,
+        protected readonly Hydrator $hydrator,
         protected readonly ErrorResponseInterfaceFactory $errorResponseFactory
     ) {
     }
 
     /**
-     * @template T of \Magebit\AgenticCommerce\Api\Data\Request\RequestInterface
-     * @param callable(array<mixed>): T $factory
+     * Reads the body, checks it against the interface the specification generated, and fills the
+     * request object from it. Nothing about the shape is stated here: the interface carries it all.
+     *
+     * @template T of object
+     * @param class-string<T> $interface Generated interface the body must match
+     * @param callable(): T $factory Builds the empty request object
      * @return T|ErrorResponseInterface
      */
-    protected function createRequestObjectAndValidate(callable $factory): mixed
+    protected function createRequestObjectAndValidate(string $interface, callable $factory): mixed
     {
         /** @var Http $request */
         $request = $this->getRequest();
@@ -66,13 +74,51 @@ abstract class ApiController implements ActionInterface, CsrfAwareActionInterfac
             ]]);
         }
 
-        $requestObject = $factory(['data' => $rawData]);
+        $result = $this->requestValidator->validate($rawData, $interface);
 
-        if ($validationError = $this->requestValidationService->validate($requestObject)) {
-            return $validationError;
+        if (!$result->isValid()) {
+            return $this->validationResultToResponse($result);
         }
 
+        $requestObject = $factory();
+        $this->hydrator->populateWithArray($requestObject, $rawData, $interface);
+
         return $requestObject;
+    }
+
+    /**
+     * The first complaint is reported, since `param` names one field and the spec's error carries
+     * one error.
+     *
+     * @param ValidationResult $result
+     * @return ErrorResponseInterface
+     */
+    protected function validationResultToResponse(ValidationResult $result): ErrorResponseInterface
+    {
+        $errors = $result->getErrors();
+        $path = (string) array_key_first($errors);
+
+        /** @var ErrorResponseInterface $error */
+        $error = $this->errorResponseFactory->create(['data' => [
+            'type' => ErrorResponseInterface::TYPE_INVALID_REQUEST,
+            'code' => 'invalid_request',
+            'message' => (string) reset($errors),
+            'param' => $this->jsonPath($path),
+        ]]);
+
+        return $error;
+    }
+
+    /**
+     * The validator reports dot-notation paths; `param` is a JSONPath, which roots at `$` and
+     * brackets list positions.
+     *
+     * @param string $dotted
+     * @return string
+     */
+    protected function jsonPath(string $dotted): string
+    {
+        return '$.' . preg_replace('/\.(\d+)(?=\.|$)/', '[$1]', $dotted);
     }
 
     /**

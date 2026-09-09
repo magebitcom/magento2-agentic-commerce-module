@@ -10,7 +10,7 @@
 
 namespace Magebit\AgenticCommerce\Api;
 
-use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterface;
 
 interface PaymentMethodVaultHandlerInterface
 {

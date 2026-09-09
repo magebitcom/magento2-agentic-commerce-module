@@ -19,7 +19,8 @@ use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;
 use Magebit\AgenticCommerce\Api\FeedServiceInterface;
 use Magebit\AgenticCommerce\Controller\ApiController;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -35,7 +36,8 @@ class Products extends ApiController implements HttpGetActionInterface
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
@@ -45,14 +47,21 @@ class Products extends ApiController implements HttpGetActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly FeedServiceInterface $feedService,
         protected readonly ConfigInterface $config
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory
+        );
     }
 
     /**

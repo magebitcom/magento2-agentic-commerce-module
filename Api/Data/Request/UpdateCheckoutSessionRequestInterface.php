@@ -3,46 +3,27 @@
 /**
  * This file is part of the Magebit_AgenticCommerce package.
  *
- * @copyright Copyright (c) 2025 Magebit, Ltd. (https://magebit.com/)
+ * @copyright Copyright (c) 2026 Magebit, Ltd. (https://magebit.com/)
  * @author    Magebit <info@magebit.com>
  * @license   MIT
  */
 
+declare(strict_types=1);
+
 namespace Magebit\AgenticCommerce\Api\Data\Request;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface;
-use Magebit\AcpSpec\Api\AgenticCheckout\DiscountsRequestInterface;
-use Magebit\AgenticCommerce\Api\Data\ValidatableDataInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\CheckoutSessionUpdateRequestInterface;
 
-interface UpdateCheckoutSessionRequestInterface extends RequestInterface, ValidatableDataInterface
+/**
+ * The specification's update request, with the line items narrowed to the ones this module accepts.
+ */
+interface UpdateCheckoutSessionRequestInterface extends CheckoutSessionUpdateRequestInterface
 {
     /**
-     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]
-     */
-    public function getLineItems(): array;
-
-    /**
-     * @return \Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterface|null
-     */
-    public function getFulfillmentDetails(): ?FulfillmentDetailsInterface;
-
-    /**
-     * @return \Magebit\AcpSpec\Api\AgenticCheckout\BuyerInterface|null
-     */
-    public function getBuyer(): ?BuyerInterface;
-
-    /**
-     * Discount codes the agent submitted. An empty array clears what was applied.
+     * Narrowed the same way the create request narrows it. Still nullable, because an update that
+     * names no items leaves the ones already there alone, and nullability is what says "optional".
      *
-     * @return DiscountsRequestInterface|null
+     * @return \Magebit\AgenticCommerce\Api\Data\ItemInterface[]|null
      */
-    public function getDiscounts(): ?DiscountsRequestInterface;
-
-    /**
-     * A selection per fulfillment group, replacing the single option id earlier revisions carried.
-     *
-     * @return \Magebit\AcpSpec\Api\AgenticCheckout\SelectedFulfillmentOptionInterface[]
-     */
-    public function getSelectedFulfillmentOptions(): array;
+    public function getLineItems(): ?array;
 }

@@ -26,14 +26,16 @@ use Magebit\AcpSpec\Data\AgenticCheckout\CheckoutSession;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\LocalizedException;
 use Magebit\AgenticCommerce\Api\ConfigInterface;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
 
 class Retrieve extends ApiController implements HttpGetActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      * @param LoggerInterface $logger
@@ -43,14 +45,21 @@ class Retrieve extends ApiController implements HttpGetActionInterface
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
         protected readonly LoggerInterface $logger,
         protected readonly CheckoutSessionService $checkoutSessionService,
         protected readonly ConfigInterface $config
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory
+        );
     }
 
     /**

@@ -19,33 +19,43 @@ use Magento\Framework\App\Request\Http;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magebit\AgenticCommerce\Service\ComplianceService;
-use Magebit\AgenticCommerce\Service\RequestValidationService;
-use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterfaceFactory;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magebit\AgenticCore\Model\Validation\RequestValidator;
+use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterfaceFactory;
 use Magebit\AgenticCommerce\Service\DelegatePaymentService;
 use Magebit\AcpSpec\Data\DelegatePayment\DelegatePaymentResponse;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterface;
 
 class Index extends ApiController implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $resultJsonFactory
      * @param RequestInterface $request
-     * @param RequestValidationService $requestValidationService
+     * @param RequestValidator $requestValidator
+     * @param Hydrator $hydrator
      * @param ErrorResponseInterfaceFactory $errorResponseFactory
      * @param ComplianceService $complianceService
      */
     public function __construct(
         JsonFactory $resultJsonFactory,
         RequestInterface $request,
-        RequestValidationService $requestValidationService,
+        RequestValidator $requestValidator,
+        Hydrator $hydrator,
         ErrorResponseInterfaceFactory $errorResponseFactory,
         protected readonly ComplianceService $complianceService,
         protected readonly DelegatePaymentRequestInterfaceFactory $delegatePaymentRequestFactory,
         protected readonly DelegatePaymentService $delegatePaymentService,
         protected readonly LoggerInterface $logger,
     ) {
-        parent::__construct($resultJsonFactory, $request, $requestValidationService, $errorResponseFactory);
+        parent::__construct(
+            $resultJsonFactory,
+            $request,
+            $requestValidator,
+            $hydrator,
+            $errorResponseFactory
+        );
     }
 
     /**
@@ -67,7 +77,10 @@ class Index extends ApiController implements HttpPostActionInterface
             return $response;
         }
 
-        $delegatePaymentRequest = $this->createRequestObjectAndValidate($this->delegatePaymentRequestFactory->create(...));
+        $delegatePaymentRequest = $this->createRequestObjectAndValidate(
+            DelegatePaymentRequestInterface::class,
+            $this->delegatePaymentRequestFactory->create(...)
+        );
 
         if ($delegatePaymentRequest instanceof ErrorResponseInterface) {
             return $this->makeErrorResponse($delegatePaymentRequest);

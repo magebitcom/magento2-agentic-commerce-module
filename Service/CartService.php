@@ -17,8 +17,7 @@ use Magebit\AgenticCommerce\Api\Data\Request\CartCreateRequestInterface;
 use Magebit\AgenticCommerce\Api\Data\Request\CartUpdateRequestInterface;
 use Magebit\AgenticCommerce\Api\CartServiceInterface;
 use Magebit\AgenticCommerce\Model\Convert\CartToAcpCart;
-use Magebit\AcpSpec\Api\AgenticCheckout\ItemInterface;
-use Magebit\AcpSpec\Runtime\SpecObject;
+use Magebit\AgenticCommerce\Api\Data\ItemInterface;
 use Magebit\AgenticCommerce\Exception\CartNotFoundException;
 use Magebit\AgenticCommerce\Model\Quote\BuyerWriter;
 use Magebit\AgenticCore\Model\Quote\LineItemWriter;
@@ -130,25 +129,10 @@ class CartService implements CartServiceInterface
         $this->lineItemWriter->write($quote, array_map(
             static fn (ItemInterface $item): array => [
                 'sku' => (string) $item->getId(),
-                'quantity' => self::quantityOf($item),
+                'quantity' => $item->getQuantity(),
             ],
             array_values($items ?? [])
         ));
-    }
-
-    /**
-     * Read through the runtime rather than a typed getter: `Item` is `additionalProperties: false` with
-     * no `quantity`, yet the spec's own request examples send one. Accepted leniently, defaulting to a
-     * single unit, until that is resolved upstream.
-     *
-     * @param ItemInterface $item
-     * @return int
-     */
-    private static function quantityOf(ItemInterface $item): int
-    {
-        $quantity = $item instanceof SpecObject ? $item->get('quantity') : null;
-
-        return is_numeric($quantity) && (int) $quantity > 0 ? (int) $quantity : 1;
     }
 
     /**

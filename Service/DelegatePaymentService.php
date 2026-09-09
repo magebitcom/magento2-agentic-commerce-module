@@ -12,7 +12,7 @@ namespace Magebit\AgenticCommerce\Service;
 
 use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentResponseInterface;
 use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentResponseInterfaceFactory;
-use Magebit\AgenticCommerce\Api\Data\Request\DelegatePaymentRequestInterface;
+use Magebit\AcpSpec\Api\DelegatePayment\DelegatePaymentRequestInterface;
 use Magento\Vault\Api\PaymentTokenRepositoryInterface;
 use Magebit\AgenticCommerce\Api\PaymentMethodVaultHandlerInterface;
 use Magebit\AgenticCommerce\Api\Data\Response\ErrorResponseInterfaceFactory;

@@ -12,61 +12,40 @@ declare(strict_types=1);
 
 namespace Magebit\AgenticCommerce\Test\Unit\Model\Data\Request;
 
-use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterfaceFactory;
-use Magebit\AcpSpec\Api\AgenticCheckout\FulfillmentDetailsInterfaceFactory;
-use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentCredentialInterfaceFactory;
-use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentInterfaceFactory;
-use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterfaceFactory;
+use Magebit\AcpSpec\Api\AgenticCheckout\AddressInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentCredentialInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInstrumentInterface;
+use Magebit\AcpSpec\Api\AgenticCheckout\PaymentDataInterface;
 use Magebit\AcpSpec\Data\AgenticCheckout\Address;
-use Magebit\AcpSpec\Data\AgenticCheckout\FulfillmentDetails;
 use Magebit\AcpSpec\Data\AgenticCheckout\PaymentData;
 use Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrument;
 use Magebit\AcpSpec\Data\AgenticCheckout\PaymentDataInstrumentCredential;
-use Magebit\AgenticCommerce\Model\Data\Request\FulfillmentDetailsBuilder;
-use Magebit\AgenticCommerce\Model\Data\Request\PaymentDataBuilder;
+use Magebit\AgenticCommerce\Api\Data\Request\CompleteCheckoutSessionRequestInterface;
+use Magebit\AgenticCommerce\Model\Data\Request\CompleteCheckoutSessionRequest;
+use Magebit\AgenticCore\Model\Request\Hydrator;
+use Magento\Framework\Api\ObjectFactory;
+use Magento\Framework\Reflection\MethodsMap;
+use Magento\Framework\Reflection\TypeProcessor;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
+use ReflectionNamedType;
 
 /**
  * The spec runtime never builds nested objects: it stores raw values and its typed getters return null
- * for anything that is not already the right instance. Two request fields are composite, and leaving
- * their children as arrays discarded a submitted delivery address and made completion unreachable.
+ * for anything that is not already the right instance. Building them is the shared hydrator's job, and
+ * a request whose children stay as arrays loses a submitted address and cannot be completed.
  */
 class NestedSpecHydrationTest extends TestCase
 {
     /**
-     * @return void
+     * Which class stands in for each interface the hydrator asks for.
      */
-    public function testASubmittedAddressBecomesAnAddressObject(): void
-    {
-        $details = $this->fulfillmentDetailsBuilder()->create(['data' => [
-            'name' => 'Ada Lovelace',
-            'address' => [
-                'name' => 'Ada Lovelace',
-                'line_one' => '1 Analytical Way',
-                'city' => 'Austin',
-                'state' => 'TX',
-                'country' => 'US',
-                'postal_code' => '78701',
-            ],
-        ]]);
-
-        $address = $details->getAddress();
-
-        $this->assertNotNull($address, 'A submitted address must not read back as absent.');
-        $this->assertSame('Austin', $address->getCity());
-        $this->assertSame('US', $address->getCountry());
-        $this->assertSame('1 Analytical Way', $address->getLineOne());
-    }
-
-    /**
-     * @return void
-     */
-    public function testFulfillmentDetailsWithNoAddressStayAbsent(): void
-    {
-        $details = $this->fulfillmentDetailsBuilder()->create(['data' => ['name' => 'Ada Lovelace']]);
-
-        $this->assertNull($details->getAddress());
-    }
+    private const IMPLEMENTATIONS = [
+        AddressInterface::class => Address::class,
+        PaymentDataInterface::class => PaymentData::class,
+        PaymentDataInstrumentInterface::class => PaymentDataInstrument::class,
+        PaymentDataInstrumentCredentialInterface::class => PaymentDataInstrumentCredential::class,
+    ];
 
     /**
      * The token sits two levels down. Unbuilt, completion refused every request with "Payment
@@ -76,13 +55,17 @@ class NestedSpecHydrationTest extends TestCase
      */
     public function testTheCredentialTokenSurvivesTwoLevelsOfNesting(): void
     {
-        $paymentData = $this->paymentDataBuilder()->create(['data' => [
-            'handler_id' => 'stripe',
-            'instrument' => [
-                'type' => 'card',
-                'credential' => ['type' => 'shared_payment_token', 'token' => 'spt_test_123'],
+        $request = $this->hydrate([
+            'payment_data' => [
+                'handler_id' => 'stripe',
+                'instrument' => [
+                    'type' => 'card',
+                    'credential' => ['type' => 'shared_payment_token', 'token' => 'spt_test_123'],
+                ],
             ],
-        ]]);
+        ]);
+
+        $paymentData = $request->getPaymentData();
 
         $this->assertSame('stripe', $paymentData->getHandlerId());
         $this->assertSame('spt_test_123', $paymentData->getInstrument()?->getCredential()->getToken());
@@ -93,18 +76,20 @@ class NestedSpecHydrationTest extends TestCase
      */
     public function testASubmittedBillingAddressBecomesAnAddressObject(): void
     {
-        $paymentData = $this->paymentDataBuilder()->create(['data' => [
-            'handler_id' => 'stripe',
-            'billing_address' => [
-                'name' => 'Ada Lovelace',
-                'line_one' => '1 Analytical Way',
-                'city' => 'Austin',
-                'country' => 'US',
-                'postal_code' => '78701',
+        $request = $this->hydrate([
+            'payment_data' => [
+                'handler_id' => 'stripe',
+                'billing_address' => [
+                    'name' => 'Ada Lovelace',
+                    'line_one' => '1 Analytical Way',
+                    'city' => 'Austin',
+                    'country' => 'US',
+                    'postal_code' => '78701',
+                ],
             ],
-        ]]);
+        ]);
 
-        $this->assertSame('Austin', $paymentData->getBillingAddress()?->getCity());
+        $this->assertSame('Austin', $request->getPaymentData()->getBillingAddress()?->getCity());
     }
 
     /**
@@ -115,57 +100,61 @@ class NestedSpecHydrationTest extends TestCase
      */
     public function testPaymentDataWithNoBillingAddressStaysAbsent(): void
     {
-        $paymentData = $this->paymentDataBuilder()->create(['data' => ['handler_id' => 'stripe']]);
+        $request = $this->hydrate(['payment_data' => ['handler_id' => 'stripe']]);
 
-        $this->assertNull($paymentData->getBillingAddress());
+        $this->assertNull($request->getPaymentData()->getBillingAddress());
     }
 
     /**
-     * @return FulfillmentDetailsBuilder
+     * @param array<string, mixed> $body
+     * @return CompleteCheckoutSessionRequestInterface
      */
-    private function fulfillmentDetailsBuilder(): FulfillmentDetailsBuilder
+    private function hydrate(array $body): CompleteCheckoutSessionRequestInterface
     {
-        return new FulfillmentDetailsBuilder(
-            $this->factory(FulfillmentDetailsInterfaceFactory::class, FulfillmentDetails::class),
-            $this->factory(AddressInterfaceFactory::class, Address::class)
+        $request = new CompleteCheckoutSessionRequest();
+
+        $this->hydrator()->populateWithArray(
+            $request,
+            $body,
+            CompleteCheckoutSessionRequestInterface::class
         );
+
+        return $request;
     }
 
     /**
-     * @return PaymentDataBuilder
+     * @return Hydrator
      */
-    private function paymentDataBuilder(): PaymentDataBuilder
+    private function hydrator(): Hydrator
     {
-        return new PaymentDataBuilder(
-            $this->factory(PaymentDataInterfaceFactory::class, PaymentData::class),
-            $this->factory(PaymentDataInstrumentInterfaceFactory::class, PaymentDataInstrument::class),
-            $this->factory(
-                PaymentDataInstrumentCredentialInterfaceFactory::class,
-                PaymentDataInstrumentCredential::class
-            ),
-            $this->factory(AddressInterfaceFactory::class, Address::class)
-        );
-    }
+        $objectFactory = $this->createMock(ObjectFactory::class);
+        $objectFactory->method('create')->willReturnCallback(
+            static function (string $type): object {
+                $class = self::IMPLEMENTATIONS[$type] ?? $type;
 
-    /**
-     * Mirrors Magento's generated factories, which pass ['data' => $raw] to the constructor.
-     *
-     * @param class-string $factoryClass
-     * @param class-string $dtoClass
-     * @return object
-     */
-    private function factory(string $factoryClass, string $dtoClass): object
-    {
-        $factory = $this->createMock($factoryClass);
-        $factory->method('create')->willReturnCallback(
-            static function (array $arguments = []) use ($dtoClass): object {
-                /** @var array<mixed> $data */
-                $data = $arguments['data'] ?? [];
-
-                return new $dtoClass($data);
+                return new $class();
             }
         );
 
-        return $factory;
+        $methodsMap = $this->createMock(MethodsMap::class);
+        $methodsMap->method('getMethodReturnType')->willReturnCallback(
+            static fn (string $type, string $method): string => self::returnTypeOf($type, $method)
+        );
+
+        return new Hydrator($objectFactory, new TypeProcessor(), $methodsMap);
+    }
+
+    /**
+     * Stands in for Magento's own annotation reader, which needs a cache this test has no use for.
+     *
+     * @param string $type Interface the getter is declared on
+     * @param string $method Getter name
+     * @return string The type the getter returns
+     */
+    private static function returnTypeOf(string $type, string $method): string
+    {
+        $returnType = (new ReflectionMethod($type, $method))->getReturnType();
+
+        return $returnType instanceof ReflectionNamedType ? $returnType->getName() : 'mixed';
     }
 }
