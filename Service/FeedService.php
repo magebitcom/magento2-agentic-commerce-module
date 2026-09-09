@@ -101,13 +101,9 @@ class FeedService implements FeedServiceInterface
         // empty catalogue that looks like a real answer.
         $this->countryOf($feedId);
 
-        $collection = $this->sellableProducts();
-        $ids = array_values(array_unique(array_map('intval', $collection->getAllIds())));
-        $pageIds = array_slice($ids, max(0, $offset), $this->pageSize($limit));
-
         $products = [];
 
-        foreach ($this->loadByIds($pageIds) as $product) {
+        foreach ($this->page($limit, $offset) as $product) {
             $products[] = $this->convert($product);
         }
 
@@ -172,6 +168,34 @@ class FeedService implements FeedServiceInterface
     }
 
     /**
+     * The page is cut in the query, because the response carries no total and no paging links, so
+     * nothing needs the ids of the whole catalogue.
+     *
+     * @param int|null $limit
+     * @param int $offset
+     * @return MagentoProduct[]
+     */
+    private function page(?int $limit, int $offset): array
+    {
+        $collection = $this->sellableProducts();
+
+        // Without a fixed order the database is free to return rows differently every time, which
+        // would make two pages overlap or skip products.
+        $collection->addAttributeToSort('entity_id', Collection::SORT_ORDER_ASC);
+        $collection->getSelect()->limit($this->pageSize($limit), max(0, $offset));
+
+        $products = [];
+
+        foreach ($collection as $product) {
+            if ($product instanceof MagentoProduct) {
+                $products[] = $product;
+            }
+        }
+
+        return $products;
+    }
+
+    /**
      * @param MagentoProduct $product
      * @return FeedProductInterface
      */
@@ -211,30 +235,6 @@ class FeedService implements FeedServiceInterface
         }
 
         return $children;
-    }
-
-    /**
-     * @param int[] $ids
-     * @return MagentoProduct[]
-     */
-    private function loadByIds(array $ids): array
-    {
-        if ($ids === []) {
-            return [];
-        }
-
-        $collection = $this->sellableProducts();
-        $collection->addIdFilter($ids);
-
-        $products = [];
-
-        foreach ($collection as $product) {
-            if ($product instanceof MagentoProduct) {
-                $products[] = $product;
-            }
-        }
-
-        return $products;
     }
 
     /**
