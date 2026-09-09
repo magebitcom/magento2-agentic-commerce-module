@@ -25,6 +25,7 @@ use Magento\Catalog\Model\Product as MagentoProduct;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -34,8 +35,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * A feed page is read from the database one page at a time, so a small limit never costs a walk over
- * the whole catalogue.
+ * A feed page is read from the database one page at a time, and the children of every configurable on
+ * that page come from a single extra load.
  */
 class FeedProductsPagingTest extends TestCase
 {
@@ -50,6 +51,11 @@ class FeedProductsPagingTest extends TestCase
      * @var Select[]
      */
     private array $selects = [];
+
+    /**
+     * @var array<int, array{0: MagentoProduct, 1: string, 2: MagentoProduct[]}>
+     */
+    private array $converted = [];
 
     /**
      * A caller asking for more than the cap gets the cap, so one request can never pull the whole
@@ -85,15 +91,59 @@ class FeedProductsPagingTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws FeedNotFoundException
+     */
+    public function testTheChildrenOfAConfigurableReachTheOutput(): void
+    {
+        $parent = $this->configurable(1, [11, 12]);
+        $children = [$this->simple(11), $this->simple(12)];
+
+        $response = $this->service([$parent], $children)->products(self::FEED_ID);
+
+        $this->assertCount(1, $response->getProducts());
+        $this->assertSame($children, $this->converted[0][2]);
+    }
+
+    /**
+     * One load for the page and one for its children, however many configurables the page holds.
+     *
+     * @return void
+     * @throws FeedNotFoundException
+     */
+    public function testAllConfigurablesOnThePageShareOneChildLoad(): void
+    {
+        $page = [$this->configurable(1, [11]), $this->configurable(2, [12])];
+
+        $this->service($page, [$this->simple(11), $this->simple(12)])->products(self::FEED_ID);
+
+        $this->assertCount(2, $this->collections);
+    }
+
+    /**
+     * @return void
+     * @throws FeedNotFoundException
+     */
+    public function testASimpleProductHasNoChildrenAndCostsNoExtraLoad(): void
+    {
+        $this->service([$this->simple(1)])->products(self::FEED_ID);
+
+        $this->assertSame([], $this->converted[0][2]);
+        $this->assertCount(1, $this->collections);
+    }
+
+    /**
      * @param MagentoProduct[] $page
+     * @param MagentoProduct[] $children
      * @return FeedService
      */
-    private function service(array $page = []): FeedService
+    private function service(array $page = [], array $children = []): FeedService
     {
         $this->collections = [];
         $this->selects = [$this->createMock(Select::class), $this->createMock(Select::class)];
+        $this->converted = [];
 
-        $pages = [$this->collection($page, $this->selects[0])];
+        $pages = [$this->collection($page, $this->selects[0]), $this->collection($children, $this->selects[1])];
 
         $factory = $this->createMock(CollectionFactory::class);
         $factory->method('create')->willReturnCallback(
@@ -146,14 +196,65 @@ class FeedProductsPagingTest extends TestCase
     }
 
     /**
+     * @param int $id
+     * @param int[] $childIds
+     * @return MagentoProduct&MockObject
+     */
+    private function configurable(int $id, array $childIds): MagentoProduct
+    {
+        $type = $this->createMock(Configurable::class);
+        $type->method('getChildrenIds')->willReturn([0 => array_combine($childIds, $childIds)]);
+
+        $product = $this->product($id, Configurable::TYPE_CODE);
+        $product->method('getTypeInstance')->willReturn($type);
+
+        return $product;
+    }
+
+    /**
+     * @param int $id
+     * @return MagentoProduct&MockObject
+     */
+    private function simple(int $id): MagentoProduct
+    {
+        return $this->product($id, 'simple');
+    }
+
+    /**
+     * @param int $id
+     * @param string $typeId
+     * @return MagentoProduct&MockObject
+     */
+    private function product(int $id, string $typeId): MagentoProduct
+    {
+        $product = $this->getMockBuilder(MagentoProduct::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getId', 'getSku', 'getTypeId', 'getTypeInstance', 'getProductUrl'])
+            ->getMock();
+        $product->method('getId')->willReturn($id);
+        $product->method('getSku')->willReturn('sku-' . $id);
+        $product->method('getTypeId')->willReturn($typeId);
+        $product->method('getProductUrl')->willReturn('https://store.test/sku-' . $id);
+
+        return $product;
+    }
+
+    /**
      * @return ProductToFeedProduct&MockObject
      */
     private function converter(): ProductToFeedProduct
     {
         $converter = $this->createMock(ProductToFeedProduct::class);
         $converter->method('execute')->willReturnCallback(
-            static fn (MagentoProduct $product): FeedProductInterface
-                => new FeedProduct(['id' => (string) $product->getSku()])
+            function (
+                MagentoProduct $product,
+                string $currencyCode,
+                array $children = []
+            ): FeedProductInterface {
+                $this->converted[] = [$product, $currencyCode, $children];
+
+                return new FeedProduct(['id' => (string) $product->getSku()]);
+            }
         );
 
         return $converter;

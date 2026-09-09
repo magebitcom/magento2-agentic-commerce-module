@@ -49,6 +49,11 @@ class FeedService implements FeedServiceInterface
     private const STOCK_FILTER_FLAG = 'has_stock_status_filter';
 
     /**
+     * The only attributes the feed reads, so parents and children are selected the same way.
+     */
+    private const FEED_ATTRIBUTES = ['name', 'description', 'price', 'image', 'status', 'visibility'];
+
+    /**
      * @param FeedMetadataInterfaceFactory $metadataFactory
      * @param ProductsResponseInterfaceFactory $productsResponseFactory
      * @param ProductToFeedProduct $productConverter
@@ -101,10 +106,12 @@ class FeedService implements FeedServiceInterface
         // empty catalogue that looks like a real answer.
         $this->countryOf($feedId);
 
+        $page = $this->page($limit, $offset);
+        $childrenByParent = $this->childrenForPage($page);
         $products = [];
 
-        foreach ($this->page($limit, $offset) as $product) {
-            $products[] = $this->convert($product);
+        foreach ($page as $product) {
+            $products[] = $this->convert($product, $this->childrenOf($product, $childrenByParent));
         }
 
         /** @var ProductsResponseInterface $response */
@@ -196,45 +203,122 @@ class FeedService implements FeedServiceInterface
     }
 
     /**
-     * @param MagentoProduct $product
-     * @return FeedProductInterface
+     * Every configurable on the page gets its children from one shared collection, so a page costs a
+     * single child load instead of one per parent.
+     *
+     * @param MagentoProduct[] $page
+     * @return array<int, MagentoProduct[]>
      */
-    private function convert(MagentoProduct $product): FeedProductInterface
+    private function childrenForPage(array $page): array
     {
-        return $this->productConverter->execute(
-            $product,
-            $this->currencyCode(),
-            $this->childrenOf($product),
-            (string) $product->getProductUrl(),
-            (string) $this->imageHelper->init($product, 'product_page_image_large')->getUrl()
-        );
+        $idsByParent = [];
+
+        foreach ($page as $product) {
+            $childIds = $this->childIdsOf($product);
+
+            if ($childIds !== []) {
+                $idsByParent[(int) $product->getId()] = $childIds;
+            }
+        }
+
+        if ($idsByParent === []) {
+            return [];
+        }
+
+        $loaded = $this->loadChildren(array_merge(...array_values($idsByParent)));
+        $childrenByParent = [];
+
+        foreach ($idsByParent as $parentId => $childIds) {
+            foreach ($childIds as $childId) {
+                if (isset($loaded[$childId])) {
+                    $childrenByParent[$parentId][] = $loaded[$childId];
+                }
+            }
+        }
+
+        return $childrenByParent;
     }
 
     /**
      * @param MagentoProduct $product
+     * @return int[]
+     */
+    private function childIdsOf(MagentoProduct $product): array
+    {
+        $type = $product->getTypeInstance();
+
+        if ($product->getTypeId() !== Configurable::TYPE_CODE || !$type instanceof Configurable) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($type->getChildrenIds((int) $product->getId()) as $group) {
+            foreach ((array) $group as $childId) {
+                $ids[] = (int) $childId;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * @param int[] $ids
+     * @return array<int, MagentoProduct>
+     */
+    private function loadChildren(array $ids): array
+    {
+        $ids = array_values(array_unique($ids));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $collection = $this->collectionFactory->create();
+        $collection->addAttributeToSelect(self::FEED_ATTRIBUTES);
+        $collection->addStoreFilter((int) $this->storeManager->getStore()->getId());
+        $collection->addIdFilter($ids);
+        $collection->setFlag(self::STOCK_FILTER_FLAG, true);
+
+        $children = [];
+
+        foreach ($collection as $product) {
+            if ($product instanceof MagentoProduct) {
+                $children[(int) $product->getId()] = $product;
+            }
+        }
+
+        return $children;
+    }
+
+    /**
+     * @param MagentoProduct $product
+     * @param array<int, MagentoProduct[]> $childrenByParent
      * @return MagentoProduct[]
      */
-    private function childrenOf(MagentoProduct $product): array
+    private function childrenOf(MagentoProduct $product, array $childrenByParent): array
     {
         if ($product->getTypeId() !== Configurable::TYPE_CODE) {
             return [];
         }
 
-        $type = $product->getTypeInstance();
+        return $childrenByParent[(int) $product->getId()] ?? [];
+    }
 
-        if (!$type instanceof Configurable) {
-            return [];
-        }
-
-        $children = [];
-
-        foreach ($type->getUsedProducts($product) as $child) {
-            if ($child instanceof MagentoProduct) {
-                $children[] = $child;
-            }
-        }
-
-        return $children;
+    /**
+     * @param MagentoProduct $product
+     * @param MagentoProduct[] $children
+     * @return FeedProductInterface
+     */
+    private function convert(MagentoProduct $product, array $children): FeedProductInterface
+    {
+        return $this->productConverter->execute(
+            $product,
+            $this->currencyCode(),
+            $children,
+            (string) $product->getProductUrl(),
+            (string) $this->imageHelper->init($product, 'product_page_image_large')->getUrl()
+        );
     }
 
     /**
@@ -243,7 +327,7 @@ class FeedService implements FeedServiceInterface
     private function sellableProducts(): Collection
     {
         $collection = $this->collectionFactory->create();
-        $collection->addAttributeToSelect(['name', 'description', 'price', 'image', 'status', 'visibility']);
+        $collection->addAttributeToSelect(self::FEED_ATTRIBUTES);
         $collection->addAttributeToFilter('status', ['eq' => Status::STATUS_ENABLED]);
         $collection->setVisibility($this->visibility->getVisibleInSiteIds());
         $collection->addStoreFilter((int) $this->storeManager->getStore()->getId());
