@@ -49,9 +49,8 @@ abstract class AbstractMapper implements ProductMapperInterface
     {
         /** @var Product $product */
         $value = $this->getAttributeValue($product, $mapping, $parentProduct);
-        $value = $this->formatValue($value, $product, $mapping);
 
-        return $value;
+        return $this->formatValue($value, $product, $mapping, $parentProduct);
     }
 
     /**
@@ -65,8 +64,9 @@ abstract class AbstractMapper implements ProductMapperInterface
      */
     public function formatValue(mixed $value, ProductInterface $product, array $mapping, ?ProductInterface $parentProduct = null): mixed
     {
-        $value = $this->getAttributeValue($product, $mapping);
-
+        // The value read for us is the one to format. Reading it again here dropped the parent
+        // product, so every column that comes from the parent, such as the group id a variant
+        // belongs to, came out empty.
         if (isset($mapping[self::CONFIG_KEY_FORMATTER])) {
             $formatter = $mapping[self::CONFIG_KEY_FORMATTER];
 

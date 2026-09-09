@@ -61,10 +61,12 @@ interface ConfigInterface
     public function getSellerNameSource(?int $storeId = null): string;
 
     /**
+     * Null when the store has no seller name set.
+     *
      * @param int|null $storeId
-     * @return string
+     * @return string|null
      */
-    public function getSellerName(?int $storeId = null): string;
+    public function getSellerName(?int $storeId = null): ?string;
 
     /**
      * @param int|null $storeId

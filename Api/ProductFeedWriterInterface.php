@@ -22,6 +22,14 @@ interface ProductFeedWriterInterface
     public function write(array $products, int $page): void;
 
     /**
+     * Called once after the last page, so a writer that has to see every product before it can lay
+     * the file out has somewhere to do it.
+     *
+     * @return void
+     */
+    public function finish(): void;
+
+    /**
      * @param string $feedFilePath
      * @return void
      */

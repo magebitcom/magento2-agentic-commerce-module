@@ -69,6 +69,8 @@ class ProductFeed
             $productFeedWriter->write($data, $page);
         }
 
+        $productFeedWriter->finish();
+
         return $data;
     }
 

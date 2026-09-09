@@ -23,5 +23,11 @@ interface FeedProductInterface extends
     Spec\GeoTaggingInterface,
     Spec\RelatedProductInterface
 {
-    //
+    /**
+     * The product as one row of column names and values, which is what a feed file is written from.
+     *
+     * @param string[] $keys Columns to return, or none for all of them
+     * @return array<string, mixed>
+     */
+    public function toArray(array $keys = []): array;
 }

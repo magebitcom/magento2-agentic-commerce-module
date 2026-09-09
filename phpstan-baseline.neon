@@ -606,17 +606,7 @@ parameters:
 			count: 1
 			path: Model/Export/ProductFeed.php
 
-		-
-			message: '#^Call to method getData\(\) on an unknown class Magebit\\AgenticCommerce\\Model\\Export\\Writer\\FeedProductInterface\.$#'
-			identifier: class.notFound
-			count: 2
-			path: Model/Export/Writer/CsvWriter.php
 
-		-
-			message: '#^Parameter \$products of method Magebit\\AgenticCommerce\\Model\\Export\\Writer\\CsvWriter\:\:write\(\) has invalid type Magebit\\AgenticCommerce\\Model\\Export\\Writer\\FeedProductInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: Model/Export/Writer/CsvWriter.php
 
 		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\AbstractMapper\:\:formatValue\(\) has parameter \$mapping with no value type specified in iterable type array\.$#'
@@ -648,11 +638,6 @@ parameters:
 			count: 1
 			path: Model/Mapping/ConfigurableProductMapper.php
 
-		-
-			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:addVariantAttributes\(\) with return type void returns array\<string, mixed\> but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: Model/Mapping/ConfigurableProductMapper.php
 
 		-
 			message: '#^Method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:getChildProducts\(\) should return array\<Magento\\Catalog\\Model\\Product\> but returns array\<Magento\\Catalog\\Api\\Data\\ProductInterface\>\.$#'
@@ -660,23 +645,8 @@ parameters:
 			count: 1
 			path: Model/Mapping/ConfigurableProductMapper.php
 
-		-
-			message: '#^Parameter \#2 \.\.\.\$arrays of function array_merge expects array, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: Model/Mapping/ConfigurableProductMapper.php
 
-		-
-			message: '#^Result of method Magebit\\AgenticCommerce\\Model\\Mapping\\ConfigurableProductMapper\:\:addVariantAttributes\(\) \(void\) is used\.$#'
-			identifier: method.void
-			count: 1
-			path: Model/Mapping/ConfigurableProductMapper.php
 
-		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: Model/Mapping/ConfigurableProductMapper.php
 
 		-
 			message: '#^Call to method getData\(\) on an unknown class Magebit\\AgenticCommerce\\Model\\Mapping\\Formatter\\Product\.$#'

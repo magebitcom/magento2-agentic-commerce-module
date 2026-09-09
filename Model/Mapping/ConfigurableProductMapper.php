@@ -51,21 +51,28 @@ class ConfigurableProductMapper extends AbstractMapper implements ProductMapperI
     public function mapChildProduct(ProductInterface $product, ProductInterface $parentProduct): FeedProductInterface
     {
         $allMappings = $this->productFeedMapping->getMappingsForTypes(['all', 'configurable']);
+        $data = [];
 
         foreach ($allMappings as $mapping) {
             $data[$mapping[self::CONFIG_KEY_TARGET_ATTRIBUTE]] = $this->mapAttribute($product, $mapping, $parentProduct);
-            $data = array_merge($data, $this->addVariantAttributes($product, $parentProduct));
         }
+
+        // Added once the mapped columns are in place, so the variant columns land at the end. Doing
+        // this inside the loop above put them in the middle of the row and repeated the work per
+        // column.
+        $data = array_merge($data, $this->addVariantAttributes($product, $parentProduct));
 
         return $this->feedProductFactory->create(['data' => $data]);
     }
 
     /**
+     * One pair of columns per option the parent varies by, such as size and colour.
+     *
      * @param ProductInterface $product
      * @param ProductInterface $parentProduct
-     * @return void
+     * @return array<string, string|null>
      */
-    public function addVariantAttributes(ProductInterface $product, ProductInterface $parentProduct)
+    public function addVariantAttributes(ProductInterface $product, ProductInterface $parentProduct): array
     {
         $data = [];
 
