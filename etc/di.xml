@@ -152,12 +152,6 @@
             <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
         </arguments>
     </type>
-    <type name="Magebit\AgenticCommerce\Cron\DispatchWebhooks">
-        <arguments>
-            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
-            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
-        </arguments>
-    </type>
 
     <preference for="Magebit\AgenticCore\Api\Webhook\SecretProviderInterface" type="Magebit\AgenticCommerce\Model\Webhook\SecretProvider"/>
 
@@ -367,4 +361,11 @@
             <argument name="gate" xsi:type="object">Magebit\AgenticCommerce\Model\Idempotency\Gate</argument>
         </arguments>
     </type>
+    <virtualType name="Magebit\AgenticCommerce\Model\Webhook\DueDeliveries" type="Magebit\AgenticCore\Model\Webhook\DueDeliveries">
+        <arguments>
+            <argument name="dispatcher" xsi:type="object">Magebit\AgenticCommerce\Model\Webhook\Dispatcher</argument>
+            <argument name="logger" xsi:type="object">Magebit\AgenticCommerce\Logger\AgenticCommerceLogger</argument>
+            <argument name="scope" xsi:type="string">acp</argument>
+        </arguments>
+    </virtualType>
 </config>
