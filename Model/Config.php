@@ -22,6 +22,11 @@ use Magento\Store\Model\ScopeInterface;
 class Config implements ConfigInterface
 {
     /**
+     * Magento's own store name, which the seller name setting can point at instead of its own field.
+     */
+    private const CONFIG_GENERAL_STORE_NAME = 'general/store_information/name';
+
+    /**
      * @param ScopeConfigInterface $scopeConfig
      * @param UrlInterface $urlBuilder
      * @param SerializerInterface $serializer
@@ -80,23 +85,22 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @return string
+     * Null when the chosen setting is empty. The specification makes the seller name optional, so an
+     * unnamed store leaves the field out rather than the export failing on it.
+     *
+     * @param int|null $storeId
+     * @return string|null
      */
-    public function getSellerName(?int $storeId = null): string
+    public function getSellerName(?int $storeId = null): ?string
     {
-        $source = $this->getSellerNameSource($storeId);
+        $path = $this->getSellerNameSource($storeId) === 'general'
+            ? self::CONFIG_GENERAL_STORE_NAME
+            : ConfigInterface::CONFIG_SELLER_NAME;
 
-        if ($source === 'general') {
-            // @phpstan-ignore return.type
-            return $this->scopeConfig->getValue(
-                'general/store_information/name',
-                ScopeInterface::SCOPE_STORE,
-                $storeId
-            );
-        }
+        $value = $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE, $storeId);
+        $name = is_string($value) ? trim($value) : '';
 
-        // @phpstan-ignore return.type
-        return $this->scopeConfig->getValue(ConfigInterface::CONFIG_SELLER_NAME, ScopeInterface::SCOPE_STORE, $storeId);
+        return $name === '' ? null : $name;
     }
 
     /**

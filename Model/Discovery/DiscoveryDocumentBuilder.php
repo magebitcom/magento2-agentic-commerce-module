@@ -35,6 +35,8 @@ class DiscoveryDocumentBuilder
     private const DOCUMENTATION_URL = 'https://agenticcommerce.dev/docs';
     private const TRANSPORT_REST = 'rest';
     private const SERVICE_CHECKOUT = 'checkout';
+    private const SERVICE_CARTS = 'carts';
+    private const SERVICE_DELEGATE_PAYMENT = 'delegate_payment';
 
     /**
      * @param DiscoveryResponseInterfaceFactory $responseFactory
@@ -71,9 +73,14 @@ class DiscoveryDocumentBuilder
 
         /** @var DiscoveryCapabilitiesInterface $capabilities */
         $capabilities = $this->capabilitiesFactory->create();
-        $capabilities->setServices([self::SERVICE_CHECKOUT]);
+        // Every service the store answers on. An agent will not try one that is not named here.
+        $capabilities->setServices([
+            self::SERVICE_CHECKOUT,
+            self::SERVICE_CARTS,
+            self::SERVICE_DELEGATE_PAYMENT,
+        ]);
         $capabilities->setSupportedCurrencies($this->getSupportedCurrencies());
-        $capabilities->setSupportedLocales([$this->localeResolver->getLocale()]);
+        $capabilities->setSupportedLocales([$this->getLocale()]);
 
         /** @var DiscoveryResponseInterface $response */
         $response = $this->responseFactory->create();
@@ -91,11 +98,18 @@ class DiscoveryDocumentBuilder
      */
     private function getApiBaseUrl(): string
     {
-        return rtrim($this->urlBuilder->getBaseUrl(), '/')
-            . '/' . trim($this->config->getCheckoutRouterBasePath(), '/');
+        $root = rtrim($this->urlBuilder->getBaseUrl(), '/');
+        // Agents build every URL as {api_base_url}/{resource}, so this is what the resources hang
+        // off rather than one of them. Naming the sessions here made an agent ask for
+        // /checkout_sessions/checkout_sessions.
+        $parent = dirname(trim($this->config->getCheckoutRouterBasePath(), '/'));
+
+        return $parent === '.' ? $root : $root . '/' . $parent;
     }
 
     /**
+     * Lowercased, which is what the specification asks for.
+     *
      * @return string[]
      */
     private function getSupportedCurrencies(): array
@@ -104,6 +118,20 @@ class DiscoveryDocumentBuilder
         $store = $this->storeManager->getStore();
         $currencies = $store->getAvailableCurrencyCodes(true);
 
-        return $currencies === [] ? [$store->getCurrentCurrencyCode()] : array_values($currencies);
+        if ($currencies === []) {
+            $currencies = [$store->getCurrentCurrencyCode()];
+        }
+
+        return array_values(array_unique(array_map('strtolower', $currencies)));
+    }
+
+    /**
+     * Magento writes a locale as en_US; the specification asks for the BCP 47 form, en-US.
+     *
+     * @return string
+     */
+    private function getLocale(): string
+    {
+        return str_replace('_', '-', $this->localeResolver->getLocale());
     }
 }

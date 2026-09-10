@@ -71,7 +71,7 @@
         <!-- Price Information -->
 
         <mapping id="price">
-            <source_attribute>price</source_attribute>
+            <source_attribute xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Source\Price</source_attribute>
             <target_attribute xsi:type="const">Magebit\AgenticCommerce\Api\Data\Spec\PriceInterface::PRICE</target_attribute>
             <formatter xsi:type="object">Magebit\AgenticCommerce\Model\Mapping\Formatter\Price</formatter>
         </mapping>
